@@ -22,6 +22,7 @@ async function fetchViaCobalt(url, type = 'video') {
     },
     body: JSON.stringify({
       url: url,
+      // v10 requires 'downloadMode' instead of 'isAudioOnly'
       downloadMode: type === 'mp3' ? 'audio' : 'video',
       videoQuality: '1080',
     })
@@ -38,6 +39,7 @@ app.post('/api/info', async (req, res) => {
       return res.status(400).json({ error: "Please enter a valid URL." });
     }
 
+    // Problem sites that block Render IPs
     const isProblemSite = /instagram\.com|x\.com|twitter\.com|dailymotion\.com|dai\.ly|facebook\.com/.test(url);
 
     if (isProblemSite) {
@@ -103,6 +105,7 @@ app.get('/api/download', async (req, res) => {
 
   ytProcess.stdout.pipe(res);
 
+  // CRITICAL: Cleanup to prevent zombie processes
   res.on('close', () => { if (ytProcess?.kill) ytProcess.kill('SIGINT'); });
   ytProcess.on('error', (err) => {
     console.error("Download Error:", err);
