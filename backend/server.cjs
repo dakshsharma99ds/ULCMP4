@@ -8,9 +8,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Using a standard Desktop User-Agent for better compatibility with Dailymotion
+// High-compatibility headers
 const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
+const MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1';
 
+// API: Fetch video info
 app.post('/api/info', async (req, res) => {
   try {
     const { url } = req.body;
@@ -19,14 +21,14 @@ app.post('/api/info', async (req, res) => {
     const options = { 
       dumpSingleJson: true, 
       noCheckCertificates: true,
-      userAgent: USER_AGENT,
-      // Prevents the crash by disabling the impersonation retry logic
-      noImpersonate: true 
+      noWarnings: true,
+      userAgent: isDailymotion ? USER_AGENT : MOBILE_USER_AGENT,
     };
 
-    // Dailymotion specifically needs a referer to avoid blocks
+    // Fix for Dailymotion crash on Render
     if (isDailymotion) {
       options.referer = 'https://www.dailymotion.com/';
+      options.extractorArgs = 'dailymotion:impersonate=false';
     }
 
     const info = await youtubedl(url, options);
@@ -37,6 +39,7 @@ app.post('/api/info', async (req, res) => {
   }
 });
 
+// API: Handle download
 app.get('/api/download', async (req, res) => {
   const { url, type, title } = req.query; 
   const safeTitle = (title || "download").replace(/[<>:"/\\|?*]/g, '').substring(0, 100);
@@ -46,17 +49,18 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Type', type === 'mp3' ? 'audio/mpeg' : 'video/mp4');
 
   let ytProcess;
-  const isSocial = /instagram\.com|facebook\.com|tiktok\.com|dailymotion\.com|dai\.ly/.test(url);
+  const isDailymotion = url.includes('dailymotion.com') || url.includes('dai.ly');
+  const isSocial = /instagram\.com|facebook\.com|tiktok\.com/.test(url) || isDailymotion;
 
   const commonOptions = {
     output: '-',
     noCheckCertificates: true,
-    userAgent: USER_AGENT,
-    noImpersonate: true // Critical: stops the crash on Render
+    userAgent: isDailymotion ? USER_AGENT : MOBILE_USER_AGENT
   };
 
-  if (url.includes('dailymotion.com') || url.includes('dai.ly')) {
+  if (isDailymotion) {
     commonOptions.referer = 'https://www.dailymotion.com/';
+    commonOptions.extractorArgs = 'dailymotion:impersonate=false';
   }
 
   if (type === 'mp3') {
@@ -67,11 +71,13 @@ app.get('/api/download', async (req, res) => {
       audioFormat: 'mp3',
     });
   } else if (isSocial) {
+    // 'b' format is more stable for social media login walls
     ytProcess = youtubedl.exec(url, {
       ...commonOptions,
       format: 'b', 
     });
   } else {
+    // High-quality format for YouTube and others
     ytProcess = youtubedl.exec(url, {
       ...commonOptions,
       format: 'bestvideo[height<=1080]+bestaudio/best',
@@ -80,6 +86,7 @@ app.get('/api/download', async (req, res) => {
 
   ytProcess.stdout.pipe(res);
 
+  // Stop the process if user cancels download
   res.on('close', () => {
     if (ytProcess && ytProcess.kill) ytProcess.kill('SIGINT');
   });
@@ -96,8 +103,15 @@ const fallbackDistPath = path.join(__dirname, 'dist');
 const finalDist = fs.existsSync(distPath) ? distPath : fallbackDistPath;
 
 app.use(express.static(finalDist));
+
+// Support for React Router / Client-side routing
 app.get(/^(?!\/api).+/, (req, res) => {
-  res.sendFile(path.join(finalDist, 'index.html'));
+  const indexPath = path.join(finalDist, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send("Frontend not found. Did you run npm run build?");
+  }
 });
 
 const PORT = process.env.PORT || 10000;
