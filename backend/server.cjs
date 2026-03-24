@@ -13,7 +13,7 @@ const MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X
 
 // --- HELPER: COBALT v10 BYPASS ---
 async function fetchViaCobalt(url, type = 'video') {
-  // Updated to the v10 endpoint
+  // CORRECT v10 ENDPOINT
   const response = await fetch('https://api.cobalt.tools/api/json', {
     method: 'POST',
     headers: {
@@ -22,7 +22,7 @@ async function fetchViaCobalt(url, type = 'video') {
     },
     body: JSON.stringify({
       url: url,
-      // v10 uses 'downloadMode' instead of 'isAudioOnly'
+      // CORRECT v10 PARAMETER: 'downloadMode'
       downloadMode: type === 'mp3' ? 'audio' : 'video',
       videoQuality: '1080',
     })
@@ -34,7 +34,6 @@ async function fetchViaCobalt(url, type = 'video') {
 app.post('/api/info', async (req, res) => {
   try {
     const { url } = req.body;
-
     if (!url || !url.startsWith('http')) {
       return res.status(400).json({ error: "Please enter a valid URL." });
     }
@@ -44,7 +43,6 @@ app.post('/api/info', async (req, res) => {
     if (isProblemSite) {
       const data = await fetchViaCobalt(url);
       if (data.status === 'error') throw new Error(data.text);
-      
       return res.json({ 
         title: "Social Media Media", 
         thumbnail: "https://placehold.co/600x400?text=Ready+to+Download" 
@@ -66,7 +64,6 @@ app.post('/api/info', async (req, res) => {
 // API: Handle download
 app.get('/api/download', async (req, res) => {
   const { url, type, title } = req.query; 
-  
   if (!url || !url.startsWith('http')) return res.status(400).send("Invalid URL");
 
   const safeTitle = (title || "download").replace(/[<>:"/\\|?*]/g, '').substring(0, 100);
@@ -91,7 +88,6 @@ app.get('/api/download', async (req, res) => {
 
   let ytProcess;
   const commonOptions = { output: '-', noCheckCertificates: true, userAgent: MOBILE_USER_AGENT };
-
   if (type === 'mp3') {
     ytProcess = youtubedl.exec(url, { ...commonOptions, format: 'bestaudio/best', extractAudio: true, audioFormat: 'mp3' });
   } else {
@@ -99,7 +95,6 @@ app.get('/api/download', async (req, res) => {
   }
 
   ytProcess.stdout.pipe(res);
-
   res.on('close', () => { if (ytProcess?.kill) ytProcess.kill('SIGINT'); });
   ytProcess.on('error', (err) => {
     console.error("Download Error:", err);
