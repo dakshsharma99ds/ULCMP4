@@ -9,11 +9,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Bypasses basic bot detection by mimicking a mobile device
 const MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1';
 
 // --- HELPER: COBALT v10 BYPASS ---
 async function fetchViaCobalt(url, type = 'video') {
+  // Updated to the v10 endpoint
   const response = await fetch('https://api.cobalt.tools/api/json', {
     method: 'POST',
     headers: {
@@ -22,7 +22,7 @@ async function fetchViaCobalt(url, type = 'video') {
     },
     body: JSON.stringify({
       url: url,
-      // v10 requires 'downloadMode' instead of 'isAudioOnly'
+      // v10 uses 'downloadMode' instead of 'isAudioOnly'
       downloadMode: type === 'mp3' ? 'audio' : 'video',
       videoQuality: '1080',
     })
@@ -39,7 +39,6 @@ app.post('/api/info', async (req, res) => {
       return res.status(400).json({ error: "Please enter a valid URL." });
     }
 
-    // Problem sites that block Render IPs
     const isProblemSite = /instagram\.com|x\.com|twitter\.com|dailymotion\.com|dai\.ly|facebook\.com/.test(url);
 
     if (isProblemSite) {
@@ -47,7 +46,7 @@ app.post('/api/info', async (req, res) => {
       if (data.status === 'error') throw new Error(data.text);
       
       return res.json({ 
-        title: "Social Media Video", 
+        title: "Social Media Media", 
         thumbnail: "https://placehold.co/600x400?text=Ready+to+Download" 
       });
     }
@@ -91,11 +90,7 @@ app.get('/api/download', async (req, res) => {
   }
 
   let ytProcess;
-  const commonOptions = { 
-    output: '-', 
-    noCheckCertificates: true, 
-    userAgent: MOBILE_USER_AGENT 
-  };
+  const commonOptions = { output: '-', noCheckCertificates: true, userAgent: MOBILE_USER_AGENT };
 
   if (type === 'mp3') {
     ytProcess = youtubedl.exec(url, { ...commonOptions, format: 'bestaudio/best', extractAudio: true, audioFormat: 'mp3' });
@@ -105,7 +100,6 @@ app.get('/api/download', async (req, res) => {
 
   ytProcess.stdout.pipe(res);
 
-  // CRITICAL: Cleanup to prevent zombie processes
   res.on('close', () => { if (ytProcess?.kill) ytProcess.kill('SIGINT'); });
   ytProcess.on('error', (err) => {
     console.error("Download Error:", err);
@@ -120,8 +114,7 @@ const finalDist = fs.existsSync(distPath) ? distPath : fallbackDistPath;
 
 app.use(express.static(finalDist));
 app.get(/^(?!\/api).+/, (req, res) => {
-  const indexPath = path.join(finalDist, 'index.html');
-  res.sendFile(indexPath);
+  res.sendFile(path.join(finalDist, 'index.html'));
 });
 
 const PORT = process.env.PORT || 10000;
