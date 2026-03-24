@@ -45,13 +45,12 @@ function App() {
       </div>,
       { 
         duration: 8000,
-        icon: null // Removes the "!" icon for this specific toast
+        icon: null 
       }
     );
   };
 
   useEffect(() => {
-    // Show notification on first load
     showYoutubeError();
   }, []);
 
@@ -68,7 +67,6 @@ function App() {
     const targetUrl = manualUrl || url;
     if (!targetUrl) return;
 
-    // Block YouTube links and show notification
     if (isYouTube(targetUrl)) {
       showYoutubeError();
       return;
@@ -76,7 +74,8 @@ function App() {
     
     setLoading(true);
     try {
-      const res = await fetch('http://localhost:5000/api/info', {
+      // UPDATED: Using relative path for production hosting
+      const res = await fetch('/api/info', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: targetUrl })
@@ -101,7 +100,8 @@ function App() {
 
   const startDownload = (type, quality = '1080p') => {
     setDlProcessing(true);
-    const downloadUrl = `http://localhost:5000/api/download?url=${encodeURIComponent(url)}&type=${type}&quality=${quality}&title=${encodeURIComponent(info.title)}`;
+    // UPDATED: Using relative path for production hosting
+    const downloadUrl = `/api/download?url=${encodeURIComponent(url)}&type=${type}&quality=${quality}&title=${encodeURIComponent(info.title)}`;
     
     const link = document.createElement('a');
     link.href = downloadUrl;
