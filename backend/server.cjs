@@ -7,13 +7,12 @@ const { Readable } = require('stream');
 
 const app = express();
 app.use(cors());
-app.use(express.json()); [cite: 2]
+app.use(express.json());
 
 // Bypasses basic bot detection by mimicking a mobile device
 const MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1';
 
 // --- HELPER: COBALT v10 BYPASS ---
-// Used for sites that block Render IPs or require specific headers
 async function fetchViaCobalt(url, type = 'video') {
   const response = await fetch('https://api.cobalt.tools/api/json', {
     method: 'POST',
@@ -23,7 +22,6 @@ async function fetchViaCobalt(url, type = 'video') {
     },
     body: JSON.stringify({
       url: url,
-      // 'downloadMode' is the mandatory v10 standard
       downloadMode: type === 'mp3' ? 'audio' : 'video',
       videoQuality: '1080',
     })
@@ -31,17 +29,15 @@ async function fetchViaCobalt(url, type = 'video') {
   return await response.json();
 }
 
-// API: Fetch video info [cite: 3]
+// API: Fetch video info
 app.post('/api/info', async (req, res) => {
   try {
     const { url } = req.body;
 
-    // Safety: Prevent crashes from non-URL text
     if (!url || !url.startsWith('http')) {
       return res.status(400).json({ error: "Please enter a valid URL." });
     }
 
-    // List of sites that require the Cobalt bypass
     const isProblemSite = /instagram\.com|x\.com|twitter\.com|dailymotion\.com|dai\.ly|facebook\.com/.test(url);
 
     if (isProblemSite) {
@@ -49,7 +45,7 @@ app.post('/api/info', async (req, res) => {
       if (data.status === 'error') throw new Error(data.text);
       
       return res.json({ 
-        title: "Social Media Media", 
+        title: "Social Media Video", 
         thumbnail: "https://placehold.co/600x400?text=Ready+to+Download" 
       });
     }
@@ -66,17 +62,17 @@ app.post('/api/info', async (req, res) => {
   }
 });
 
-// API: Handle download [cite: 4]
+// API: Handle download
 app.get('/api/download', async (req, res) => {
   const { url, type, title } = req.query; 
   
   if (!url || !url.startsWith('http')) return res.status(400).send("Invalid URL");
 
-  const safeTitle = (title || "download").replace(/[<>:"/\\|?*]/g, '').substring(0, 100); [cite: 4]
-  const finalFileName = type === 'mp3' ? `MP3-${safeTitle}.mp3` : `1080p-${safeTitle}.mp4`; [cite: 4]
+  const safeTitle = (title || "download").replace(/[<>:"/\\|?*]/g, '').substring(0, 100);
+  const finalFileName = type === 'mp3' ? `MP3-${safeTitle}.mp3` : `1080p-${safeTitle}.mp4`;
   
-  res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(finalFileName)}"`); [cite: 4]
-  res.setHeader('Content-Type', type === 'mp3' ? 'audio/mpeg' : 'video/mp4'); [cite: 4]
+  res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(finalFileName)}"`);
+  res.setHeader('Content-Type', type === 'mp3' ? 'audio/mpeg' : 'video/mp4');
 
   const isProblemSite = /instagram\.com|x\.com|twitter\.com|dailymotion\.com|dai\.ly|facebook\.com/.test(url);
 
@@ -85,7 +81,6 @@ app.get('/api/download', async (req, res) => {
       const data = await fetchViaCobalt(url, type);
       if (data.url) {
         const mediaRes = await fetch(data.url);
-        // Direct stream from Cobalt to the user
         return Readable.fromWeb(mediaRes.body).pipe(res);
       }
     } catch (err) {
@@ -93,40 +88,38 @@ app.get('/api/download', async (req, res) => {
     }
   }
 
-  // Fallback for Reddit, LinkedIn, etc.
   let ytProcess;
   const commonOptions = { 
     output: '-', 
     noCheckCertificates: true, 
     userAgent: MOBILE_USER_AGENT 
-  }; [cite: 4]
+  };
 
   if (type === 'mp3') {
-    ytProcess = youtubedl.exec(url, { ...commonOptions, format: 'bestaudio/best', extractAudio: true, audioFormat: 'mp3' }); [cite: 5]
+    ytProcess = youtubedl.exec(url, { ...commonOptions, format: 'bestaudio/best', extractAudio: true, audioFormat: 'mp3' });
   } else {
-    ytProcess = youtubedl.exec(url, { ...commonOptions, format: 'bestvideo[height<=1080]+bestaudio/best' }); [cite: 6]
+    ytProcess = youtubedl.exec(url, { ...commonOptions, format: 'bestvideo[height<=1080]+bestaudio/best' });
   }
 
-  ytProcess.stdout.pipe(res); [cite: 7]
+  ytProcess.stdout.pipe(res);
 
-  // Prevents CPU spikes and zombie processes on Render [cite: 8]
   res.on('close', () => { if (ytProcess?.kill) ytProcess.kill('SIGINT'); });
   ytProcess.on('error', (err) => {
     console.error("Download Error:", err);
     if (!res.headersSent) res.status(500).send("Download failed");
-  }); [cite: 9]
+  });
 });
 
 // --- SERVE STATIC FRONTEND ---
-const distPath = path.join(__dirname, '..', 'dist'); [cite: 10]
-const fallbackDistPath = path.join(__dirname, 'dist'); [cite: 11]
+const distPath = path.join(__dirname, '..', 'dist');
+const fallbackDistPath = path.join(__dirname, 'dist');
 const finalDist = fs.existsSync(distPath) ? distPath : fallbackDistPath;
 
-app.use(express.static(finalDist)); [cite: 12]
+app.use(express.static(finalDist));
 app.get(/^(?!\/api).+/, (req, res) => {
   const indexPath = path.join(finalDist, 'index.html');
   res.sendFile(indexPath);
 });
 
-const PORT = process.env.PORT || 10000; [cite: 13]
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`)); [cite: 13]
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
