@@ -13,7 +13,7 @@ const MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X
 
 // --- HELPER: COBALT v10 BYPASS ---
 async function fetchViaCobalt(url, type = 'video') {
-  // CORRECT v10 ENDPOINT
+  // Use the modern v10 endpoint
   const response = await fetch('https://api.cobalt.tools/api/json', {
     method: 'POST',
     headers: {
@@ -22,7 +22,7 @@ async function fetchViaCobalt(url, type = 'video') {
     },
     body: JSON.stringify({
       url: url,
-      // CORRECT v10 PARAMETER
+      // 'downloadMode' is the correct v10 standard
       downloadMode: type === 'mp3' ? 'audio' : 'video',
       videoQuality: '1080',
     })
