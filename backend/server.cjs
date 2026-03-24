@@ -11,9 +11,9 @@ app.use(express.json());
 
 const MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1';
 
-// --- HELPER: COBALT BYPASS ---
-// Used for sites that block Render IPs (X, Dailymotion, Facebook)
+// --- HELPER: COBALT v10 BYPASS ---
 async function fetchViaCobalt(url, type = 'video') {
+  // Use the new v10 endpoint
   const response = await fetch('https://api.cobalt.tools/api/json', {
     method: 'POST',
     headers: {
@@ -22,6 +22,7 @@ async function fetchViaCobalt(url, type = 'video') {
     },
     body: JSON.stringify({
       url: url,
+      // v10 uses 'downloadMode' instead of 'isAudioOnly'
       downloadMode: type === 'mp3' ? 'audio' : 'video',
       videoQuality: '1080',
     })
@@ -34,21 +35,19 @@ app.post('/api/info', async (req, res) => {
   try {
     const { url } = req.body;
 
-    // Validation to prevent the "Group - 1" style text crashes
+    // Hard block against non-URL text
     if (!url || !url.startsWith('http')) {
       return res.status(400).json({ error: "Please enter a valid URL." });
     }
 
-    // Check if it's a "Problem Site"
     const isProblemSite = /x\.com|twitter\.com|dailymotion\.com|dai\.ly|facebook\.com/.test(url);
 
     if (isProblemSite) {
-      // Use Cobalt for info if it's a problem site
       const data = await fetchViaCobalt(url);
       if (data.status === 'error') throw new Error(data.text);
       
       return res.json({ 
-        title: "Social Media Video", 
+        title: "Social Media Media", 
         thumbnail: "https://placehold.co/600x400?text=Ready+to+Download" 
       });
     }
@@ -61,7 +60,7 @@ app.post('/api/info', async (req, res) => {
     res.json({ title: info.title, thumbnail: info.thumbnail });
   } catch (error) {
     console.error("Info Fetch Error:", error);
-    res.status(500).json({ error: "Could not fetch info. Site might be blocking the server." });
+    res.status(500).json({ error: "Could not fetch info." });
   }
 });
 
@@ -91,7 +90,7 @@ app.get('/api/download', async (req, res) => {
     }
   }
 
-  // Fallback to yt-dlp for Instagram, Reddit, etc.
+  // Fallback to yt-dlp
   let ytProcess;
   const commonOptions = {
     output: '-',
@@ -107,6 +106,7 @@ app.get('/api/download', async (req, res) => {
 
   ytProcess.stdout.pipe(res);
 
+  // Cleanup for Render
   res.on('close', () => { if (ytProcess?.kill) ytProcess.kill('SIGINT'); });
   ytProcess.on('error', (err) => {
     console.error("Download Error:", err);
