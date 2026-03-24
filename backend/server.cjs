@@ -3,115 +3,41 @@ const cors = require('cors');
 const youtubedl = require('youtube-dl-exec');
 const path = require('path');
 const fs = require('fs');
-const { Readable } = require('stream');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// User Agents for high compatibility
-const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
+// Bypasses basic bot detection by mimicking a mobile device
 const MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1';
 
 // API: Fetch video info
 app.post('/api/info', async (req, res) => {
   try {
     const { url } = req.body;
-
-    // 1. Validation: Prevent crashes from non-URL text
-    if (!url || !url.startsWith('http')) {
-      return res.status(400).json({ error: "Please enter a valid URL." });
-    }
-
-    const isDailymotion = url.includes('dailymotion.com') || url.includes('dai.ly');
-
-    // 2. Dailymotion Fix: Use oEmbed to bypass Render IP block for info
-    if (isDailymotion) {
-      const oembedUrl = `https://www.dailymotion.com/services/oembed?url=${encodeURIComponent(url)}`;
-      const oembedRes = await fetch(oembedUrl);
-      const oembedData = await oembedRes.json();
-      return res.json({ 
-        title: oembedData.title || "Dailymotion Video", 
-        thumbnail: oembedData.thumbnail_url 
-      });
-    }
-
-    // Standard fetch for YouTube, Instagram, etc.
     const info = await youtubedl(url, { 
       dumpSingleJson: true, 
       noCheckCertificates: true,
-      noWarnings: true,
-      userAgent: MOBILE_USER_AGENT,
+      userAgent: MOBILE_USER_AGENT 
     });
     res.json({ title: info.title, thumbnail: info.thumbnail });
   } catch (error) {
     console.error("Info Fetch Error:", error);
-    res.status(500).json({ error: "Could not fetch video details." });
+    res.status(500).json({ error: "Could not fetch info" });
   }
 });
 
 // API: Handle download
 app.get('/api/download', async (req, res) => {
   const { url, type, title } = req.query; 
-
-  if (!url || !url.startsWith('http')) {
-    return res.status(400).send("Invalid URL");
-  }
-
   const safeTitle = (title || "download").replace(/[<>:"/\\|?*]/g, '').substring(0, 100);
   const finalFileName = type === 'mp3' ? `MP3-${safeTitle}.mp3` : `1080p-${safeTitle}.mp4`;
   
   res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(finalFileName)}"`);
   res.setHeader('Content-Type', type === 'mp3' ? 'audio/mpeg' : 'video/mp4');
 
-  const isDailymotion = url.includes('dailymotion.com') || url.includes('dai.ly');
-
-  // 3. Dailymotion Download Fix: Route through Cobalt v10
-  if (isDailymotion) {
-    try {
-      const cobaltBody = { url: url };
-      
-      if (type === 'mp3') {
-        cobaltBody.downloadMode = 'audio'; 
-        cobaltBody.audioFormat = 'mp3';
-      } else {
-        cobaltBody.videoQuality = '1080';
-      }
-
-      const cobaltRes = await fetch('https://api.cobalt.tools/api/json', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          'User-Agent': USER_AGENT
-        },
-        body: JSON.stringify(cobaltBody)
-      });
-      
-      const cobaltData = await cobaltRes.json();
-      
-      if (cobaltData.status === 'error') {
-         console.error("Cobalt API Error:", cobaltData.text);
-         return res.status(500).send(`Provider Error: ${cobaltData.text}`);
-      }
-
-      if (cobaltData && cobaltData.url) {
-        const mediaRes = await fetch(cobaltData.url);
-        // Using Readable.fromWeb to stream the response from Cobalt to the user
-        return Readable.fromWeb(mediaRes.body).pipe(res);
-      } else {
-        throw new Error("No download URL returned from provider.");
-      }
-    } catch (err) {
-      console.error("Routing Error:", err);
-      if (!res.headersSent) res.status(500).send("Download failed via bypass.");
-      return;
-    }
-  }
-
-  // 4. Standard yt-dlp for YouTube/Social Media
   let ytProcess;
-  const isSocial = /instagram\.com|facebook\.com|tiktok\.com/.test(url);
+  const isSocial = url.includes('instagram.com') || url.includes('facebook.com') || url.includes('tiktok.com');
 
   const commonOptions = {
     output: '-',
@@ -127,6 +53,7 @@ app.get('/api/download', async (req, res) => {
       audioFormat: 'mp3',
     });
   } else if (isSocial) {
+    // Uses 'b' for pre-merged files to bypass social media login walls
     ytProcess = youtubedl.exec(url, {
       ...commonOptions,
       format: 'b', 
@@ -138,10 +65,14 @@ app.get('/api/download', async (req, res) => {
     });
   }
 
+  // Pipe the download stream to the user
   ytProcess.stdout.pipe(res);
 
+  // CRITICAL: Cleanup process if the user cancels the download
   res.on('close', () => {
-    if (ytProcess && ytProcess.kill) ytProcess.kill('SIGINT');
+    if (ytProcess && ytProcess.kill) {
+      ytProcess.kill('SIGINT');
+    }
   });
 
   ytProcess.on('error', (err) => {
@@ -150,20 +81,24 @@ app.get('/api/download', async (req, res) => {
   });
 });
 
-// --- STATIC FRONTEND SERVING ---
+// --- SERVE STATIC FRONTEND FILES ---
+// Logic to handle different directory structures on Render vs Local
 const distPath = path.join(__dirname, '..', 'dist');
 const fallbackDistPath = path.join(__dirname, 'dist');
-const finalDist = fs.existsSync(distPath) ? distPath : fallbackDistPath;
 
-app.use(express.static(finalDist));
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+} else {
+  app.use(express.static(fallbackDistPath));
+}
 
+// Final catch-all to serve index.html for React Router compatibility
 app.get(/^(?!\/api).+/, (req, res) => {
-  const indexPath = path.join(finalDist, 'index.html');
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    res.status(404).send("Frontend build not found.");
-  }
+  const indexPath = fs.existsSync(path.join(distPath, 'index.html')) 
+    ? path.join(distPath, 'index.html') 
+    : path.join(fallbackDistPath, 'index.html');
+  
+  res.sendFile(indexPath);
 });
 
 const PORT = process.env.PORT || 10000;
