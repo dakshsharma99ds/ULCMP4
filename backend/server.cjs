@@ -13,6 +13,16 @@ app.use(express.json());
 
 const MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1';
 
+// Clean URLs to prevent the "httphttps://" bug
+function cleanUrl(url) {
+  if (!url) return "";
+  let cleaned = url.trim();
+  if (cleaned.startsWith('httphttps://')) {
+    cleaned = cleaned.replace('httphttps://', 'https://');
+  }
+  return cleaned;
+}
+
 async function fetchViaCobalt(url, type = 'video') {
   const response = await fetch('https://api.cobalt.tools/api/json', {
     method: 'POST',
@@ -31,17 +41,18 @@ async function fetchViaCobalt(url, type = 'video') {
 
 app.post('/api/info', async (req, res) => {
   try {
-    const { url } = req.body;
+    let { url } = req.body;
+    url = cleanUrl(url);
+
     if (!url || !url.startsWith('http')) return res.status(400).json({ error: "Invalid URL" });
 
-    // Aggressive detection for sites that fail on Render
-    const isProblemSite = /instagram\.com|instagr\.am|x\.com|twitter\.com|facebook\.com|fb\.watch|tiktok\.com/.test(url);
+    // Added dailymotion and dai.ly to the bypass list
+    const isProblemSite = /instagram\.com|instagr\.am|x\.com|twitter\.com|facebook\.com|fb\.watch|tiktok\.com|dailymotion\.com|dai\.ly/.test(url);
 
     if (isProblemSite) {
       console.log("Using Cobalt Bypass for Info:", url);
       const data = await fetchViaCobalt(url);
       
-      // If Cobalt gives an error, it's likely a private link or rate-limit
       if (data.status === 'error') {
          return res.status(400).json({ error: "Cobalt error: " + data.text });
       }
@@ -52,7 +63,6 @@ app.post('/api/info', async (req, res) => {
       });
     }
 
-    // Only use yt-dlp for YouTube/other safe sites
     const info = await youtubedl(url, { dumpSingleJson: true, noCheckCertificates: true, userAgent: MOBILE_USER_AGENT });
     res.json({ title: info.title, thumbnail: info.thumbnail });
   } catch (error) {
@@ -62,13 +72,15 @@ app.post('/api/info', async (req, res) => {
 });
 
 app.get('/api/download', async (req, res) => {
-  const { url, type, title } = req.query; 
+  let { url, type, title } = req.query; 
+  url = cleanUrl(url);
+
   if (!url) return res.status(400).send("No URL");
 
   const safeTitle = (title || "download").replace(/[<>:"/\\|?*]/g, '').substring(0, 100);
   res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(safeTitle)}.${type === 'mp3' ? 'mp3' : 'mp4'}"`);
 
-  const isProblemSite = /instagram\.com|instagr\.am|x\.com|twitter\.com|facebook\.com|fb\.watch|tiktok\.com/.test(url);
+  const isProblemSite = /instagram\.com|instagr\.am|x\.com|twitter\.com|facebook\.com|fb\.watch|tiktok\.com|dailymotion\.com|dai\.ly/.test(url);
 
   if (isProblemSite) {
     try {
