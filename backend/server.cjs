@@ -60,8 +60,9 @@ app.get('/api/download', async (req, res) => {
 // --- SERVE STATIC FRONTEND FILES ---
 app.use(express.static(path.join(__dirname, '..', 'dist')));
 
-// THE EXPRESS 5 CATCH-ALL FIX
-app.get('/:path(.*)', (req, res) => {
+// FINAL COMPATIBILITY FIX: Use a Regular Expression for the catch-all
+// This avoids the 'Missing parameter name' error in Express 5.x
+app.get(/^(?!\/api).+/, (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });
 
