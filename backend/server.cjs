@@ -13,7 +13,7 @@ const MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X
 
 // --- HELPER: COBALT v10 BYPASS ---
 async function fetchViaCobalt(url, type = 'video') {
-  // Use the new v10 endpoint
+  // Use the modern v10 endpoint 
   const response = await fetch('https://api.cobalt.tools/api/json', {
     method: 'POST',
     headers: {
@@ -22,7 +22,7 @@ async function fetchViaCobalt(url, type = 'video') {
     },
     body: JSON.stringify({
       url: url,
-      // v10 uses 'downloadMode' instead of 'isAudioOnly'
+      // 'downloadMode' is the v10 standard 
       downloadMode: type === 'mp3' ? 'audio' : 'video',
       videoQuality: '1080',
     })
@@ -35,12 +35,13 @@ app.post('/api/info', async (req, res) => {
   try {
     const { url } = req.body;
 
-    // Hard block against non-URL text
+    // Safety: Block non-URL inputs to prevent crashes 
     if (!url || !url.startsWith('http')) {
       return res.status(400).json({ error: "Please enter a valid URL." });
     }
 
-    const isProblemSite = /x\.com|twitter\.com|dailymotion\.com|dai\.ly|facebook\.com/.test(url);
+    // UPDATED: Added instagram to the problem sites list
+    const isProblemSite = /instagram\.com|x\.com|twitter\.com|dailymotion\.com|dai\.ly|facebook\.com/.test(url);
 
     if (isProblemSite) {
       const data = await fetchViaCobalt(url);
@@ -76,13 +77,14 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(finalFileName)}"`);
   res.setHeader('Content-Type', type === 'mp3' ? 'audio/mpeg' : 'video/mp4');
 
-  const isProblemSite = /x\.com|twitter\.com|dailymotion\.com|dai\.ly|facebook\.com/.test(url);
+  const isProblemSite = /instagram\.com|x\.com|twitter\.com|dailymotion\.com|dai\.ly|facebook\.com/.test(url);
 
   if (isProblemSite) {
     try {
       const data = await fetchViaCobalt(url, type);
       if (data.url) {
         const mediaRes = await fetch(data.url);
+        // Stream directly from Cobalt to the user 
         return Readable.fromWeb(mediaRes.body).pipe(res);
       }
     } catch (err) {
@@ -90,13 +92,9 @@ app.get('/api/download', async (req, res) => {
     }
   }
 
-  // Fallback to yt-dlp
+  // Fallback for Reddit, LinkedIn, Tumblr, etc. 
   let ytProcess;
-  const commonOptions = {
-    output: '-',
-    noCheckCertificates: true,
-    userAgent: MOBILE_USER_AGENT
-  };
+  const commonOptions = { output: '-', noCheckCertificates: true, userAgent: MOBILE_USER_AGENT };
 
   if (type === 'mp3') {
     ytProcess = youtubedl.exec(url, { ...commonOptions, format: 'bestaudio/best', extractAudio: true, audioFormat: 'mp3' });
@@ -106,7 +104,7 @@ app.get('/api/download', async (req, res) => {
 
   ytProcess.stdout.pipe(res);
 
-  // Cleanup for Render
+  // Stop zombie processes on Render 
   res.on('close', () => { if (ytProcess?.kill) ytProcess.kill('SIGINT'); });
   ytProcess.on('error', (err) => {
     console.error("Download Error:", err);
@@ -114,7 +112,7 @@ app.get('/api/download', async (req, res) => {
   });
 });
 
-// --- SERVE STATIC FRONTEND FILES ---
+// --- SERVE STATIC FRONTEND --- 
 const distPath = path.join(__dirname, '..', 'dist');
 const fallbackDistPath = path.join(__dirname, 'dist');
 const finalDist = fs.existsSync(distPath) ? distPath : fallbackDistPath;
