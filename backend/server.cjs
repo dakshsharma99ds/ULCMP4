@@ -60,8 +60,8 @@ app.get('/api/download', async (req, res) => {
 // --- SERVE STATIC FRONTEND FILES ---
 app.use(express.static(path.join(__dirname, '..', 'dist')));
 
-// Updated for Express 5.x compatibility
-app.get('/*', (req, res) => {
+// Fix for Express 5.x "Missing parameter name" error
+app.get('/:any*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });
 
