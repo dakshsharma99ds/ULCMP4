@@ -13,7 +13,7 @@ const MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X
 
 // --- HELPER: COBALT v10 BYPASS ---
 async function fetchViaCobalt(url, type = 'video') {
-  // Use the modern v10 endpoint
+  // CORRECT v10 ENDPOINT
   const response = await fetch('https://api.cobalt.tools/api/json', {
     method: 'POST',
     headers: {
@@ -22,7 +22,7 @@ async function fetchViaCobalt(url, type = 'video') {
     },
     body: JSON.stringify({
       url: url,
-      // 'downloadMode' is the v10 standard
+      // CORRECT v10 PARAMETER
       downloadMode: type === 'mp3' ? 'audio' : 'video',
       videoQuality: '1080',
     })
@@ -35,12 +35,12 @@ app.post('/api/info', async (req, res) => {
   try {
     const { url } = req.body;
 
-    // Safety: Prevent crashes from non-URL text
+    // Validation: Stops manual text paste crashes
     if (!url || !url.startsWith('http')) {
       return res.status(400).json({ error: "Please enter a valid URL." });
     }
 
-    // Problem sites that block Render IPs
+    // List of sites that require the Cobalt bypass
     const isProblemSite = /instagram\.com|x\.com|twitter\.com|dailymotion\.com|dai\.ly|facebook\.com/.test(url);
 
     if (isProblemSite) {
@@ -103,7 +103,7 @@ app.get('/api/download', async (req, res) => {
 
   ytProcess.stdout.pipe(res);
 
-  // Stop zombie processes on Render
+  // Prevents CPU spikes and crashes on Render
   res.on('close', () => { if (ytProcess?.kill) ytProcess.kill('SIGINT'); });
   ytProcess.on('error', (err) => {
     console.error("Download Error:", err);
