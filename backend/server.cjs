@@ -1,21 +1,19 @@
 const express = require('express');
 const cors = require('cors');
 const youtubedl = require('youtube-dl-exec');
-const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Common User-Agent to bypass basic bot detection
 const MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1';
 
 // API: Fetch video info
 app.post('/api/info', async (req, res) => {
   try {
     const { url } = req.body;
-    // Added User-Agent here to prevent info-fetch blocks
     const info = await youtubedl(url, { 
       dumpSingleJson: true, 
       noCheckCertificates: true,
@@ -38,52 +36,72 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Type', type === 'mp3' ? 'audio/mpeg' : 'video/mp4');
 
   let ytProcess;
-  const isSocial = url.includes('instagram.com') || url.includes('facebook.com') || url.includes('tiktok.com');
+  
+  // ADDED: dailymotion and dai.ly to this list
+  const isSocial = url.includes('instagram.com') || 
+                   url.includes('facebook.com') || 
+                   url.includes('tiktok.com') || 
+                   url.includes('dailymotion.com') || 
+                   url.includes('dai.ly');
+
+  const commonOptions = {
+    output: '-',
+    noCheckCertificates: true,
+    userAgent: MOBILE_USER_AGENT
+  };
 
   if (type === 'mp3') {
     ytProcess = youtubedl.exec(url, {
-      output: '-',
+      ...commonOptions,
       format: 'bestaudio/best',
       extractAudio: true,
       audioFormat: 'mp3',
-      noCheckCertificates: true,
-      userAgent: MOBILE_USER_AGENT // Added for consistency
     });
-    ytProcess.stdout.pipe(res);
   } else if (isSocial) {
-    // --- FIX APPLIED HERE ---
     ytProcess = youtubedl.exec(url, {
-      output: '-',
-      format: 'b', // Using 'b' (best single file) instead of 'best'
-      noCheckCertificates: true,
-      userAgent: MOBILE_USER_AGENT // Identifying as iPhone
+      ...commonOptions,
+      format: 'b', 
     });
-    ytProcess.stdout.pipe(res);
   } else {
     ytProcess = youtubedl.exec(url, {
-      output: '-',
+      ...commonOptions,
       format: 'bestvideo[height<=1080]+bestaudio/best',
-      noCheckCertificates: true,
     });
-    ytProcess.stdout.pipe(res);
   }
 
-  // Basic error handling for the process
+  ytProcess.stdout.pipe(res);
+
+  res.on('close', () => {
+    if (ytProcess && ytProcess.kill) {
+      ytProcess.kill('SIGINT');
+    }
+  });
+
   ytProcess.on('error', (err) => {
-    console.error("Process Error:", err);
+    console.error("Download Process Error:", err);
     if (!res.headersSent) res.status(500).send("Download failed");
   });
 });
 
 // --- SERVE STATIC FRONTEND FILES ---
-app.use(express.static(path.join(__dirname, '..', 'dist')));
+const distPath = path.join(__dirname, '..', 'dist');
+const fallbackDistPath = path.join(__dirname, 'dist');
 
-// FINAL COMPATIBILITY FIX: Use a Regular Expression for the catch-all
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+} else {
+  app.use(express.static(fallbackDistPath));
+}
+
 app.get(/^(?!\/api).+/, (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
+  const indexPath = fs.existsSync(path.join(distPath, 'index.html')) 
+    ? path.join(distPath, 'index.html') 
+    : path.join(fallbackDistPath, 'index.html');
+  
+  res.sendFile(indexPath);
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
