@@ -8,17 +8,28 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1';
+// Using a standard Desktop User-Agent for better compatibility with Dailymotion
+const USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
 
-// API: Fetch video info
 app.post('/api/info', async (req, res) => {
   try {
     const { url } = req.body;
-    const info = await youtubedl(url, { 
+    const isDailymotion = url.includes('dailymotion.com') || url.includes('dai.ly');
+    
+    const options = { 
       dumpSingleJson: true, 
       noCheckCertificates: true,
-      userAgent: MOBILE_USER_AGENT 
-    });
+      userAgent: USER_AGENT,
+      // Prevents the crash by disabling the impersonation retry logic
+      noImpersonate: true 
+    };
+
+    // Dailymotion specifically needs a referer to avoid blocks
+    if (isDailymotion) {
+      options.referer = 'https://www.dailymotion.com/';
+    }
+
+    const info = await youtubedl(url, options);
     res.json({ title: info.title, thumbnail: info.thumbnail });
   } catch (error) {
     console.error("Info Fetch Error:", error);
@@ -26,7 +37,6 @@ app.post('/api/info', async (req, res) => {
   }
 });
 
-// API: Handle download
 app.get('/api/download', async (req, res) => {
   const { url, type, title } = req.query; 
   const safeTitle = (title || "download").replace(/[<>:"/\\|?*]/g, '').substring(0, 100);
@@ -36,19 +46,18 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Type', type === 'mp3' ? 'audio/mpeg' : 'video/mp4');
 
   let ytProcess;
-  
-  // ADDED: dailymotion and dai.ly to this list
-  const isSocial = url.includes('instagram.com') || 
-                   url.includes('facebook.com') || 
-                   url.includes('tiktok.com') || 
-                   url.includes('dailymotion.com') || 
-                   url.includes('dai.ly');
+  const isSocial = /instagram\.com|facebook\.com|tiktok\.com|dailymotion\.com|dai\.ly/.test(url);
 
   const commonOptions = {
     output: '-',
     noCheckCertificates: true,
-    userAgent: MOBILE_USER_AGENT
+    userAgent: USER_AGENT,
+    noImpersonate: true // Critical: stops the crash on Render
   };
+
+  if (url.includes('dailymotion.com') || url.includes('dai.ly')) {
+    commonOptions.referer = 'https://www.dailymotion.com/';
+  }
 
   if (type === 'mp3') {
     ytProcess = youtubedl.exec(url, {
@@ -72,9 +81,7 @@ app.get('/api/download', async (req, res) => {
   ytProcess.stdout.pipe(res);
 
   res.on('close', () => {
-    if (ytProcess && ytProcess.kill) {
-      ytProcess.kill('SIGINT');
-    }
+    if (ytProcess && ytProcess.kill) ytProcess.kill('SIGINT');
   });
 
   ytProcess.on('error', (err) => {
@@ -86,19 +93,11 @@ app.get('/api/download', async (req, res) => {
 // --- SERVE STATIC FRONTEND FILES ---
 const distPath = path.join(__dirname, '..', 'dist');
 const fallbackDistPath = path.join(__dirname, 'dist');
+const finalDist = fs.existsSync(distPath) ? distPath : fallbackDistPath;
 
-if (fs.existsSync(distPath)) {
-  app.use(express.static(distPath));
-} else {
-  app.use(express.static(fallbackDistPath));
-}
-
+app.use(express.static(finalDist));
 app.get(/^(?!\/api).+/, (req, res) => {
-  const indexPath = fs.existsSync(path.join(distPath, 'index.html')) 
-    ? path.join(distPath, 'index.html') 
-    : path.join(fallbackDistPath, 'index.html');
-  
-  res.sendFile(indexPath);
+  res.sendFile(path.join(finalDist, 'index.html'));
 });
 
 const PORT = process.env.PORT || 10000;
