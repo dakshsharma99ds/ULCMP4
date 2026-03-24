@@ -58,15 +58,13 @@ app.get('/api/download', async (req, res) => {
 });
 
 // --- SERVE STATIC FRONTEND FILES ---
-// Since this file is in /backend, we use '..' to go up one level to find /dist
 app.use(express.static(path.join(__dirname, '..', 'dist')));
 
-// Fallback: send all other requests to the React app
-app.get('*', (req, res) => {
+// Updated for Express 5.x compatibility
+app.get('/*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });
 
-// Use Render's PORT or default to 5000
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
