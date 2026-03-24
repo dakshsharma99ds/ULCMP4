@@ -13,7 +13,7 @@ const MOBILE_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X
 
 // --- HELPER: COBALT v10 BYPASS ---
 async function fetchViaCobalt(url, type = 'video') {
-  // Use the modern v10 endpoint 
+  // Use the modern v10 endpoint
   const response = await fetch('https://api.cobalt.tools/api/json', {
     method: 'POST',
     headers: {
@@ -22,7 +22,7 @@ async function fetchViaCobalt(url, type = 'video') {
     },
     body: JSON.stringify({
       url: url,
-      // 'downloadMode' is the v10 standard 
+      // 'downloadMode' is the v10 standard
       downloadMode: type === 'mp3' ? 'audio' : 'video',
       videoQuality: '1080',
     })
@@ -35,12 +35,12 @@ app.post('/api/info', async (req, res) => {
   try {
     const { url } = req.body;
 
-    // Safety: Block non-URL inputs to prevent crashes 
+    // Safety: Prevent crashes from non-URL text
     if (!url || !url.startsWith('http')) {
       return res.status(400).json({ error: "Please enter a valid URL." });
     }
 
-    // UPDATED: Added instagram to the problem sites list
+    // Problem sites that block Render IPs
     const isProblemSite = /instagram\.com|x\.com|twitter\.com|dailymotion\.com|dai\.ly|facebook\.com/.test(url);
 
     if (isProblemSite) {
@@ -84,7 +84,6 @@ app.get('/api/download', async (req, res) => {
       const data = await fetchViaCobalt(url, type);
       if (data.url) {
         const mediaRes = await fetch(data.url);
-        // Stream directly from Cobalt to the user 
         return Readable.fromWeb(mediaRes.body).pipe(res);
       }
     } catch (err) {
@@ -92,7 +91,7 @@ app.get('/api/download', async (req, res) => {
     }
   }
 
-  // Fallback for Reddit, LinkedIn, Tumblr, etc. 
+  // Fallback for Reddit, LinkedIn, etc.
   let ytProcess;
   const commonOptions = { output: '-', noCheckCertificates: true, userAgent: MOBILE_USER_AGENT };
 
@@ -104,7 +103,7 @@ app.get('/api/download', async (req, res) => {
 
   ytProcess.stdout.pipe(res);
 
-  // Stop zombie processes on Render 
+  // Stop zombie processes on Render
   res.on('close', () => { if (ytProcess?.kill) ytProcess.kill('SIGINT'); });
   ytProcess.on('error', (err) => {
     console.error("Download Error:", err);
@@ -112,7 +111,7 @@ app.get('/api/download', async (req, res) => {
   });
 });
 
-// --- SERVE STATIC FRONTEND --- 
+// --- SERVE STATIC FRONTEND ---
 const distPath = path.join(__dirname, '..', 'dist');
 const fallbackDistPath = path.join(__dirname, 'dist');
 const finalDist = fs.existsSync(distPath) ? distPath : fallbackDistPath;
