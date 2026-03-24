@@ -48,7 +48,6 @@ app.get('/api/download', async (req, res) => {
     });
     ytProcess.stdout.pipe(res);
   } else {
-    // Standard MP4 processing
     ytProcess = youtubedl.exec(url, {
       output: '-',
       format: 'bestvideo[height<=1080]+bestaudio/best',
@@ -58,13 +57,13 @@ app.get('/api/download', async (req, res) => {
   }
 });
 
-// SERVE STATIC FRONTEND FILES
-// Vite builds files into the 'dist' folder
-app.use(express.static(path.join(__dirname, 'dist')));
+// --- SERVE STATIC FRONTEND FILES ---
+// Since this file is in /backend, we use '..' to go up one level to find /dist
+app.use(express.static(path.join(__dirname, '..', 'dist')));
 
 // Fallback: send all other requests to the React app
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
 });
 
 // Use Render's PORT or default to 5000
