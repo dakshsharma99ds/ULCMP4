@@ -128,7 +128,6 @@ const Contact = () => {
             </div>
           </div>
         </div>
-
         <div 
           ref={containerRef}
           onTouchStart={() => setIsTouched(true)}
