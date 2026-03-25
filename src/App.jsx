@@ -16,13 +16,10 @@ function App() {
   const [scrollbarVisible, setScrollbarVisible] = useState(false);
   
   const [currentPage, setCurrentPage] = useState('home');
-
-  // Helper to detect YouTube links
   const isYouTube = (link) => {
     return link.toLowerCase().includes('youtube.com') || link.toLowerCase().includes('youtu.be');
   };
 
-  // Custom YouTube Error Toast Component
   const showYoutubeError = () => {
     toast.error(
       <div className="font-mono text-[10px] leading-relaxed tracking-wider text-left w-full">
@@ -74,7 +71,6 @@ function App() {
     
     setLoading(true);
     try {
-      // UPDATED: Using relative path for production hosting
       const res = await fetch('/api/info', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -100,16 +96,14 @@ function App() {
 
   const startDownload = (type, quality = '1080p') => {
     setDlProcessing(true);
-    // UPDATED: Using relative path for production hosting
-    const downloadUrl = `/api/download?url=${encodeURIComponent(url)}&type=${type}&quality=${quality}&title=${encodeURIComponent(info.title)}`;
-    
+    const downloadUrl = `/api/download?url=${encodeURIComponent(url)}&type=${type}&quality=${quality}&title=${encodeURIComponent(info.title)}`; 
     const link = document.createElement('a');
     link.href = downloadUrl;
     link.setAttribute('download', '');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+   
     setTimeout(() => {
         setDlProcessing(false);
     }, 8000); 
