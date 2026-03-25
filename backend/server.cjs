@@ -11,7 +11,8 @@ const COMMON_FLAGS = {
   noCheckCertificates: true,
   noWarnings: true,
   addHeader: [
-    'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+    'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    'Accept-Language:en-US,en;q=0.9'
   ]
 };
 
@@ -22,11 +23,11 @@ app.post('/api/info', async (req, res) => {
   try {
     const info = await youtubedl(url, {
       dumpSingleJson: true,
+      flatPlaylist: true, // Prevents loading every single segment for the preview
       ...COMMON_FLAGS
     });
-    res.json({ title: info.title, thumbnail: info.thumbnail });
+    res.json({ title: info.title || "Snapchat Video", thumbnail: info.thumbnail });
   } catch (error) {
-    console.error("Info Fetch Error:", error);
     res.status(500).json({ error: "Failed to fetch media info." });
   }
 });
@@ -42,17 +43,15 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
 
   try {
-    const isSnap = url.includes('snapchat.com');
-
     const downloadOptions = {
       output: '-',
-      // 'best' is the fastest for Snap because it grabs the direct CDN link 
-      // without trying to mux/combine video and audio.
-      format: isMp3 ? 'bestaudio' : (isSnap ? 'best' : 'bestvideo[height<=1080]+bestaudio/best'),
+      format: isMp3 ? 'bestaudio' : 'best',
       ...COMMON_FLAGS,
-      // Forces yt-dlp to stop searching for extra metadata once it finds the stream
-      noPlaylist: true,
-      concurrentFragments: 5 
+      // CRITICAL SPEED FLAGS:
+      noCheckFormats: true,    // Skips the 10-second "checking" phase
+      noPlaylist: true,        // Prevents it from looking for other stories in the profile
+      concurrentFragments: 10, // Maximize download speed
+      bufferSize: '32K'        // Starts the stream pipe to the user faster
     };
 
     const ytProcess = youtubedl.exec(url, downloadOptions);
@@ -70,10 +69,7 @@ app.get('/api/download', async (req, res) => {
 
 const distPath = path.resolve(process.cwd(), 'dist');
 app.use(express.static(distPath));
-
-app.get(/^((?!\/api).)*$/, (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
-});
+app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`--- ULCMP4 SNAP-SPEED OPTIMIZED ---`));
+app.listen(PORT, () => console.log(`--- ULCMP4 SNAP-OVERDRIVE ---`));
