@@ -7,7 +7,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Common flags for performance and reliability
 const COMMON_FLAGS = {
   noCheckCertificates: true,
   noWarnings: true,
@@ -21,19 +20,11 @@ const COMMON_FLAGS = {
 app.post('/api/info', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: "No URL provided" });
-
   try {
-    const info = await youtubedl(url, {
-      dumpSingleJson: true,
-      ...COMMON_FLAGS
-    });
-    res.json({ 
-      title: info.title || "Social Media Content", 
-      thumbnail: info.thumbnail || "" 
-    });
+    const info = await youtubedl(url, { dumpSingleJson: true, ...COMMON_FLAGS });
+    res.json({ title: info.title || "Video", thumbnail: info.thumbnail || "" });
   } catch (error) {
-    console.error("Info Error:", error.message);
-    res.status(500).json({ error: "Could not fetch video info." });
+    res.status(500).json({ error: "Failed to fetch media info." });
   }
 });
 
@@ -42,7 +33,6 @@ app.get('/api/download', async (req, res) => {
   if (!url) return res.status(400).send("No URL provided");
 
   const isMp3 = type === 'mp3';
-  const isReddit = url.includes('reddit.com');
   const fileName = `${encodeURIComponent(title || 'download')}.${isMp3 ? 'mp3' : 'mp4'}`;
 
   res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
@@ -50,59 +40,52 @@ app.get('/api/download', async (req, res) => {
 
   try {
     /**
-     * THE FIX:
-     * 1. MP3: Grab best audio.
-     * 2. Reddit: Reddit separates audio/video. Without FFmpeg, we MUST pick 
-     * one format (b) to avoid the "Requested format not available" error.
-     * 3. Others: Try to find a pre-merged MP4 first.
+     * THE REDDIT "FORMAT NOT AVAILABLE" KILLER:
+     * We use a broad fallback. If 'best' fails, we grab the first available stream.
+     * The '0' at the end is a yt-dlp trick to pick the very first format in the list
+     * if all other logic fails.
      */
-    let formatSelector = isMp3 ? 'bestaudio/best' : 'best[ext=mp4]/best';
-    if (isReddit && !isMp3) {
-      formatSelector = 'b/best'; // Forces a single stream that exists
-    }
+    const formatSelection = isMp3 
+      ? 'bestaudio/best' 
+      : 'bestvideo+bestaudio/best[ext=mp4]/best/0'; 
 
     const ytProcess = youtubedl.exec(url, {
       output: '-',
-      format: formatSelector,
+      format: formatSelection,
       ...COMMON_FLAGS,
-      noCheckFormats: true, // Prevents the 0B hang
-      noPart: true          // Essential for streaming to stdout
+      noCheckFormats: true,
+      noPart: true,
+      // Helps Reddit skip the manifest checks that cause the 0B crash
+      youtubeSkipDashManifest: true,
+      youtubeSkipHlsManifest: true
     });
 
-    // Pipe the data stream directly to the response
     ytProcess.stdout.pipe(res);
 
-    // Error handling for the stream
+    // Prevent the server from crashing on ChildProcessError
+    ytProcess.on('error', (err) => {
+      console.error("yt-dlp Execution Error:", err.message);
+      if (!res.headersSent) res.status(500).end();
+    });
+
     ytProcess.stderr.on('data', (data) => {
-      if (data.toString().includes('ERROR')) {
-        console.error("yt-dlp error:", data.toString());
-      }
+      const msg = data.toString();
+      if (msg.includes('ERROR')) console.error("yt-dlp Log:", msg);
     });
 
     res.on('close', () => {
       if (ytProcess.kill) ytProcess.kill();
     });
 
-    ytProcess.on('error', (err) => {
-      console.error("Process Error:", err);
-      if (!res.headersSent) res.status(500).end();
-    });
-
   } catch (error) {
-    console.error("Critical Error:", error);
-    if (!res.headersSent) res.status(500).send("Download failed.");
+    console.error("Critical Server Error:", error);
+    if (!res.headersSent) res.status(500).send("Server error.");
   }
 });
 
-// Frontend setup
 const distPath = path.resolve(process.cwd(), 'dist');
 app.use(express.static(distPath));
-
-app.get(/^((?!\/api).)*$/, (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
-});
+app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => {
-  console.log(`--- ULCMP4 ENGINE REPAIRED & RUNNING ON ${PORT} ---`);
-});
+app.listen(PORT, () => console.log(`--- ULCMP4 ENGINE STABILIZED ON ${PORT} ---`));
