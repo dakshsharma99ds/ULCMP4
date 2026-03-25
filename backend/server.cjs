@@ -7,18 +7,26 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Common flags for speed and compatibility
+// Helper to clean/fix URLs before processing
+const prepareUrl = (url) => {
+  let cleanUrl = url.trim();
+  // Fix Threads: Change .com to .net so the extractor recognizes it
+  if (cleanUrl.includes('threads.com')) {
+    cleanUrl = cleanUrl.replace('threads.com', 'threads.net');
+  }
+  return cleanUrl;
+};
+
 const COMMON_FLAGS = {
   noCheckCertificates: true,
   noWarnings: true,
-  // Using a Chrome User-Agent prevents Snapchat/Threads from throttling the speed
   addHeader: [
     'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
   ]
 };
 
 app.post('/api/info', async (req, res) => {
-  const { url } = req.body;
+  const url = prepareUrl(req.body.url || '');
   if (!url) return res.status(400).json({ error: "No URL provided" });
 
   try {
@@ -34,7 +42,8 @@ app.post('/api/info', async (req, res) => {
 });
 
 app.get('/api/download', async (req, res) => {
-  const { url, type, title } = req.query;
+  const { type, title } = req.query;
+  const url = prepareUrl(req.query.url || '');
   if (!url) return res.status(400).send("No URL provided");
 
   const isMp3 = type === 'mp3';
@@ -44,24 +53,23 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
 
   try {
-    // For Snapchat/Threads, we use 'best' to avoid the slow muxing process
-    const formatSelection = isMp3 
-      ? 'bestaudio' 
-      : (url.includes('snapchat') || url.includes('threads.net')) 
-        ? 'best' 
-        : 'bestvideo[height<=1080]+bestaudio/best';
+    let formatSelection = isMp3 ? 'bestaudio' : 'bestvideo[height<=1080]+bestaudio/best';
+    let extraArgs = {};
+
+    // Speed fix for Snapchat & Threads: Use 'best' to avoid slow muxing/generic crawling
+    if (url.includes('snapchat.com') || url.includes('threads.net')) {
+      formatSelection = 'best';
+    }
 
     const ytProcess = youtubedl.exec(url, {
       output: '-',
       format: formatSelection,
-      ...COMMON_FLAGS
+      ...COMMON_FLAGS,
+      ...extraArgs
     });
 
     ytProcess.stdout.pipe(res);
-
-    res.on('close', () => {
-      if (ytProcess.kill) ytProcess.kill();
-    });
+    res.on('close', () => { if (ytProcess.kill) ytProcess.kill(); });
   } catch (error) {
     console.error("Download Error:", error);
     res.status(500).send("Download failed.");
@@ -70,10 +78,7 @@ app.get('/api/download', async (req, res) => {
 
 const distPath = path.resolve(process.cwd(), 'dist');
 app.use(express.static(distPath));
-
-app.get(/^((?!\/api).)*$/, (req, res) => {
-  res.sendFile(path.join(distPath, 'index.html'));
-});
+app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`--- ULCMP4 UPDATED (Snapchat/Threads) ---`));
+app.listen(PORT, () => console.log(`--- ULCMP4 UPDATED (Threads/Snap Fix) ---`));
