@@ -106,7 +106,7 @@ function App() {
    
     setTimeout(() => {
         setDlProcessing(false);
-    }, 8000); 
+    }, 12000); 
   };
 
   const textTransitionStyle = (isVisible) => ({
