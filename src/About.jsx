@@ -36,7 +36,6 @@ const About = () => {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-4 w-full px-4">
-        {/* Main Card */}
         <div className="col-span-2 md:col-span-12 relative group order-1 outline-none" tabIndex="0">
           <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700"></div>
           <div className="relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl p-4 md:p-8 backdrop-blur-xl flex items-center gap-4 md:gap-8 group-hover:border-emerald-500/30 group-focus:border-emerald-500/30 transition-all duration-500">
@@ -54,7 +53,6 @@ const About = () => {
           </div>
         </div>
 
-        {/* Main Motive Card */}
         <div className="col-span-1 md:col-span-4 relative group order-2 outline-none" tabIndex="0">
           <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700"></div>
           <div className="relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl p-3 md:p-6 backdrop-blur-xl h-32 md:h-44 flex flex-col items-center group-hover:border-emerald-500/30 group-focus:border-emerald-500/30 transition-all duration-500">
@@ -67,7 +65,6 @@ const About = () => {
           </div>
         </div>
 
-        {/* Tech Stack Card */}
         <div className="col-span-1 md:col-span-4 relative group order-3 md:order-4 outline-none" tabIndex="0">
           <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700"></div>
           <div className="relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl p-3 md:p-6 backdrop-blur-xl h-32 md:h-44 flex flex-col items-center group-hover:border-emerald-500/30 group-focus:border-emerald-500/30 transition-all duration-500">
@@ -102,7 +99,6 @@ const About = () => {
           </div>
         </div>
 
-        {/* Supported Platforms Card */}
         <div className="col-span-2 md:col-span-4 relative group order-4 md:order-3 outline-none" tabIndex="0">
           <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700"></div>
           <div className="relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden h-28 md:h-44 flex flex-col items-center group-hover:border-emerald-500/30 group-focus:border-emerald-500/30 transition-all duration-500">
