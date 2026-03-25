@@ -8,6 +8,7 @@ const About = () => {
       }
     };
   }, []);
+  
 
   const socialPlatforms = [
     { name: "REDDIT", image: "./reddit.png" },
