@@ -40,14 +40,13 @@ app.get('/api/download', async (req, res) => {
 
   try {
     /**
-     * THE REDDIT "FORMAT NOT AVAILABLE" KILLER:
-     * We use a broad fallback. If 'best' fails, we grab the first available stream.
-     * The '0' at the end is a yt-dlp trick to pick the very first format in the list
-     * if all other logic fails.
+     * THE STABLE FORMAT:
+     * We removed the complex DASH/HLS skip flags. 
+     * Instead, we use 'b' for Reddit/Insta to ensure we get a single, non-fragmented stream.
      */
     const formatSelection = isMp3 
       ? 'bestaudio/best' 
-      : 'bestvideo+bestaudio/best[ext=mp4]/best/0'; 
+      : 'best[ext=mp4]/b/best';
 
     const ytProcess = youtubedl.exec(url, {
       output: '-',
@@ -55,22 +54,26 @@ app.get('/api/download', async (req, res) => {
       ...COMMON_FLAGS,
       noCheckFormats: true,
       noPart: true,
-      // Helps Reddit skip the manifest checks that cause the 0B crash
-      youtubeSkipDashManifest: true,
-      youtubeSkipHlsManifest: true
+      // Instagram-specific speed optimization
+      extractorRetries: 1,
+      noMtime: true
     });
 
+    // Pipe directly to response
     ytProcess.stdout.pipe(res);
 
-    // Prevent the server from crashing on ChildProcessError
+    // CRITICAL: We catch the error but don't THROW it. 
+    // This prevents the tinyspawn ChildProcessError from crashing the Node server.
     ytProcess.on('error', (err) => {
-      console.error("yt-dlp Execution Error:", err.message);
-      if (!res.headersSent) res.status(500).end();
+      console.log("yt-dlp Handled Error:", err.message);
+      if (!res.headersSent) {
+        res.status(500).end();
+      }
     });
 
     ytProcess.stderr.on('data', (data) => {
-      const msg = data.toString();
-      if (msg.includes('ERROR')) console.error("yt-dlp Log:", msg);
+      // Just log it, don't let it crash the process
+      console.log(`yt-dlp Log: ${data.toString()}`);
     });
 
     res.on('close', () => {
@@ -78,7 +81,7 @@ app.get('/api/download', async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Critical Server Error:", error);
+    console.error("Critical Server Error:", error.message);
     if (!res.headersSent) res.status(500).send("Server error.");
   }
 });
@@ -88,4 +91,4 @@ app.use(express.static(distPath));
 app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`--- ULCMP4 ENGINE STABILIZED ON ${PORT} ---`));
+app.listen(PORT, () => console.log(`--- ULCMP4 ULTIMATE STABLE ON ${PORT} ---`));
