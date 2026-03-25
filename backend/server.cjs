@@ -40,16 +40,10 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
 
   try {
-    /**
-     * DYNAMIC FORMAT LOGIC:
-     * Reddit: Force bestvideo or best single stream. 
-     * Others: Prefer merged MP4 but fallback to any best stream.
-     */
     let formatSelection;
     if (isMp3) {
       formatSelection = 'bestaudio/best';
     } else if (isReddit) {
-      // Reddit fix: explicitly separate video/audio or grab the best single file
       formatSelection = 'bestvideo+bestaudio/best';
     } else {
       formatSelection = 'best[ext=mp4]/b/best';
@@ -63,13 +57,10 @@ app.get('/api/download', async (req, res) => {
       noPart: true,
       extractorRetries: 1,
       noMtime: true,
-      // Helps Reddit skip DASH checks that cause the 0B fail
       youtubeSkipDashManifest: true 
     });
 
     ytProcess.stdout.pipe(res);
-
-    // Prevent tinyspawn from throwing a global error
     ytProcess.on('error', (err) => {
       console.error("yt-dlp Execution Error:", err.message);
       if (!res.headersSent) res.status(500).end();
@@ -94,4 +85,4 @@ app.use(express.static(distPath));
 app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`--- ULCMP4 ENGINE STABILIZED ON ${PORT} ---`));
+app.listen(PORT, () => console.log(`--- Server running at ${PORT} ---`));
