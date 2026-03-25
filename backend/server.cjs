@@ -33,6 +33,7 @@ app.get('/api/download', async (req, res) => {
   if (!url) return res.status(400).send("No URL provided");
 
   const isMp3 = type === 'mp3';
+  const isReddit = url.includes('reddit.com');
   const fileName = `${encodeURIComponent(title || 'download')}.${isMp3 ? 'mp3' : 'mp4'}`;
 
   res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
@@ -40,13 +41,19 @@ app.get('/api/download', async (req, res) => {
 
   try {
     /**
-     * THE STABLE FORMAT:
-     * We removed the complex DASH/HLS skip flags. 
-     * Instead, we use 'b' for Reddit/Insta to ensure we get a single, non-fragmented stream.
+     * DYNAMIC FORMAT LOGIC:
+     * Reddit: Force bestvideo or best single stream. 
+     * Others: Prefer merged MP4 but fallback to any best stream.
      */
-    const formatSelection = isMp3 
-      ? 'bestaudio/best' 
-      : 'best[ext=mp4]/b/best';
+    let formatSelection;
+    if (isMp3) {
+      formatSelection = 'bestaudio/best';
+    } else if (isReddit) {
+      // Reddit fix: explicitly separate video/audio or grab the best single file
+      formatSelection = 'bestvideo+bestaudio/best';
+    } else {
+      formatSelection = 'best[ext=mp4]/b/best';
+    }
 
     const ytProcess = youtubedl.exec(url, {
       output: '-',
@@ -54,25 +61,21 @@ app.get('/api/download', async (req, res) => {
       ...COMMON_FLAGS,
       noCheckFormats: true,
       noPart: true,
-      // Instagram-specific speed optimization
       extractorRetries: 1,
-      noMtime: true
+      noMtime: true,
+      // Helps Reddit skip DASH checks that cause the 0B fail
+      youtubeSkipDashManifest: true 
     });
 
-    // Pipe directly to response
     ytProcess.stdout.pipe(res);
 
-    // CRITICAL: We catch the error but don't THROW it. 
-    // This prevents the tinyspawn ChildProcessError from crashing the Node server.
+    // Prevent tinyspawn from throwing a global error
     ytProcess.on('error', (err) => {
-      console.log("yt-dlp Handled Error:", err.message);
-      if (!res.headersSent) {
-        res.status(500).end();
-      }
+      console.error("yt-dlp Execution Error:", err.message);
+      if (!res.headersSent) res.status(500).end();
     });
 
     ytProcess.stderr.on('data', (data) => {
-      // Just log it, don't let it crash the process
       console.log(`yt-dlp Log: ${data.toString()}`);
     });
 
@@ -81,7 +84,7 @@ app.get('/api/download', async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Critical Server Error:", error.message);
+    console.error("Critical Error:", error.message);
     if (!res.headersSent) res.status(500).send("Server error.");
   }
 });
@@ -91,4 +94,4 @@ app.use(express.static(distPath));
 app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`--- ULCMP4 ULTIMATE STABLE ON ${PORT} ---`));
+app.listen(PORT, () => console.log(`--- ULCMP4 ENGINE STABILIZED ON ${PORT} ---`));
