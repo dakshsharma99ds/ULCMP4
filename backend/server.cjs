@@ -7,11 +7,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Shared flags for consistency and speed
+// Common flags for performance and reliability
 const COMMON_FLAGS = {
   noCheckCertificates: true,
   noWarnings: true,
-  noPlaylist: true, // Prevents crawling entire profiles/subreddits
+  noPlaylist: true,
   addHeader: [
     'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
     'Accept-Language: en-US,en;q=0.9'
@@ -28,12 +28,12 @@ app.post('/api/info', async (req, res) => {
       ...COMMON_FLAGS
     });
     res.json({ 
-      title: info.title || "Social Media Media", 
+      title: info.title || "Social Media Content", 
       thumbnail: info.thumbnail || "" 
     });
   } catch (error) {
-    console.error("Info Fetch Error:", error.message);
-    res.status(500).json({ error: "Failed to fetch media info." });
+    console.error("Info Error:", error.message);
+    res.status(500).json({ error: "Could not fetch video info." });
   }
 });
 
@@ -42,6 +42,7 @@ app.get('/api/download', async (req, res) => {
   if (!url) return res.status(400).send("No URL provided");
 
   const isMp3 = type === 'mp3';
+  const isReddit = url.includes('reddit.com');
   const fileName = `${encodeURIComponent(title || 'download')}.${isMp3 ? 'mp3' : 'mp4'}`;
 
   res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
@@ -49,53 +50,51 @@ app.get('/api/download', async (req, res) => {
 
   try {
     /**
-     * THE FORMAT REVOLUTION:
-     * 1. best[ext=mp4]: Perfect for Facebook/LinkedIn/Snapchat (combined files).
-     * 2. /: Fallback operator.
-     * 3. best: For Reddit/Twitter where a pre-combined MP4 often doesn't exist.
-     * This stops the "Requested format is not available" error.
+     * THE FIX:
+     * 1. MP3: Grab best audio.
+     * 2. Reddit: Reddit separates audio/video. Without FFmpeg, we MUST pick 
+     * one format (b) to avoid the "Requested format not available" error.
+     * 3. Others: Try to find a pre-merged MP4 first.
      */
-    const formatSelection = isMp3 
-      ? 'bestaudio/best' 
-      : 'best[ext=mp4]/best'; 
+    let formatSelector = isMp3 ? 'bestaudio/best' : 'best[ext=mp4]/best';
+    if (isReddit && !isMp3) {
+      formatSelector = 'b/best'; // Forces a single stream that exists
+    }
 
     const ytProcess = youtubedl.exec(url, {
       output: '-',
-      format: formatSelection,
+      format: formatSelector,
       ...COMMON_FLAGS,
-      // Helps avoid the 0KB hang by skipping format validation
-      noCheckFormats: true 
+      noCheckFormats: true, // Prevents the 0B hang
+      noPart: true          // Essential for streaming to stdout
     });
 
-    // Pipe the data directly to the user's browser
+    // Pipe the data stream directly to the response
     ytProcess.stdout.pipe(res);
 
-    // Capture logs to the Render console for debugging
+    // Error handling for the stream
     ytProcess.stderr.on('data', (data) => {
-      const logMsg = data.toString();
-      if (logMsg.includes('ERROR')) {
-        console.error(`yt-dlp Log Error: ${logMsg}`);
+      if (data.toString().includes('ERROR')) {
+        console.error("yt-dlp error:", data.toString());
       }
     });
 
-    // Clean up if the user cancels or closes the tab
     res.on('close', () => {
       if (ytProcess.kill) ytProcess.kill();
     });
 
-    // Catch process errors to prevent server-side crashes
     ytProcess.on('error', (err) => {
-      console.error("Download Process Error:", err);
+      console.error("Process Error:", err);
       if (!res.headersSent) res.status(500).end();
     });
 
   } catch (error) {
-    console.error("Critical Download Error:", error.message);
+    console.error("Critical Error:", error);
     if (!res.headersSent) res.status(500).send("Download failed.");
   }
 });
 
-// Serve Frontend Files
+// Frontend setup
 const distPath = path.resolve(process.cwd(), 'dist');
 app.use(express.static(distPath));
 
