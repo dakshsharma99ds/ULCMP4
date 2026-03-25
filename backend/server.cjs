@@ -2,47 +2,30 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const youtubedl = require('youtube-dl-exec');
-const axios = require('axios');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const COMMON_FLAGS = {
-  noCheckCertificates: true,
-  noWarnings: true,
-  addHeader: [
-    'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-  ]
-};
-
-// 1. Info Route with Dailymotion Manual Scraping
+// Get info for the preview
 app.post('/api/info', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: "No URL provided" });
 
-  if (url.includes('dailymotion.com') || url.includes('dai.ly')) {
-    try {
-      const { data: html } = await axios.get(url, { 
-        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36' } 
-      });
-      const title = html.match(/<meta property="og:title" content="(.*?)"/)?.[1] || "Dailymotion Video";
-      const thumbnail = html.match(/<meta property="og:image" content="(.*?)"/)?.[1] || "";
-      return res.json({ title, thumbnail });
-    } catch (err) {
-      console.warn("Dailymotion scraping fallback...");
-    }
-  }
-
   try {
-    const info = await youtubedl(url, { dumpSingleJson: true, ...COMMON_FLAGS });
+    const info = await youtubedl(url, {
+      dumpSingleJson: true,
+      noCheckCertificates: true,
+      noWarnings: true,
+    });
     res.json({ title: info.title, thumbnail: info.thumbnail });
   } catch (error) {
+    console.error("Info Fetch Error:", error);
     res.status(500).json({ error: "Failed to fetch media info." });
   }
 });
 
-// 2. Download Route
+// Handle the actual download stream
 app.get('/api/download', async (req, res) => {
   const { url, type, title } = req.query;
   if (!url) return res.status(400).send("No URL provided");
@@ -53,31 +36,34 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
   res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
 
-  // Logic to handle Dailymotion on old yt-dlp versions
-  let downloadFlags = {
-    output: '-',
-    format: isMp3 ? 'bestaudio' : 'best', // 'best' is more compatible for direct streaming
-    ...COMMON_FLAGS
-  };
-
-  if (url.includes('dailymotion.com') || url.includes('dai.ly')) {
-    // '--ies generic' is the old-school way to bypass specific extractor bugs
-    downloadFlags.ies = 'generic'; 
-  }
-
   try {
-    const ytProcess = youtubedl.exec(url, downloadFlags);
+    const ytProcess = youtubedl.exec(url, {
+      output: '-',
+      format: isMp3 ? 'bestaudio' : 'bestvideo[height<=1080]+bestaudio/best',
+      noCheckCertificates: true,
+    });
+
     ytProcess.stdout.pipe(res);
-    res.on('close', () => { if (ytProcess.kill) ytProcess.kill(); });
+
+    res.on('close', () => {
+      if (ytProcess.kill) ytProcess.kill();
+    });
   } catch (error) {
-    console.error("Download fail:", error);
+    console.error("Download Error:", error);
     res.status(500).send("Download failed.");
   }
 });
 
+/**
+ * Static File Serving & SPA Routing (Express 5 Fix)
+ */
 const distPath = path.resolve(process.cwd(), 'dist');
 app.use(express.static(distPath));
-app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
+
+// Corrected Regex catch-all for Express 5
+app.get(/^((?!\/api).)*$/, (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`--- ULCMP4 FINAL RESTORE ON ${PORT} ---`));
+app.listen(PORT, () => console.log(`Server restored and running on port ${PORT}`));
