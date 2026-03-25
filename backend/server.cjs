@@ -58,7 +58,7 @@ async function fetchViaCobalt(url, type = 'video') {
       console.error(`Instance ${instance} failed to respond.`);
     }
   }
-  return { status: 'error', text: 'All download services are currently busy. Please try again in a few minutes.' };
+  return { status: 'error', text: 'All download services are currently busy. Please try again later.' };
 }
 
 /**
@@ -78,7 +78,6 @@ app.post('/api/info', async (req, res) => {
       return res.status(400).json({ error: data.text });
     }
     
-    // Return generic success info since Cobalt handles the heavy lifting
     res.json({ 
       title: "Media Content", 
       thumbnail: "https://placehold.co/600x400?text=Link+Verified+Successfully" 
@@ -100,23 +99,19 @@ app.get('/api/download', async (req, res) => {
 
   try {
     const data = await fetchViaCobalt(url, type);
-    
-    // Support both direct URLs and Picker (gallery) responses
     let downloadUrl = data.url || (data.picker && data.picker[0]?.url);
 
     if (downloadUrl) {
       const mediaRes = await fetch(downloadUrl);
       const safeTitle = (title || "ulcmp4-download").replace(/[<>:"/\\|?*]/g, '').substring(0, 80);
       
-      // Set correct headers for browser download
       res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(safeTitle)}.${type === 'mp3' ? 'mp3' : 'mp4'}"`);
       res.setHeader('Content-Type', type === 'mp3' ? 'audio/mpeg' : 'video/mp4');
       
-      // Stream the file directly to the user
       return Readable.fromWeb(mediaRes.body).pipe(res);
     }
     
-    res.status(400).send("Could not find a valid download link for this content.");
+    res.status(400).send("Could not find a valid download link.");
   } catch (err) {
     console.error("Download Route Error:", err);
     res.status(500).send("Internal Server Error during download.");
@@ -126,13 +121,16 @@ app.get('/api/download', async (req, res) => {
 /**
  * Static File Serving & Frontend Routing
  */
-// Fix for Render's directory structure
 const distPath = path.resolve(process.cwd(), 'dist');
 
+// Serve actual static assets (JS, CSS, Images)
 app.use(express.static(distPath));
 
-// catch-all route corrected for Express 5 (using named parameter logic)
-app.get('/:path*', (req, res) => {
+/** * FINAL FIX FOR EXPRESS 5: 
+ * Using a Regex literal to bypass the path-to-regexp parser.
+ * This matches everything except routes starting with /api.
+ */
+app.get(/^((?!\/api).)*$/, (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
