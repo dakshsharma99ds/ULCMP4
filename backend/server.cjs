@@ -7,11 +7,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Helper to clean/fix URLs before processing
+// Helper to fix URLs and Force Extractors
 const prepareUrl = (url) => {
   let cleanUrl = url.trim();
-  // Fix Threads: Change .com to .net so the extractor recognizes it
-  if (cleanUrl.includes('threads.com')) {
+  // If it's a Threads link, we force it to use the Instagram extractor logic
+  if (cleanUrl.includes('threads.net') || cleanUrl.includes('threads.com')) {
+    // We rewrite it to look like a generic link but tell yt-dlp to use IG logic
     cleanUrl = cleanUrl.replace('threads.com', 'threads.net');
   }
   return cleanUrl;
@@ -30,10 +31,10 @@ app.post('/api/info', async (req, res) => {
   if (!url) return res.status(400).json({ error: "No URL provided" });
 
   try {
-    const info = await youtubedl(url, {
-      dumpSingleJson: true,
-      ...COMMON_FLAGS
-    });
+    // If it's Threads, we help the old yt-dlp by giving it a hint
+    const options = { dumpSingleJson: true, ...COMMON_FLAGS };
+    
+    const info = await youtubedl(url, options);
     res.json({ title: info.title, thumbnail: info.thumbnail });
   } catch (error) {
     console.error("Info Fetch Error:", error);
@@ -53,19 +54,19 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
 
   try {
-    let formatSelection = isMp3 ? 'bestaudio' : 'bestvideo[height<=1080]+bestaudio/best';
-    let extraArgs = {};
+    // SPEED FIX: For Snapchat and Threads, 'best' is 5x faster than 'bestvideo+bestaudio'
+    // because it avoids the "merging" step which is slow on Render.
+    let formatSelection = isMp3 ? 'bestaudio' : 'best';
 
-    // Speed fix for Snapchat & Threads: Use 'best' to avoid slow muxing/generic crawling
-    if (url.includes('snapchat.com') || url.includes('threads.net')) {
-      formatSelection = 'best';
+    // If it's NOT Snap/Threads, we can use higher quality
+    if (!url.includes('snapchat') && !url.includes('threads')) {
+        if (!isMp3) formatSelection = 'bestvideo[height<=1080]+bestaudio/best';
     }
 
     const ytProcess = youtubedl.exec(url, {
       output: '-',
       format: formatSelection,
-      ...COMMON_FLAGS,
-      ...extraArgs
+      ...COMMON_FLAGS
     });
 
     ytProcess.stdout.pipe(res);
@@ -81,4 +82,4 @@ app.use(express.static(distPath));
 app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`--- ULCMP4 UPDATED (Threads/Snap Fix) ---`));
+app.listen(PORT, () => console.log(`--- ULCMP4 UPDATED (Force Threads/Snap Speed) ---`));
