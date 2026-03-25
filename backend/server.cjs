@@ -7,6 +7,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Common flags for Dailymotion and other strict extractors
+const COMMON_FLAGS = {
+  noCheckCertificates: true,
+  noWarnings: true,
+  // Fix for "impersonation" error: Use a standard User-Agent and disable internal impersonation logic
+  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  noImpersonate: true
+};
+
 // Get info for the preview
 app.post('/api/info', async (req, res) => {
   const { url } = req.body;
@@ -15,8 +24,7 @@ app.post('/api/info', async (req, res) => {
   try {
     const info = await youtubedl(url, {
       dumpSingleJson: true,
-      noCheckCertificates: true,
-      noWarnings: true,
+      ...COMMON_FLAGS
     });
     res.json({ title: info.title, thumbnail: info.thumbnail });
   } catch (error) {
@@ -40,7 +48,7 @@ app.get('/api/download', async (req, res) => {
     const ytProcess = youtubedl.exec(url, {
       output: '-',
       format: isMp3 ? 'bestaudio' : 'bestvideo[height<=1080]+bestaudio/best',
-      noCheckCertificates: true,
+      ...COMMON_FLAGS
     });
 
     ytProcess.stdout.pipe(res);
@@ -66,4 +74,7 @@ app.get(/^((?!\/api).)*$/, (req, res) => {
 });
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Server restored and running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`--- ULCMP4 RESTORED & DAILYMOTION FIXED ---`);
+  console.log(`Server running on port ${PORT}`);
+});
