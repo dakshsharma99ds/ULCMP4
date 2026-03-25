@@ -42,7 +42,7 @@ app.post('/api/info', async (req, res) => {
   }
 });
 
-// 2. Download Route with Dailymotion Bypass
+// 2. Download Route
 app.get('/api/download', async (req, res) => {
   const { url, type, title } = req.query;
   if (!url) return res.status(400).send("No URL provided");
@@ -53,17 +53,16 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
   res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
 
-  const downloadFlags = {
+  // Logic to handle Dailymotion on old yt-dlp versions
+  let downloadFlags = {
     output: '-',
-    format: isMp3 ? 'bestaudio' : 'bestvideo+bestaudio/best',
+    format: isMp3 ? 'bestaudio' : 'best', // 'best' is more compatible for direct streaming
     ...COMMON_FLAGS
   };
 
-  // If it's Dailymotion, we force the "Generic" extractor to bypass impersonation errors
   if (url.includes('dailymotion.com') || url.includes('dai.ly')) {
-    downloadFlags.allowedExtractors = 'generic,dailymotion';
-    // We also use a simpler format for Dailymotion to avoid the m3u8 impersonation loop
-    if (!isMp3) downloadFlags.format = 'best'; 
+    // '--ies generic' is the old-school way to bypass specific extractor bugs
+    downloadFlags.ies = 'generic'; 
   }
 
   try {
@@ -71,6 +70,7 @@ app.get('/api/download', async (req, res) => {
     ytProcess.stdout.pipe(res);
     res.on('close', () => { if (ytProcess.kill) ytProcess.kill(); });
   } catch (error) {
+    console.error("Download fail:", error);
     res.status(500).send("Download failed.");
   }
 });
