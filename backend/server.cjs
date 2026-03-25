@@ -7,13 +7,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Common flags for Dailymotion and other strict extractors
+// Universal flags for all yt-dlp versions
 const COMMON_FLAGS = {
   noCheckCertificates: true,
   noWarnings: true,
-  // Fix for "impersonation" error: Use a standard User-Agent and disable internal impersonation logic
-  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-  noImpersonate: true
+  // We send the User-Agent as a header to avoid "Impersonation" crashes
+  addHeader: [
+    'User-Agent:Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    'Accept-Language:en-US,en;q=0.9'
+  ]
 };
 
 // Get info for the preview
@@ -68,13 +70,13 @@ app.get('/api/download', async (req, res) => {
 const distPath = path.resolve(process.cwd(), 'dist');
 app.use(express.static(distPath));
 
-// Corrected Regex catch-all for Express 5
+// Standard SPA routing
 app.get(/^((?!\/api).)*$/, (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log(`--- ULCMP4 RESTORED & DAILYMOTION FIXED ---`);
-  console.log(`Server running on port ${PORT}`);
+  console.log(`--- ULCMP4 LIVE ---`);
+  console.log(`Ready for Insta, X, Reddit, Tumblr, FB, and Dailymotion`);
 });
