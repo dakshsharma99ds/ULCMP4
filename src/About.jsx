@@ -28,7 +28,7 @@ const About = () => {
           ABOUT
         </h1>
         <p className="text-emerald-500/60 text-[8px] md:text-[10px] tracking-[0.45em] md:tracking-[1.00em] mt-2 uppercase text-center w-full whitespace-nowrap">
-          universal link convertor
+          universal link converter
         </p>
         <div className="h-0.5 w-fit bg-linear-to-r from-transparent via-emerald-500 to-transparent mt-4 opacity-50">
            <div className="invisible text-[8px] md:text-[10px] tracking-[0.45em] md:tracking-[1.00em] uppercase">universal link convertor</div>
@@ -45,7 +45,7 @@ const About = () => {
               </div>
             </div>
             <div>
-              <h2 className="nico-font text-[10px] md:text-xl text-emerald-500/80 tracking-widest uppercase mb-1 md:mb-3">universal link convertor</h2>
+              <h2 className="nico-font text-[10px] md:text-xl text-emerald-500/80 tracking-widest uppercase mb-1 md:mb-3">universal link converter</h2>
               <p className="font-mono text-[9px] md:text-sm leading-relaxed text-gray-400 group-hover:text-gray-200 group-focus:text-gray-200 transition-colors duration-500 tracking-tight">
                 ULC provides seamless access to high-quality social media content. One click downloads MP4/MP3 files directly without ads, logins, or quality loss.
               </p>
