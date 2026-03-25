@@ -7,17 +7,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Helper to fix URLs and Force Extractors
-const prepareUrl = (url) => {
-  let cleanUrl = url.trim();
-  // If it's a Threads link, we force it to use the Instagram extractor logic
-  if (cleanUrl.includes('threads.net') || cleanUrl.includes('threads.com')) {
-    // We rewrite it to look like a generic link but tell yt-dlp to use IG logic
-    cleanUrl = cleanUrl.replace('threads.com', 'threads.net');
-  }
-  return cleanUrl;
-};
-
 const COMMON_FLAGS = {
   noCheckCertificates: true,
   noWarnings: true,
@@ -27,14 +16,14 @@ const COMMON_FLAGS = {
 };
 
 app.post('/api/info', async (req, res) => {
-  const url = prepareUrl(req.body.url || '');
+  const { url } = req.body;
   if (!url) return res.status(400).json({ error: "No URL provided" });
 
   try {
-    // If it's Threads, we help the old yt-dlp by giving it a hint
-    const options = { dumpSingleJson: true, ...COMMON_FLAGS };
-    
-    const info = await youtubedl(url, options);
+    const info = await youtubedl(url, {
+      dumpSingleJson: true,
+      ...COMMON_FLAGS
+    });
     res.json({ title: info.title, thumbnail: info.thumbnail });
   } catch (error) {
     console.error("Info Fetch Error:", error);
@@ -43,8 +32,7 @@ app.post('/api/info', async (req, res) => {
 });
 
 app.get('/api/download', async (req, res) => {
-  const { type, title } = req.query;
-  const url = prepareUrl(req.query.url || '');
+  const { url, type, title } = req.query;
   if (!url) return res.status(400).send("No URL provided");
 
   const isMp3 = type === 'mp3';
@@ -54,23 +42,26 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
 
   try {
-    // SPEED FIX: For Snapchat and Threads, 'best' is 5x faster than 'bestvideo+bestaudio'
-    // because it avoids the "merging" step which is slow on Render.
-    let formatSelection = isMp3 ? 'bestaudio' : 'best';
+    const isSnap = url.includes('snapchat.com');
 
-    // If it's NOT Snap/Threads, we can use higher quality
-    if (!url.includes('snapchat') && !url.includes('threads')) {
-        if (!isMp3) formatSelection = 'bestvideo[height<=1080]+bestaudio/best';
-    }
-
-    const ytProcess = youtubedl.exec(url, {
+    const downloadOptions = {
       output: '-',
-      format: formatSelection,
-      ...COMMON_FLAGS
-    });
+      // 'best' is the fastest for Snap because it grabs the direct CDN link 
+      // without trying to mux/combine video and audio.
+      format: isMp3 ? 'bestaudio' : (isSnap ? 'best' : 'bestvideo[height<=1080]+bestaudio/best'),
+      ...COMMON_FLAGS,
+      // Forces yt-dlp to stop searching for extra metadata once it finds the stream
+      noPlaylist: true,
+      concurrentFragments: 5 
+    };
+
+    const ytProcess = youtubedl.exec(url, downloadOptions);
 
     ytProcess.stdout.pipe(res);
-    res.on('close', () => { if (ytProcess.kill) ytProcess.kill(); });
+
+    res.on('close', () => {
+      if (ytProcess.kill) ytProcess.kill();
+    });
   } catch (error) {
     console.error("Download Error:", error);
     res.status(500).send("Download failed.");
@@ -79,7 +70,10 @@ app.get('/api/download', async (req, res) => {
 
 const distPath = path.resolve(process.cwd(), 'dist');
 app.use(express.static(distPath));
-app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
+
+app.get(/^((?!\/api).)*$/, (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`--- ULCMP4 UPDATED (Force Threads/Snap Speed) ---`));
+app.listen(PORT, () => console.log(`--- ULCMP4 SNAP-SPEED OPTIMIZED ---`));
