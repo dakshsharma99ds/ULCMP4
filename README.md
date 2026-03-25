@@ -6,7 +6,7 @@ Universal Link Convertor , A clean, ad-free experience to convert social media l
 
 ---
 
-## ✨ Supported Platforms
+## ⭐ Supported Platforms
 
 * **🟢 Instagram**
 * **🟢 LinkedIn**
