@@ -7,7 +7,6 @@ const Contact = () => {
   const containerRef = useRef();
   const [isTouched, setIsTouched] = useState(false);
 
-  // Handle clicking outside to remove the glow on mobile
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
@@ -47,7 +46,7 @@ const Contact = () => {
       .then((result) => {
           toast.success("TRANSMISSION_SUCCESSFUL: Data received.", { id: loadingToast });
           e.target.reset();
-          setIsTouched(false); // Reset glow after success
+          setIsTouched(false);
       }, (error) => {
           toast.error("TRANSMISSION_FAILED: Node disconnected.", { id: loadingToast });
       });
@@ -130,15 +129,12 @@ const Contact = () => {
           </div>
         </div>
 
-        {/* Added ref and ontouchstart logic here */}
         <div 
           ref={containerRef}
           onTouchStart={() => setIsTouched(true)}
           className="w-full max-w-[320px] md:max-w-md relative group shrink-0 glitch-stabilizer"
         >
-          {/* Dynamic opacity based on touch state or hover */}
           <div className={`absolute -inset-1 bg-linear-to-r from-emerald-500/20 to-blue-500/20 rounded-[30px] md:rounded-[40px] blur-2xl transition duration-1000 ${isTouched ? 'opacity-100' : 'opacity-50 group-hover:opacity-100'}`}></div>
-          
           <div className="relative bg-black/40 border border-white/10 rounded-[30px] md:rounded-[40px] p-7 md:p-10 backdrop-blur-3xl shadow-2xl">
             <form ref={form} onSubmit={sendEmail} className="space-y-4 md:space-y-5">
               <input name="from_name" type="text" className="w-full bg-white/3 border border-white/10 rounded-xl md:rounded-2xl px-5 md:px-6 py-3 md:py-4 outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 font-mono text-xs md:text-sm transition-all placeholder:text-gray-600 text-white" placeholder="IDENT_NAME" />
