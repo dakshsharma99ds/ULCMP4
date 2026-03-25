@@ -36,9 +36,9 @@ const Contact = () => {
       return toast.error("ERROR: INVALID_EMAIL_ID");
     }
 
-    const SERVICE_ID = "service_5ks9xov"; 
-    const TEMPLATE_ID = "template_08now6i"; 
-    const PUBLIC_KEY = "vnd8tCPWyeI93Spta";
+    const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+    const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+    const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
     const loadingToast = toast.loading("INITIATING_TRANSFER...");
 
     emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, form.current, PUBLIC_KEY)
