@@ -6,6 +6,7 @@ const youtubedl = require('youtube-dl-exec');
 const app = express();
 app.use(cors());
 app.use(express.json());
+
 app.post('/api/info', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: "No URL provided" });
@@ -34,20 +35,36 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
 
   try {
+    /**
+     * THE FIX: 
+     * For Facebook (and others), 'best' ensures we get a single file with both A/V.
+     * Using 'bestvideo+bestaudio' with stdout ('-') fails because it can't merge 
+     * without a local temporary file and FFmpeg.
+     */
+    const formatSelection = isMp3 
+      ? 'bestaudio/best' 
+      : 'best[ext=mp4]/best'; // Force best single MP4 file or highest available combined stream
+
     const ytProcess = youtubedl.exec(url, {
       output: '-',
-      format: isMp3 ? 'bestaudio' : 'bestvideo[height<=1080]+bestaudio/best',
+      format: formatSelection,
       noCheckCertificates: true,
+      noWarnings: true,
     });
 
     ytProcess.stdout.pipe(res);
 
+    // If the user cancels the download, kill the yt-dlp process immediately
     res.on('close', () => {
       if (ytProcess.kill) ytProcess.kill();
     });
+
+    // Optional: Log errors from yt-dlp to your Render console
+    ytProcess.stderr.on('data', (data) => console.log(`yt-dlp: ${data}`));
+
   } catch (error) {
     console.error("Download Error:", error);
-    res.status(500).send("Download failed.");
+    if (!res.headersSent) res.status(500).send("Download failed.");
   }
 });
 
