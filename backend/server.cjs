@@ -7,15 +7,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// List of public Cobalt instances for 2026 reliability
-const COBALT_INSTANCES = [
-  'https://cobalt.api.hyper.lol',
-  'https://api.cobalt.tools',
-  'https://cobalt-api.v-center.space'
-];
+/**
+ * YOUR PRIVATE COBALT INSTANCE
+ * Replace this URL with the one from your new Render Docker Service
+ */
+const PRIVATE_COBALT_URL = 'https://ulcmp4-api.onrender.com';
 
 /**
- * Clean URLs to prevent double protocol bugs (e.g., httphttps://)
+ * URL Sanitizer
+ * Fixes "httphttps://" or extra spaces from the frontend
  */
 function cleanUrl(url) {
   if (!url) return "";
@@ -27,38 +27,34 @@ function cleanUrl(url) {
 }
 
 /**
- * Logic to cycle through Cobalt instances if one is down or rate-limited
+ * Primary Fetch Logic
+ * Communicates directly with your private Docker container
  */
-async function fetchViaCobalt(url, type = 'video') {
-  for (const instance of COBALT_INSTANCES) {
-    try {
-      console.log(`Attempting download via: ${instance}`);
-      const response = await fetch(`${instance}/api/json`, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          url: url,
-          downloadMode: type === 'mp3' ? 'audio' : 'video',
-          videoQuality: '1080',
-        })
-      });
+async function fetchViaPrivateCobalt(url, type = 'video') {
+  try {
+    const response = await fetch(`${PRIVATE_COBALT_URL}/api/json`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url: url,
+        downloadMode: type === 'mp3' ? 'audio' : 'video',
+        videoQuality: '1080',
+      })
+    });
 
-      if (!response.ok) continue;
-
-      const data = await response.json();
-      if (data.status === 'error') {
-        console.warn(`Instance ${instance} returned error: ${data.text}`);
-        continue;
-      }
-      return data;
-    } catch (err) {
-      console.error(`Instance ${instance} failed to respond.`);
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      return { status: 'error', text: errData.text || 'Private API Offline' };
     }
+
+    return await response.json();
+  } catch (err) {
+    console.error("Private API Connection Error:", err.message);
+    return { status: 'error', text: 'Could not connect to private download engine.' };
   }
-  return { status: 'error', text: 'All download services are currently busy. Please try again later.' };
 }
 
 /**
@@ -70,21 +66,21 @@ app.post('/api/info', async (req, res) => {
     url = cleanUrl(url);
 
     if (!url || !url.startsWith('http')) {
-      return res.status(400).json({ error: "Please provide a valid URL." });
+      return res.status(400).json({ error: "Please enter a valid link." });
     }
 
-    const data = await fetchViaCobalt(url);
+    const data = await fetchViaPrivateCobalt(url);
     if (data.status === 'error') {
       return res.status(400).json({ error: data.text });
     }
     
+    // We send a success signal to the frontend
     res.json({ 
-      title: "Media Content", 
+      title: "Media Ready", 
       thumbnail: "https://placehold.co/600x400?text=Link+Verified+Successfully" 
     });
   } catch (error) {
-    console.error("Info Route Error:", error);
-    res.status(500).json({ error: "Server encountered an error fetching info." });
+    res.status(500).json({ error: "Server error during info fetch." });
   }
 });
 
@@ -98,7 +94,9 @@ app.get('/api/download', async (req, res) => {
   if (!url) return res.status(400).send("No URL provided.");
 
   try {
-    const data = await fetchViaCobalt(url, type);
+    const data = await fetchViaPrivateCobalt(url, type);
+    
+    // Handle both direct and gallery (picker) results
     let downloadUrl = data.url || (data.picker && data.picker[0]?.url);
 
     if (downloadUrl) {
@@ -108,33 +106,29 @@ app.get('/api/download', async (req, res) => {
       res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(safeTitle)}.${type === 'mp3' ? 'mp3' : 'mp4'}"`);
       res.setHeader('Content-Type', type === 'mp3' ? 'audio/mpeg' : 'video/mp4');
       
+      // Stream directly from your private API to the user's browser
       return Readable.fromWeb(mediaRes.body).pipe(res);
     }
     
-    res.status(400).send("Could not find a valid download link.");
+    res.status(400).send("Private API could not generate a link.");
   } catch (err) {
-    console.error("Download Route Error:", err);
-    res.status(500).send("Internal Server Error during download.");
+    res.status(500).send("Internal download error.");
   }
 });
 
 /**
- * Static File Serving & Frontend Routing
+ * Static File Serving & SPA Routing (Express 5 Compatible)
  */
 const distPath = path.resolve(process.cwd(), 'dist');
-
-// Serve actual static assets (JS, CSS, Images)
 app.use(express.static(distPath));
 
-/** * FINAL FIX FOR EXPRESS 5: 
- * Using a Regex literal to bypass the path-to-regexp parser.
- * This matches everything except routes starting with /api.
- */
+// Regex catch-all: Avoids Express 5 path-to-regexp parsing issues
 app.get(/^((?!\/api).)*$/, (req, res) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-  console.log(`--- ULCMP4 SERVER LIVE ON PORT ${PORT} ---`);
+  console.log(`--- ULCMP4 PRO LIVE ON PORT ${PORT} ---`);
+  console.log(`Targeting Private API: ${PRIVATE_COBALT_URL}`);
 });
