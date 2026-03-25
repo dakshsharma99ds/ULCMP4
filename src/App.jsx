@@ -325,7 +325,7 @@ function App() {
                     <span className="text-emerald-400">MP4</span>
                   </h1>
                   <div className="relative inline-block">
-                    <p className="text-emerald-500/80 tracking-[0.65em] md:tracking-[0.95em] text-[8px] md:text-[11px] uppercase font-bold">Link to mp4 in seconds.</p>
+                    <p className="text-emerald-500/80 tracking-[0.65em] md:tracking-[0.95em] text-[8px] md:text-[11px] uppercase font-bold">universal link converter</p>
                     <div className="h-0.5 w-full bg-linear-to-r from-transparent via-emerald-500 to-transparent mt-3 opacity-50"></div>
                   </div>
                 </div>
