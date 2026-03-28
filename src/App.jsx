@@ -169,7 +169,7 @@ function App() {
 
   const getPlatformLogo = (fetchedUrl) => {
     const lowerUrl = fetchedUrl?.toLowerCase() || "";
-    const iconClasses = "w-12 h-12 text-white/70 select-none pointer-events-none";
+    const iconClasses = "w-12 h-12 text-white/70"; // Removed select-none and pointer-events-none
 
     if (lowerUrl.includes('linkedin.com')) {
       return (
@@ -186,7 +186,7 @@ function App() {
       );
     }
     if (lowerUrl.includes('tumblr.com')) {
-      return <img src="./tumblr.png" alt="tumblr" className={iconClasses} style={{ WebkitUserDrag: 'none' }} />;
+      return <img src="./tumblr.png" alt="tumblr" className={iconClasses} />; // Removed style drag restriction
     }
     return null;
   };
@@ -325,7 +325,6 @@ function App() {
       
       <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
         
-        {/* Instant Download Loading Screen (Static No Fade) */}
         {dlProcessing && (
           <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center">
             <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-10"></div>
@@ -335,7 +334,6 @@ function App() {
                  DOWNLOADING
                </h2>
                
-               {/* Spaced out letters with flex justify-between to match header width exactly */}
                <div className="flex justify-between w-full mt-6 text-gray-500 text-[10px] md:text-xs font-mono uppercase tracking-widest">
                  {"PLEASE WAIT UNTIL THE FILE IS READY".split("").map((char, i) => (
                    <span key={i} className={char === " " ? "w-1" : ""}>{char}</span>
@@ -399,9 +397,8 @@ function App() {
                             ) : (
                               <img 
                                 src={info.thumbnail} 
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 shadow-2xl select-none pointer-events-none" 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 shadow-2xl" 
                                 alt="preview" 
-                                style={{ WebkitUserDrag: 'none' }}
                               />
                             )}
                           </div>
