@@ -43,14 +43,11 @@ function App() {
           FOR YOUTUBE.
         </span>
       </div>,
-      { 
-        duration: 8000,
-        icon: null 
-      }
+      { duration: 8000, icon: null }
     );
   };
 
- const showInstagramStoryError = () => {
+  const showInstagramStoryError = () => {
     toast.error(
       <div className="font-mono text-[10px] leading-relaxed tracking-wider w-full">
         <span className="text-emerald-400 font-bold block text-[13px]">SERVER ERROR:</span>
@@ -69,10 +66,7 @@ function App() {
           FOR STORIES.
         </span>
       </div>,
-      { 
-        duration: 8000,
-        icon: null 
-      }
+      { duration: 8000, icon: null }
     );
   };
 
@@ -175,22 +169,25 @@ function App() {
 
   const getPlatformLogo = (fetchedUrl) => {
     const lowerUrl = fetchedUrl?.toLowerCase() || "";
+    // select-none and pointer-events-none prevent blue highlight and dragging
+    const iconClasses = "w-12 h-12 text-white/70 select-none pointer-events-none";
+
     if (lowerUrl.includes('linkedin.com')) {
       return (
-        <svg viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12 text-white/70 select-none pointer-events-none">
+        <svg viewBox="0 0 24 24" fill="currentColor" className={iconClasses}>
           <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
         </svg>
       );
     }
     if (lowerUrl.includes('instagram.com')) {
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-12 h-12 text-white/70 select-none pointer-events-none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={iconClasses}>
           <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
         </svg>
       );
     }
     if (lowerUrl.includes('tumblr.com')) {
-      return <img src="./tumblr.png" alt="tumblr" className="w-12 h-12 object-contain opacity-70 select-none pointer-events-none" style={{ WebkitUserDrag: 'none' }} />;
+      return <img src="./tumblr.png" alt="tumblr" className={iconClasses} style={{ WebkitUserDrag: 'none' }} />;
     }
     return null;
   };
@@ -328,29 +325,22 @@ function App() {
       </button>
       
       <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
+        
+        {/* Simplified Download Loading Screen */}
         <AnimatePresence>
           {dlProcessing && (
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
               className="fixed inset-0 z-50 bg-black/90 backdrop-blur-2xl flex flex-col items-center justify-center"
             >
               <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-8"></div>
               <div className="flex flex-col items-stretch w-fit">
-                 <h2 className="nico-font text-2xl md:text-4xl text-emerald-400 tracking-widest animate-pulse text-center">DOWNLOADING</h2>
-                 <div className="flex justify-between w-full mt-4 text-gray-500 text-[10px] md:text-xs font-mono uppercase">
-                    {"PLEASE WAIT UNTIL THE FILE IS READY".split("").map((char, index) => (
-                      <motion.span 
-                        key={index} 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: index * 0.03 }}
-                        className={char === " " ? "w-1" : ""}
-                      >
-                        {char}
-                      </motion.span>
-                    ))}
+                 <h2 className="nico-font text-2xl md:text-4xl text-emerald-400 tracking-widest text-center">DOWNLOADING</h2>
+                 <div className="w-full mt-4 text-gray-500 text-[10px] md:text-xs font-mono uppercase text-center tracking-[0.2em]">
+                   PLEASE WAIT UNTIL THE FILE IS READY
                  </div>
               </div>
             </motion.div>
@@ -368,7 +358,6 @@ function App() {
               transition={pageVariants.transition}
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
-             
               <div className="w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0">
                 <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
                   <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
@@ -405,7 +394,6 @@ function App() {
                   {info && (
                     <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
-                        
                         <div className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 group bg-black md:h-auto">
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {(info.fetchedUrl?.toLowerCase().includes('linkedin.com') || info.fetchedUrl?.toLowerCase().includes('instagram.com') || info.fetchedUrl?.toLowerCase().includes('tumblr.com') || !info.thumbnail) ? (
@@ -413,8 +401,9 @@ function App() {
                             ) : (
                               <img 
                                 src={info.thumbnail} 
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 shadow-2xl" 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 shadow-2xl select-none pointer-events-none" 
                                 alt="preview" 
+                                style={{ WebkitUserDrag: 'none' }}
                               />
                             )}
                           </div>
@@ -427,7 +416,6 @@ function App() {
                               {info.title}
                             </h3>
                           </div>
-                          
                           <div className="flex flex-col gap-3 mt-auto">
                             <button 
                               onClick={() => startDownload('mp4', '1080p')} 
@@ -435,7 +423,6 @@ function App() {
                             >
                               Download MP4 (1080P)
                             </button>
-                            
                             <button 
                               onClick={() => startDownload('mp3')} 
                               className="w-full py-4 bg-white/10 border border-white/10 text-white font-black rounded-xl hover:bg-white hover:text-black transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]"
