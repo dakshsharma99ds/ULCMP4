@@ -14,7 +14,6 @@ function App() {
   const [history, setHistory] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [scrollbarVisible, setScrollbarVisible] = useState(false);
-  
   const [currentPage, setCurrentPage] = useState('home');
   const isYouTube = (link) => {
     return link.toLowerCase().includes('youtube.com') || link.toLowerCase().includes('youtu.be');
@@ -331,8 +330,24 @@ function App() {
         {dlProcessing && (
           <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-2xl flex flex-col items-center justify-center">
             <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-8"></div>
-            <h2 className="nico-font text-2xl md:text-4xl text-emerald-400 tracking-widest animate-pulse">DOWNLOADING</h2>
-            <p className="text-gray-500 mt-4 tracking-[0.3em] text-[10px] md:text-xs font-mono uppercase">Please wait until the file is ready</p>
+            <div className="flex flex-col items-stretch w-fit">
+               <h2 className="nico-font text-2xl md:text-4xl text-emerald-400 tracking-widest animate-pulse text-center">DOWNLOADING</h2>
+               <div className="flex justify-between w-full mt-4 text-gray-500 tracking-[0.1em] text-[10px] md:text-xs font-mono uppercase">
+                  <span>P</span><span>L</span><span>E</span><span>A</span><span>S</span><span>E</span>
+                  <span className="inline-block w-1"></span>
+                  <span>W</span><span>A</span><span>I</span><span>T</span>
+                  <span className="inline-block w-1"></span>
+                  <span>U</span><span>N</span><span>T</span><span>I</span><span>L</span>
+                  <span className="inline-block w-1"></span>
+                  <span>T</span><span>H</span><span>E</span>
+                  <span className="inline-block w-1"></span>
+                  <span>F</span><span>I</span><span>L</span><span>E</span>
+                  <span className="inline-block w-1"></span>
+                  <span>I</span><span>S</span>
+                  <span className="inline-block w-1"></span>
+                  <span>R</span><span>E</span><span>A</span><span>D</span><span>Y</span>
+               </div>
+            </div>
           </div>
         )}
 
