@@ -325,21 +325,20 @@ function App() {
       
       <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
         
-        {/* Instant Download Loading Screen (No Fade) */}
+        {/* Instant Download Loading Screen (Static No Fade) */}
         {dlProcessing && (
-          <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-2xl flex flex-col items-center justify-center">
-            <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-8"></div>
+          <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center">
+            <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-10"></div>
             
-            {/* Wrapper ensures subtext length matches the header length */}
-            <div className="flex flex-col w-fit items-stretch">
-               <h2 className="nico-font text-2xl md:text-4xl text-emerald-400 tracking-widest text-center whitespace-nowrap">
+            <div className="flex flex-col w-fit items-stretch px-4">
+               <h2 className="nico-font text-2xl md:text-5xl text-emerald-400 tracking-widest text-center whitespace-nowrap">
                  DOWNLOADING
                </h2>
                
-               {/* justify-between matches the horizontal span of the text above */}
-               <div className="flex justify-between w-full mt-4 text-gray-500 text-[10px] md:text-xs font-mono uppercase tracking-tight">
-                 {"PLEASE WAIT UNTIL THE FILE IS READY".split(" ").map((word, i) => (
-                   <span key={i}>{word}</span>
+               {/* Spaced out letters with flex justify-between to match header width exactly */}
+               <div className="flex justify-between w-full mt-6 text-gray-500 text-[10px] md:text-xs font-mono uppercase tracking-widest">
+                 {"PLEASE WAIT UNTIL THE FILE IS READY".split("").map((char, i) => (
+                   <span key={i} className={char === " " ? "w-1" : ""}>{char}</span>
                  ))}
                </div>
             </div>
