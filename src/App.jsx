@@ -169,7 +169,6 @@ function App() {
 
   const getPlatformLogo = (fetchedUrl) => {
     const lowerUrl = fetchedUrl?.toLowerCase() || "";
-    // select-none and pointer-events-none prevent blue highlight and dragging
     const iconClasses = "w-12 h-12 text-white/70 select-none pointer-events-none";
 
     if (lowerUrl.includes('linkedin.com')) {
@@ -326,26 +325,26 @@ function App() {
       
       <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
         
-        {/* Simplified Download Loading Screen */}
-        <AnimatePresence>
-          {dlProcessing && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 z-50 bg-black/90 backdrop-blur-2xl flex flex-col items-center justify-center"
-            >
-              <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-8"></div>
-              <div className="flex flex-col items-stretch w-fit">
-                 <h2 className="nico-font text-2xl md:text-4xl text-emerald-400 tracking-widest text-center">DOWNLOADING</h2>
-                 <div className="w-full mt-4 text-gray-500 text-[10px] md:text-xs font-mono uppercase text-center tracking-[0.2em]">
-                   PLEASE WAIT UNTIL THE FILE IS READY
-                 </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Instant Download Loading Screen (No Fade) */}
+        {dlProcessing && (
+          <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-2xl flex flex-col items-center justify-center">
+            <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-8"></div>
+            
+            {/* Wrapper ensures subtext length matches the header length */}
+            <div className="flex flex-col w-fit items-stretch">
+               <h2 className="nico-font text-2xl md:text-4xl text-emerald-400 tracking-widest text-center whitespace-nowrap">
+                 DOWNLOADING
+               </h2>
+               
+               {/* justify-between matches the horizontal span of the text above */}
+               <div className="flex justify-between w-full mt-4 text-gray-500 text-[10px] md:text-xs font-mono uppercase tracking-tight">
+                 {"PLEASE WAIT UNTIL THE FILE IS READY".split(" ").map((word, i) => (
+                   <span key={i}>{word}</span>
+                 ))}
+               </div>
+            </div>
+          </div>
+        )}
 
         <AnimatePresence mode="wait">
           {currentPage === 'home' && (
