@@ -169,7 +169,7 @@ function App() {
 
   const getPlatformLogo = (fetchedUrl) => {
     const lowerUrl = fetchedUrl?.toLowerCase() || "";
-    const iconClasses = "w-12 h-12 text-white/70"; // Removed select-none and pointer-events-none
+    const iconClasses = "w-12 h-12 text-white/70"; 
 
     if (lowerUrl.includes('linkedin.com')) {
       return (
@@ -186,7 +186,7 @@ function App() {
       );
     }
     if (lowerUrl.includes('tumblr.com')) {
-      return <img src="./tumblr.png" alt="tumblr" className={iconClasses} />; // Removed style drag restriction
+      return <img src="./tumblr.png" alt="tumblr" className={iconClasses} />; 
     }
     return null;
   };
@@ -398,11 +398,13 @@ function App() {
                               <img 
                                 src={info.thumbnail} 
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 shadow-2xl" 
-                                alt="preview" 
+                                alt="preview"
+                                draggable="true"
                               />
                             )}
                           </div>
-                          <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20"></div>
+                          {/* The fix: Added pointer-events-none to this overlay layer so it doesn't block dragging */}
+                          <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none"></div>
                         </div>
 
                         <div className="flex-1 min-w-0 flex flex-col justify-between">
