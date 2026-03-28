@@ -186,7 +186,11 @@ function App() {
       );
     }
     if (lowerUrl.includes('tumblr.com')) {
-      return <img src="./tumblr.png" alt="tumblr" className={iconClasses} />; 
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className={iconClasses}>
+          <path d="M14.538 24h-3.762c-3.447 0-4.622-2.405-4.622-4.138V11.16H4.333V8.058C6.665 7.705 8.125 6.146 8.594 3.32h3.582v4.734h4.557v3.106h-4.557v7.454c0 .594.124 1.493 1.444 1.493.53 0 .894-.04 1.378-.205V24z"/>
+        </svg>
+      );
     }
     return null;
   };
