@@ -394,8 +394,10 @@ function App() {
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
                               <img 
+                                key={info.thumbnail}
                                 src={info.thumbnail} 
                                 referrerPolicy="no-referrer"
+                                crossOrigin="anonymous"
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 shadow-2xl" 
                                 alt="preview"
                                 draggable="true"
@@ -404,7 +406,6 @@ function App() {
                               <div className="flex items-center justify-center h-full text-white/70">{getPlatformLogo(info.fetchedUrl)}</div>
                             )}
                           </div>
-                          {/* Ensure this overlay layer doesn't block the image visually or functionally */}
                           <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none"></div>
                         </div>
 
