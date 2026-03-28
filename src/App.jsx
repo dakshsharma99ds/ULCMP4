@@ -396,6 +396,7 @@ function App() {
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
                         <div className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 group bg-black md:h-auto">
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
+                            {/* THUMBNAIL LOGIC: If thumbnail exists, load proxy. If not, show logo */}
                             {info.thumbnail ? (
                               <img 
                                 key={info.thumbnail}
@@ -406,7 +407,9 @@ function App() {
                                 draggable="true"
                               />
                             ) : (
-                              <div className="flex items-center justify-center h-full text-white/70">{getPlatformLogo(info.fetchedUrl)}</div>
+                              <div className="flex items-center justify-center h-full text-white/70">
+                                {getPlatformLogo(info.fetchedUrl)}
+                              </div>
                             )}
                           </div>
                           <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none"></div>
