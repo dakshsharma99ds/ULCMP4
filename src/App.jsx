@@ -436,6 +436,7 @@ function App() {
             </motion.div>
           )}
 
+          
           {currentPage === 'about' && (
             <motion.div key="about" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition} className="w-full flex justify-center">
               <About />
