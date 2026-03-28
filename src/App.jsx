@@ -15,6 +15,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [scrollbarVisible, setScrollbarVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
+  
   const isYouTube = (link) => {
     return link.toLowerCase().includes('youtube.com') || link.toLowerCase().includes('youtu.be');
   };
@@ -176,20 +177,20 @@ function App() {
     const lowerUrl = fetchedUrl?.toLowerCase() || "";
     if (lowerUrl.includes('linkedin.com')) {
       return (
-        <svg viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12 text-white/70">
+        <svg viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12 text-white/70 select-none pointer-events-none">
           <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
         </svg>
       );
     }
     if (lowerUrl.includes('instagram.com')) {
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-12 h-12 text-white/70">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-12 h-12 text-white/70 select-none pointer-events-none">
           <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
         </svg>
       );
     }
     if (lowerUrl.includes('tumblr.com')) {
-      return <img src="./tumblr.png" alt="tumblr" className="w-12 h-12 object-contain opacity-70" />;
+      return <img src="./tumblr.png" alt="tumblr" className="w-12 h-12 object-contain opacity-70 select-none pointer-events-none" style={{ WebkitUserDrag: 'none' }} />;
     }
     return null;
   };
@@ -226,7 +227,7 @@ function App() {
             onClick={handleHamburgerClick} 
             className={`cursor-pointer shrink-0 z-50 bg-transparent transition-all duration-300 ${(isNavOpen || isSearchMode) ? 'text-emerald-400 opacity-100 delay-300' : 'opacity-0 md:opacity-100 md:delay-0 hover:text-emerald-600'}`}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
           </button>
           <div className="flex-1 ml-4 relative h-full flex items-center overflow-hidden">
             <div className={`absolute right-0 transition-all duration-400 ease-in-out ${isSearchMode ? 'opacity-100 translate-x-0 w-full' : 'opacity-0 translate-x-10 pointer-events-none w-0'}`}>
@@ -250,7 +251,7 @@ function App() {
                 transform: (isNavOpen && !isSearchMode) ? 'scale(1)' : 'scale(0.8)'
               }}
             >
-              <img src="/search.png" alt="search" className="w-5 h-5 icon-hover-trigger" />
+              <img src="/search.png" alt="search" className="w-5 h-5 icon-hover-trigger select-none pointer-events-none" style={{ WebkitUserDrag: 'none' }} />
             </button>
           </div>
         </div>
@@ -266,11 +267,11 @@ function App() {
             }}
           >
             <div onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8">
-              <img src="/home.png" alt="home" className={`w-6 h-6 shrink-0 transition-all duration-300 ${currentPage === 'home' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} />
+              <img src="/home.png" alt="home" className={`w-6 h-6 shrink-0 transition-all duration-300 select-none pointer-events-none ${currentPage === 'home' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} style={{ WebkitUserDrag: 'none' }} />
               <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-emerald-600'}`} style={textTransitionStyle(isNavOpen)}>HOME</span>
             </div>
             <div onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group">
-              <img src="/about.png" alt="about" className={`w-6 h-6 shrink-0 transition-all duration-300 ${currentPage === 'about' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} />
+              <img src="/about.png" alt="about" className={`w-6 h-6 shrink-0 transition-all duration-300 select-none pointer-events-none ${currentPage === 'about' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} style={{ WebkitUserDrag: 'none' }} />
               <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-emerald-600'}`} style={textTransitionStyle(isNavOpen)}>ABOUT</span>
             </div>
           </div>
@@ -279,7 +280,7 @@ function App() {
             <div onClick={() => { if(!isSearchMode) { setIsSearchMode(true); setIsNavOpen(true); } }}
               className={`shrink-0 flex items-center gap-6 cursor-pointer mb-4 group`}
             >
-              <img src="/recent.png" alt="history" className={`w-6 h-6 shrink-0 transition-transform duration-300 ${isSearchMode ? 'icon-emerald-active' : 'icon-hover-trigger'}`} />
+              <img src="/recent.png" alt="history" className={`w-6 h-6 shrink-0 transition-transform duration-300 select-none pointer-events-none ${isSearchMode ? 'icon-emerald-active' : 'icon-hover-trigger'}`} style={{ WebkitUserDrag: 'none' }} />
               <span className={`nico-font text-sm tracking-[0.2em] whitespace-nowrap transition-colors duration-300 ${isSearchMode ? 'text-emerald-400' : 'group-hover:text-emerald-600'}`} style={textTransitionStyle(isNavOpen || isSearchMode)}>RECENT</span>
             </div>
             <div className="ml-3 flex flex-col flex-1 min-h-0 transition-all duration-300"
@@ -307,12 +308,12 @@ function App() {
         <div className="mt-auto px-2 pt-4 pb-6 shrink-0 overflow-hidden">
           {isSearchMode ? (
             <div onClick={() => { setIsSearchMode(false); setSearchTerm(''); }} className="flex items-center gap-6 cursor-pointer group">
-              <img src="/back.png" alt="back" className="w-6 h-6 shrink-0 icon-hover-trigger" />
+              <img src="/back.png" alt="back" className="w-6 h-6 shrink-0 icon-hover-trigger select-none pointer-events-none" style={{ WebkitUserDrag: 'none' }} />
               <span className="nico-font text-sm tracking-widest group-hover:text-emerald-600" style={textTransitionStyle(isNavOpen || isSearchMode)}>BACK</span>
             </div>
           ) : (
             <div onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group">
-              <img src="/contact.png" alt="contact" className={`w-6 h-6 shrink-0 transition-all duration-300 ${currentPage === 'contact' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} />
+              <img src="/contact.png" alt="contact" className={`w-6 h-6 shrink-0 transition-all duration-300 select-none pointer-events-none ${currentPage === 'contact' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} style={{ WebkitUserDrag: 'none' }} />
               <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-emerald-600'}`} style={textTransitionStyle(isNavOpen)}>CONTACT</span>
             </div>
           )}
@@ -323,33 +324,38 @@ function App() {
         onClick={() => setIsNavOpen(true)} 
         className={`fixed top-8 left-6 z-40 md:hidden text-white hover:text-emerald-400 transition-opacity duration-300 ${(!isNavOpen && !isSearchMode) ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
       >
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
       
       <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
-        {dlProcessing && (
-          <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-2xl flex flex-col items-center justify-center">
-            <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-8"></div>
-            <div className="flex flex-col items-stretch w-fit">
-               <h2 className="nico-font text-2xl md:text-4xl text-emerald-400 tracking-widest animate-pulse text-center">DOWNLOADING</h2>
-               <div className="flex justify-between w-full mt-4 text-gray-500 tracking-[0.1em] text-[10px] md:text-xs font-mono uppercase">
-                  <span>P</span><span>L</span><span>E</span><span>A</span><span>S</span><span>E</span>
-                  <span className="inline-block w-1"></span>
-                  <span>W</span><span>A</span><span>I</span><span>T</span>
-                  <span className="inline-block w-1"></span>
-                  <span>U</span><span>N</span><span>T</span><span>I</span><span>L</span>
-                  <span className="inline-block w-1"></span>
-                  <span>T</span><span>H</span><span>E</span>
-                  <span className="inline-block w-1"></span>
-                  <span>F</span><span>I</span><span>L</span><span>E</span>
-                  <span className="inline-block w-1"></span>
-                  <span>I</span><span>S</span>
-                  <span className="inline-block w-1"></span>
-                  <span>R</span><span>E</span><span>A</span><span>D</span><span>Y</span>
-               </div>
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {dlProcessing && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/90 backdrop-blur-2xl flex flex-col items-center justify-center"
+            >
+              <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-8"></div>
+              <div className="flex flex-col items-stretch w-fit">
+                 <h2 className="nico-font text-2xl md:text-4xl text-emerald-400 tracking-widest animate-pulse text-center">DOWNLOADING</h2>
+                 <div className="flex justify-between w-full mt-4 text-gray-500 text-[10px] md:text-xs font-mono uppercase">
+                    {"PLEASE WAIT UNTIL THE FILE IS READY".split("").map((char, index) => (
+                      <motion.span 
+                        key={index} 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: index * 0.03 }}
+                        className={char === " " ? "w-1" : ""}
+                      >
+                        {char}
+                      </motion.span>
+                    ))}
+                 </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <AnimatePresence mode="wait">
           {currentPage === 'home' && (
