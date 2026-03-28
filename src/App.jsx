@@ -404,6 +404,7 @@ function App() {
                               <div className="flex items-center justify-center h-full text-white/70">{getPlatformLogo(info.fetchedUrl)}</div>
                             )}
                           </div>
+                          {/* Ensure this overlay layer doesn't block the image visually or functionally */}
                           <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none"></div>
                         </div>
 
