@@ -48,10 +48,6 @@ function App() {
   };
 
   useEffect(() => {
-    showYoutubeError();
-  }, []);
-
-  useEffect(() => {
     if (isNavOpen || isSearchMode) {
       const timer = setTimeout(() => setScrollbarVisible(true), 300);
       return () => clearTimeout(timer);
