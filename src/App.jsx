@@ -186,11 +186,7 @@ function App() {
       );
     }
     if (lowerUrl.includes('tumblr.com')) {
-      return (
-        <svg viewBox="0 0 24 24" fill="currentColor" className={iconClasses}>
-          <path d="M14.538 24h-3.762c-3.447 0-4.622-2.405-4.622-4.138V11.16H4.333V8.058C6.665 7.705 8.125 6.146 8.594 3.32h3.582v4.734h4.557v3.106h-4.557v7.454c0 .594.124 1.493 1.444 1.493.53 0 .894-.04 1.378-.205V24z"/>
-        </svg>
-      );
+      return <img src="./tumblr.png" alt="tumblr" className={iconClasses} />; 
     }
     return null;
   };
@@ -396,7 +392,6 @@ function App() {
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
                         <div className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 group bg-black md:h-auto">
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
-                            {/* Updated logic: Prefer thumbnail via proxy. Only fallback to logo if info.thumbnail is missing OR fails to load */}
                             {info.thumbnail ? (
                               <img 
                                 key={info.thumbnail}
@@ -405,22 +400,9 @@ function App() {
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 shadow-2xl" 
                                 alt="preview"
                                 draggable="true"
-                                onError={(e) => {
-                                  // This handles cases where the thumbnail doesn't exist or is a direct MP4 link
-                                  e.target.style.display = 'none';
-                                  const parent = e.target.parentElement;
-                                  if (!parent.querySelector('.logo-fallback')) {
-                                    const logo = document.createElement('div');
-                                    logo.className = "logo-fallback flex items-center justify-center h-full text-white/70";
-                                    logo.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" style="width: 3rem; height: 3rem;"><path d="M14.538 24h-3.762c-3.447 0-4.622-2.405-4.622-4.138V11.16H4.333V8.058C6.665 7.705 8.125 6.146 8.594 3.32h3.582v4.734h4.557v3.106h-4.557v7.454c0 .594.124 1.493 1.444 1.493.53 0 .894-.04 1.378-.205V24z"/></svg>`;
-                                    parent.appendChild(logo);
-                                  }
-                                }}
                               />
                             ) : (
-                              <div className="flex items-center justify-center h-full text-white/70">
-                                {getPlatformLogo(info.fetchedUrl)}
-                              </div>
+                              <div className="flex items-center justify-center h-full text-white/70">{getPlatformLogo(info.fetchedUrl)}</div>
                             )}
                           </div>
                           <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none"></div>
