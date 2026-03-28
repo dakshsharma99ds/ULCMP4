@@ -395,9 +395,8 @@ function App() {
                             {info.thumbnail ? (
                               <img 
                                 key={info.thumbnail}
-                                src={info.thumbnail} 
+                                src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
                                 referrerPolicy="no-referrer"
-                                crossOrigin="anonymous"
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 shadow-2xl" 
                                 alt="preview"
                                 draggable="true"
