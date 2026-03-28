@@ -20,14 +20,17 @@ function App() {
     return link.toLowerCase().includes('youtube.com') || link.toLowerCase().includes('youtu.be');
   };
 
+  const isInstagramStory = (link) => {
+    return link.toLowerCase().includes('instagram.com/stories/');
+  };
+
   const showYoutubeError = () => {
     toast.error(
       <div className="font-mono text-[10px] leading-relaxed tracking-wider text-left w-full">
         <span className="text-emerald-400 font-bold block text-[13px]">SERVER ERROR:</span>
         <div className="h-px w-full bg-emerald-500/30 my-2"></div>
         <span className="text-white/90 block">
-          YouTube conversion is currently restricted due to server-side provider limitations. 
-          All other platforms remain fully supported! You can use{" "}
+          UNFORTUNATELY YOUTUBE IS RESTRICTED DUE TO PROVIDER LIMITS. ALL OTHER PLATFORMS ARE FULLY SUPPORTED! USE{" "}
           <a 
             href="https://cnvmp4.com" 
             target="_blank" 
@@ -37,7 +40,33 @@ function App() {
           >
             CNVMP4
           </a>{" "}
-          for youtube conversion.
+          FOR YOUTUBE.
+        </span>
+      </div>,
+      { 
+        duration: 8000,
+        icon: null 
+      }
+    );
+  };
+
+ const showInstagramStoryError = () => {
+    toast.error(
+      <div className="font-mono text-[10px] leading-relaxed tracking-wider w-full">
+        <span className="text-emerald-400 font-bold block text-[13px]">SERVER ERROR:</span>
+        <div className="h-px w-full bg-emerald-500/30 my-2"></div>
+        <span className="text-white/90 block text-justify">
+          UNFORTUNATELY INSTAGRAM STORIES ARE RESTRICTED DUE TO PROVIDER LIMITS. POSTS & REELS ARE FULLY SUPPORTED! USE{" "}
+          <a 
+            href="https://igram.world/story-saver" 
+            target="_blank" 
+            rel="noreferrer" 
+            className="text-emerald-400 hover:text-emerald-300 transition-colors duration-300 drop-shadow-[0_0_5px_rgba(52,211,153,0.5)] text-[11px] font-bold"
+            style={{ textDecoration: 'none' }}
+          >
+            IGRAM
+          </a>{" "}
+          FOR STORIES.
         </span>
       </div>,
       { 
@@ -62,6 +91,11 @@ function App() {
 
     if (isYouTube(targetUrl)) {
       showYoutubeError();
+      return;
+    }
+
+    if (isInstagramStory(targetUrl)) {
+      showInstagramStoryError();
       return;
     }
     
