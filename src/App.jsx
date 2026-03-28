@@ -395,6 +395,7 @@ function App() {
                             {info.thumbnail ? (
                               <img 
                                 src={info.thumbnail} 
+                                referrerPolicy="no-referrer"
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 shadow-2xl" 
                                 alt="preview"
                                 draggable="true"
