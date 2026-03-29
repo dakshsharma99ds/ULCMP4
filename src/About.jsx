@@ -37,8 +37,8 @@ const About = () => {
 
       <div className="grid grid-cols-2 md:grid-cols-12 gap-3 md:gap-4 w-full px-4">
         <div className="col-span-2 md:col-span-12 relative group order-1 outline-none" tabIndex="0">
-          <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700"></div>
-          <div className="relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl p-4 md:p-8 backdrop-blur-xl flex items-center gap-4 md:gap-8 group-hover:border-emerald-500/30 group-focus:border-emerald-500/30 transition-all duration-500">
+          <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          <div className="card-body relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl p-4 md:p-8 backdrop-blur-xl flex items-center gap-4 md:gap-8 group-hover:border-emerald-500/30 transition-all duration-500">
             <div className="relative shrink-0 flex items-center justify-center pointer-events-none select-none">
               <div className="w-8 h-8 md:w-14 md:h-14 rounded-full border border-emerald-500/30 flex items-center justify-center bg-black/40 shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]">
                 <div className="w-3 h-3 md:w-5 md:h-5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_25px_#10b981]"></div>
@@ -46,7 +46,7 @@ const About = () => {
             </div>
             <div>
               <h2 className="nico-font text-[10px] md:text-xl text-emerald-500/80 tracking-widest uppercase mb-1 md:mb-3 select-text">universal link converter</h2>
-              <p className="font-mono text-[9px] md:text-sm leading-relaxed text-gray-400 group-hover:text-gray-200 group-focus:text-gray-200 transition-colors duration-500 tracking-tight select-text">
+              <p className="font-mono text-[9px] md:text-sm leading-relaxed text-gray-400 group-hover:text-gray-200 transition-colors duration-500 tracking-tight select-text">
                 ULC provides seamless access to high-quality social media content. One click downloads MP4/MP3 files directly without ads, logins, or quality loss.
               </p>
             </div>
@@ -54,20 +54,20 @@ const About = () => {
         </div>
 
         <div className="col-span-1 md:col-span-4 relative group order-2 outline-none" tabIndex="0">
-          <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700"></div>
-          <div className="relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl p-3 md:p-6 backdrop-blur-xl h-32 md:h-44 flex flex-col items-center group-hover:border-emerald-500/30 group-focus:border-emerald-500/30 transition-all duration-500">
+          <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          <div className="card-body relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl p-3 md:p-6 backdrop-blur-xl h-32 md:h-44 flex flex-col items-center group-hover:border-emerald-500/30 transition-all duration-500">
             <h3 className="nico-font text-[7px] md:text-[10px] text-emerald-400/80 tracking-widest uppercase mb-auto text-center select-text">Main Motive</h3>
             <div className="flex flex-col items-center gap-1 md:gap-2 mb-auto">
               {["No Ads", "No Logins", "High Quality", "Universal"].map((text, i) => (
-                <span key={i} className="font-mono text-[8px] md:text-[11px] text-gray-400 group-hover:text-white group-focus:text-white uppercase tracking-[0.12em] md:tracking-[0.2em] transition-colors duration-500 cursor-default select-text">{text}</span>
+                <span key={i} className="font-mono text-[8px] md:text-[11px] text-gray-400 group-hover:text-white uppercase tracking-[0.12em] md:tracking-[0.2em] transition-colors duration-500 cursor-default select-text">{text}</span>
               ))}
             </div>
           </div>
         </div>
 
         <div className="col-span-1 md:col-span-4 relative group order-3 md:order-4 outline-none" tabIndex="0">
-          <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700"></div>
-          <div className="relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl p-3 md:p-6 backdrop-blur-xl h-32 md:h-44 flex flex-col items-center group-hover:border-emerald-500/30 group-focus:border-emerald-500/30 transition-all duration-500">
+          <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          <div className="card-body relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl p-3 md:p-6 backdrop-blur-xl h-32 md:h-44 flex flex-col items-center group-hover:border-emerald-500/30 transition-all duration-500">
             <h3 className="nico-font text-[7px] md:text-[10px] text-emerald-400/80 tracking-widest uppercase mb-auto text-center select-text">Tech Stack</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 md:gap-x-6 gap-y-2 md:gap-y-5 mb-auto">
               <div className="flex items-center gap-1.5 md:gap-2.5">
@@ -79,41 +79,41 @@ const About = () => {
                     <ellipse rx="11" ry="4.2" transform="rotate(120)" />
                   </g>
                 </svg>
-                <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white group-focus:text-white uppercase tracking-wider font-bold transition-colors duration-500 select-text">React</span>
+                <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white uppercase tracking-wider font-bold transition-colors duration-500 select-text">React</span>
               </div>
               <div className="flex items-center gap-1.5 md:gap-2.5">
-                <svg viewBox="0 0 24 24" className="w-3 h-3 md:w-5 md:h-5 fill-emerald-500/80 pointer-events-none select-none">
+                <svg viewBox="0 0 24 24" className="tailwind-logo w-3 h-3 md:w-5 md:h-5 fill-emerald-500/80 transition-colors duration-500 pointer-events-none select-none">
                   <path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12z" />
                 </svg>
-                <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white group-focus:text-white uppercase tracking-wider font-bold transition-colors duration-500 select-text">Tailwind</span>
+                <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white uppercase tracking-wider font-bold transition-colors duration-500 select-text">Tailwind</span>
               </div>
               <div className="flex items-center gap-1.5 md:gap-2.5">
-                <img src="/framer.png" alt="Framer" draggable="false" className="w-3 h-3 md:w-5 md:h-5 [filter:brightness(0)_saturate(100%)_invert(61%)_sepia(97%)_saturate(392%)_hue-rotate(113deg)_brightness(94%)_contrast(88%)] pointer-events-none select-none" />
-                <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white group-focus:text-white uppercase tracking-wider font-bold transition-colors duration-500 select-text">Framer</span>
+                <img src="/framer.png" alt="Framer" draggable="false" className="framer-logo w-3 h-3 md:w-5 md:h-5 [filter:brightness(0)_saturate(100%)_invert(61%)_sepia(97%)_saturate(392%)_hue-rotate(113deg)_brightness(94%)_contrast(88%)] pointer-events-none select-none transition-all duration-500" />
+                <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white uppercase tracking-wider font-bold transition-colors duration-500 select-text">Framer</span>
               </div>
               <div className="flex items-center gap-1.5 md:gap-2.5">
-                <img src="/ffmpeg.png" alt="FFmpeg" draggable="false" className="w-3 h-3 md:w-5 md:h-5 filter-[brightness(0)_saturate(100%)_invert(61%)_sepia(97%)_saturate(392%)_hue-rotate(113deg)_brightness(94%)_contrast(88%)] pointer-events-none select-none" />
-                <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white group-focus:text-white uppercase tracking-wider font-bold transition-colors duration-500 select-text">FFmpeg</span>
+                <img src="/ffmpeg.png" alt="FFmpeg" draggable="false" className="ffmpeg-logo w-3 h-3 md:w-5 md:h-5 [filter:brightness(0)_saturate(100%)_invert(61%)_sepia(97%)_saturate(392%)_hue-rotate(113deg)_brightness(94%)_contrast(88%)] pointer-events-none select-none transition-all duration-500" />
+                <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white uppercase tracking-wider font-bold transition-colors duration-500 select-text">FFmpeg</span>
               </div>
             </div>
           </div>
         </div>
 
         <div className="col-span-2 md:col-span-4 relative group order-4 md:order-3 outline-none" tabIndex="0">
-          <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700"></div>
-          <div className="relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden h-28 md:h-44 flex flex-col items-center group-hover:border-emerald-500/30 group-focus:border-emerald-500/30 transition-all duration-500">
+          <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          <div className="card-body relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden h-28 md:h-44 flex flex-col items-center group-hover:border-emerald-500/30 transition-all duration-500">
               <h3 className="nico-font text-[7px] md:text-[10px] text-emerald-400/80 tracking-widest uppercase mt-3 md:mt-6 mb-auto text-center select-text">Supported Platforms</h3>
               <div className="flex animate-[marquee-h_12s_linear_infinite] whitespace-nowrap items-center w-max mb-auto">
                   {[...socialPlatforms, ...socialPlatforms, ...socialPlatforms].map((platform, index) => (
                   <div key={index} className="flex flex-col items-center mx-3 md:mx-5 gap-1 md:gap-1.5">
                     {platform.path ? (
-                      <svg viewBox="0 0 24 24" className="w-5 h-5 md:w-8 md:h-8 fill-gray-500 group-hover:fill-white group-focus:fill-white transition-colors duration-500 pointer-events-none select-none">
+                      <svg viewBox="0 0 24 24" className="platform-icon w-5 h-5 md:w-8 md:h-8 fill-gray-500 group-hover:fill-white transition-colors duration-500 pointer-events-none select-none">
                         <path d={platform.path} />
                       </svg>
                     ) : (
-                      <img src={platform.image} alt={platform.name} draggable="false" className="w-5 h-5 md:w-8 md:h-8 opacity-50 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-500 grayscale group-hover:grayscale-0 pointer-events-none select-none" />
+                      <img src={platform.image} alt={platform.name} draggable="false" className="platform-img w-5 h-5 md:w-8 md:h-8 opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-500 pointer-events-none select-none" />
                     )}
-                    <span className="font-mono text-[7px] md:text-[10px] text-gray-500 group-hover:text-white group-focus:text-white transition-colors duration-500 tracking-tight select-text">
+                    <span className="font-mono text-[7px] md:text-[10px] text-gray-500 group-hover:text-white transition-colors duration-500 tracking-tight select-text">
                       {platform.name}
                     </span>
                   </div>
@@ -130,23 +130,38 @@ const About = () => {
           100% { transform: translateX(-33.333%); }
         }
 
-        /* PC View: Remove focus glow when mouse leaves, keep only hover */
-        @media (min-width: 768px) {
-          .group:focus:not(:hover) .absolute.-inset-1 {
-            opacity: 0 !important;
+        .tailwind-logo {
+          fill: #10b981 !important;
+        }
+        .framer-logo, .ffmpeg-logo {
+          filter: brightness(0) saturate(100%) invert(61%) sepia(97%) saturate(392%) hue-rotate(113deg) brightness(94%) contrast(88%) !important;
+        }
+
+        @media (max-width: 767px) {
+          .group:focus .absolute.-inset-1 {
+            opacity: 1 !important;
           }
-          .group:focus:not(:hover) {
-            border-color: rgba(255, 255, 255, 0.1) !important;
+          .group:focus .card-body {
+            border-color: rgba(16, 185, 129, 0.3) !important;
+          }
+          .group:focus span, .group:focus p {
+            color: white !important;
+          }
+          .group:focus .platform-icon {
+            fill: white !important;
+          }
+          .group:focus .platform-img {
+            opacity: 1 !important;
+            filter: grayscale(0) !important;
           }
         }
 
-        /* Mobile View: Allow focus to stay (tap to stay) */
-        @media (max-width: 767px) {
-          .group:focus .absolute.-inset-1 {
-            opacity: 100 !important;
+        @media (min-width: 768px) {
+          .group:hover .tailwind-logo {
+            fill: #10b981 !important;
           }
-          .group:focus {
-            border-color: rgba(16, 185, 129, 0.3) !important;
+          .group:hover .framer-logo, .group:hover .ffmpeg-logo {
+            filter: brightness(0) saturate(100%) invert(61%) sepia(97%) saturate(392%) hue-rotate(113deg) brightness(94%) contrast(88%) !important;
           }
         }
 
