@@ -47,6 +47,7 @@ function App() {
     );
   };
 
+  
   const showInstagramStoryError = () => {
     toast.error(
       <div className="font-mono text-[10px] leading-relaxed tracking-wider w-full">
@@ -79,6 +80,7 @@ function App() {
     }
   }, [isNavOpen, isSearchMode]);
 
+  
   const fetchInfo = async (manualUrl = null) => {
     const targetUrl = manualUrl || url;
     if (!targetUrl) return;
