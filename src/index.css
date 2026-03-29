@@ -10,15 +10,6 @@ body {
   background-color: #0a0a0a;
   font-family: 'Nico Moji', sans-serif !important;
   color: white;
-  user-select: text !important;
-  -webkit-user-select: text !important;
-}
-
-img, svg:not(text) {
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  -webkit-user-drag: none !important;
-  pointer-events: auto;
 }
 
 @media (max-width: 640px) {
