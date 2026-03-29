@@ -22,15 +22,15 @@ const About = () => {
   ];
 
   return (
-    <div className="z-10 w-full max-w-4xl flex flex-col items-center scale-105 md:scale-100 origin-top pt-0 md:pt-0 -mt-12 md:mt-0">
-      <div className="flex flex-col items-center w-full mb-6 md:mb-10 select-text">
+    <div className="z-10 w-full max-w-4xl flex flex-col items-center select-none scale-105 md:scale-100 origin-top pt-0 md:pt-0 -mt-12 md:mt-0">
+      <div className="flex flex-col items-center w-full mb-6 md:mb-10">
         <h1 className="nico-font text-5xl md:text-8xl tracking-widest text-white drop-shadow-[0_0_20px_rgba(52,211,153,0.3)]">
           ABOUT
         </h1>
         <p className="text-emerald-500/60 text-[8px] md:text-[10px] tracking-[0.45em] md:tracking-[1.00em] mt-2 uppercase text-center w-full whitespace-nowrap">
           universal link converter
         </p>
-        <div className="h-0.5 w-fit bg-linear-to-r from-transparent via-emerald-500 to-transparent mt-4 opacity-50 select-none">
+        <div className="h-0.5 w-fit bg-linear-to-r from-transparent via-emerald-500 to-transparent mt-4 opacity-50">
            <div className="invisible text-[8px] md:text-[10px] tracking-[0.45em] md:tracking-[1.00em] uppercase">universal link convertor</div>
         </div>
       </div>
@@ -39,12 +39,12 @@ const About = () => {
         <div className="col-span-2 md:col-span-12 relative group order-1 outline-none" tabIndex="0">
           <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700"></div>
           <div className="relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl p-4 md:p-8 backdrop-blur-xl flex items-center gap-4 md:gap-8 group-hover:border-emerald-500/30 group-focus:border-emerald-500/30 transition-all duration-500">
-            <div className="relative shrink-0 flex items-center justify-center select-none">
+            <div className="relative shrink-0 flex items-center justify-center">
               <div className="w-8 h-8 md:w-14 md:h-14 rounded-full border border-emerald-500/30 flex items-center justify-center bg-black/40 shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]">
                 <div className="w-3 h-3 md:w-5 md:h-5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_25px_#10b981]"></div>
               </div>
             </div>
-            <div className="select-text">
+            <div>
               <h2 className="nico-font text-[10px] md:text-xl text-emerald-500/80 tracking-widest uppercase mb-1 md:mb-3">universal link converter</h2>
               <p className="font-mono text-[9px] md:text-sm leading-relaxed text-gray-400 group-hover:text-gray-200 group-focus:text-gray-200 transition-colors duration-500 tracking-tight">
                 ULC provides seamless access to high-quality social media content. One click downloads MP4/MP3 files directly without ads, logins, or quality loss.
@@ -56,8 +56,8 @@ const About = () => {
         <div className="col-span-1 md:col-span-4 relative group order-2 outline-none" tabIndex="0">
           <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700"></div>
           <div className="relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl p-3 md:p-6 backdrop-blur-xl h-32 md:h-44 flex flex-col items-center group-hover:border-emerald-500/30 group-focus:border-emerald-500/30 transition-all duration-500">
-            <h3 className="nico-font text-[7px] md:text-[10px] text-emerald-400/80 tracking-widest uppercase mb-auto text-center select-text">Main Motive</h3>
-            <div className="flex flex-col items-center gap-1 md:gap-2 mb-auto select-text">
+            <h3 className="nico-font text-[7px] md:text-[10px] text-emerald-400/80 tracking-widest uppercase mb-auto text-center">Main Motive</h3>
+            <div className="flex flex-col items-center gap-1 md:gap-2 mb-auto">
               {["No Ads", "No Logins", "High Quality", "Universal"].map((text, i) => (
                 <span key={i} className="font-mono text-[8px] md:text-[11px] text-gray-400 group-hover:text-white group-focus:text-white uppercase tracking-[0.12em] md:tracking-[0.2em] transition-colors duration-500 cursor-default">{text}</span>
               ))}
@@ -68,10 +68,10 @@ const About = () => {
         <div className="col-span-1 md:col-span-4 relative group order-3 md:order-4 outline-none" tabIndex="0">
           <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700"></div>
           <div className="relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl p-3 md:p-6 backdrop-blur-xl h-32 md:h-44 flex flex-col items-center group-hover:border-emerald-500/30 group-focus:border-emerald-500/30 transition-all duration-500">
-            <h3 className="nico-font text-[7px] md:text-[10px] text-emerald-400/80 tracking-widest uppercase mb-auto text-center select-text">Tech Stack</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 md:gap-x-6 gap-y-2 md:gap-y-5 mb-auto select-text">
+            <h3 className="nico-font text-[7px] md:text-[10px] text-emerald-400/80 tracking-widest uppercase mb-auto text-center">Tech Stack</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 md:gap-x-6 gap-y-2 md:gap-y-5 mb-auto">
               <div className="flex items-center gap-1.5 md:gap-2.5">
-                <svg viewBox="-11.5 -10.23174 23 20.46348" className="w-3 h-3 md:w-5 md:h-5 fill-none stroke-emerald-500/80 select-none">
+                <svg viewBox="-11.5 -10.23174 23 20.46348" className="w-3 h-3 md:w-5 md:h-5 fill-none stroke-emerald-500/80">
                   <circle cx="0" cy="0" r="2.05" fill="currentColor" className="text-emerald-500/80" />
                   <g stroke="currentColor" strokeWidth="1" fill="none" className="text-emerald-500/80">
                     <ellipse rx="11" ry="4.2" />
@@ -82,17 +82,17 @@ const About = () => {
                 <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white group-focus:text-white uppercase tracking-wider font-bold transition-colors duration-500">React</span>
               </div>
               <div className="flex items-center gap-1.5 md:gap-2.5">
-                <svg viewBox="0 0 24 24" className="w-3 h-3 md:w-5 md:h-5 fill-emerald-500/80 select-none">
+                <svg viewBox="0 0 24 24" className="w-3 h-3 md:w-5 md:h-5 fill-emerald-500/80">
                   <path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12z" />
                 </svg>
                 <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white group-focus:text-white uppercase tracking-wider font-bold transition-colors duration-500">Tailwind</span>
               </div>
               <div className="flex items-center gap-1.5 md:gap-2.5">
-                <img src="/framer.png" alt="Framer" draggable="false" className="w-3 h-3 md:w-5 md:h-5 select-none [filter:brightness(0)_saturate(100%)_invert(61%)_sepia(97%)_saturate(392%)_hue-rotate(113deg)_brightness(94%)_contrast(88%)]" />
+                <img src="/framer.png" alt="Framer" className="w-3 h-3 md:w-5 md:h-5 [filter:brightness(0)_saturate(100%)_invert(61%)_sepia(97%)_saturate(392%)_hue-rotate(113deg)_brightness(94%)_contrast(88%)]" />
                 <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white group-focus:text-white uppercase tracking-wider font-bold transition-colors duration-500">Framer</span>
               </div>
               <div className="flex items-center gap-1.5 md:gap-2.5">
-                <img src="/ffmpeg.png" alt="FFmpeg" draggable="false" className="w-3 h-3 md:w-5 md:h-5 select-none filter-[brightness(0)_saturate(100%)_invert(61%)_sepia(97%)_saturate(392%)_hue-rotate(113deg)_brightness(94%)_contrast(88%)]" />
+                <img src="/ffmpeg.png" alt="FFmpeg" className="w-3 h-3 md:w-5 md:h-5 filter-[brightness(0)_saturate(100%)_invert(61%)_sepia(97%)_saturate(392%)_hue-rotate(113deg)_brightness(94%)_contrast(88%)]" />
                 <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white group-focus:text-white uppercase tracking-wider font-bold transition-colors duration-500">FFmpeg</span>
               </div>
             </div>
@@ -102,18 +102,18 @@ const About = () => {
         <div className="col-span-2 md:col-span-4 relative group order-4 md:order-3 outline-none" tabIndex="0">
           <div className="absolute -inset-1 bg-linear-to-r from-emerald-500/10 to-blue-500/10 rounded-2xl md:rounded-3xl blur-xl opacity-0 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-700"></div>
           <div className="relative bg-white/2 border border-white/10 rounded-2xl md:rounded-3xl overflow-hidden h-28 md:h-44 flex flex-col items-center group-hover:border-emerald-500/30 group-focus:border-emerald-500/30 transition-all duration-500">
-              <h3 className="nico-font text-[7px] md:text-[10px] text-emerald-400/80 tracking-widest uppercase mt-3 md:mt-6 mb-auto text-center select-text">Supported Platforms</h3>
+              <h3 className="nico-font text-[7px] md:text-[10px] text-emerald-400/80 tracking-widest uppercase mt-3 md:mt-6 mb-auto text-center">Supported Platforms</h3>
               <div className="flex animate-[marquee-h_12s_linear_infinite] whitespace-nowrap items-center w-max mb-auto">
                   {[...socialPlatforms, ...socialPlatforms, ...socialPlatforms].map((platform, index) => (
                   <div key={index} className="flex flex-col items-center mx-3 md:mx-5 gap-1 md:gap-1.5">
                     {platform.path ? (
-                      <svg viewBox="0 0 24 24" className="w-5 h-5 md:w-8 md:h-8 fill-gray-500 group-hover:fill-white group-focus:fill-white transition-colors duration-500 select-none">
+                      <svg viewBox="0 0 24 24" className="w-5 h-5 md:w-8 md:h-8 fill-gray-500 group-hover:fill-white group-focus:fill-white transition-colors duration-500">
                         <path d={platform.path} />
                       </svg>
                     ) : (
-                      <img src={platform.image} alt={platform.name} draggable="false" className="w-5 h-5 md:w-8 md:h-8 opacity-50 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-500 grayscale group-hover:grayscale-0 select-none" />
+                      <img src={platform.image} alt={platform.name} className="w-5 h-5 md:w-8 md:h-8 opacity-50 group-hover:opacity-100 group-focus:opacity-100 transition-opacity duration-500 grayscale group-hover:grayscale-0" />
                     )}
-                    <span className="font-mono text-[7px] md:text-[10px] text-gray-500 group-hover:text-white group-focus:text-white transition-colors duration-500 tracking-tight select-text">
+                    <span className="font-mono text-[7px] md:text-[10px] text-gray-500 group-hover:text-white group-focus:text-white transition-colors duration-500 tracking-tight">
                       {platform.name}
                     </span>
                   </div>
@@ -130,11 +130,24 @@ const About = () => {
           100% { transform: translateX(-33.333%); }
         }
 
-        .group:focus .absolute.-inset-1 {
-          opacity: 100 !important;
+        /* PC View: Remove focus glow when mouse leaves, keep only hover */
+        @media (min-width: 768px) {
+          .group:focus:not(:hover) .absolute.-inset-1 {
+            opacity: 0 !important;
+          }
+          .group:focus:not(:hover) {
+            border-color: rgba(255, 255, 255, 0.1) !important;
+          }
         }
-        .group:focus {
-          border-color: rgba(16, 185, 129, 0.3) !important;
+
+        /* Mobile View: Allow focus to stay (tap to stay) */
+        @media (max-width: 767px) {
+          .group:focus .absolute.-inset-1 {
+            opacity: 100 !important;
+          }
+          .group:focus {
+            border-color: rgba(16, 185, 129, 0.3) !important;
+          }
         }
 
         .outline-none:focus {
