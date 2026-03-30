@@ -416,7 +416,7 @@ function App() {
 
                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                           <div className="overflow-hidden">
-                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight select-none">
+                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">
                               {info.title}
                             </h3>
                           </div>
