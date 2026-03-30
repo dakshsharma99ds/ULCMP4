@@ -407,6 +407,9 @@ function App() {
                                 className="w-full h-full object-cover shadow-2xl cursor-grab active:cursor-grabbing" 
                                 alt="preview"
                                 draggable="true"
+                                onDragStart={(e) => {
+                                  e.dataTransfer.effectAllowed = "copy";
+                                }}
                               />
                             ) : (
                               <div className="flex items-center justify-center h-full text-white/70 select-none">{getPlatformLogo(info.fetchedUrl)}</div>
