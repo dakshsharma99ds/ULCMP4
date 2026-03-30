@@ -26,7 +26,7 @@ function App() {
 
   const showYoutubeError = () => {
     toast.error(
-      <div className="font-mono text-[10px] leading-relaxed tracking-wider text-left w-full">
+      <div className="font-mono text-[10px] leading-relaxed tracking-wider text-left w-full select-none">
         <span className="text-emerald-400 font-bold block text-[13px]">SERVER ERROR:</span>
         <div className="h-px w-full bg-emerald-500/30 my-2"></div>
         <span className="text-white/90 block">
@@ -49,7 +49,7 @@ function App() {
 
   const showInstagramStoryError = () => {
     toast.error(
-      <div className="font-mono text-[10px] leading-relaxed tracking-wider w-full">
+      <div className="font-mono text-[10px] leading-relaxed tracking-wider w-full select-none">
         <span className="text-emerald-400 font-bold block text-[13px]">SERVER ERROR:</span>
         <div className="h-px w-full bg-emerald-500/30 my-2"></div>
         <span className="text-white/90 block text-justify">
@@ -110,6 +110,12 @@ function App() {
       }
     } catch (err) { alert("Error fetching info"); }
     setLoading(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      fetchInfo();
+    }
   };
 
   const handleHistoryClick = (item) => {
@@ -232,7 +238,7 @@ function App() {
                     type="text" 
                     autoFocus={isSearchMode}
                     placeholder="Search..." 
-                    className="w-full bg-white/5 border border-white/20 rounded-full px-4 py-1.5 text-xs font-mono outline-none focus:border-emerald-500/50 transition-all"
+                    className="w-full bg-white/5 border border-white/20 rounded-full px-4 py-1.5 text-xs font-mono outline-none focus:border-emerald-500/50 transition-all placeholder:select-none"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
@@ -291,7 +297,7 @@ function App() {
                     </div>
                   ))
                 ) : (
-                  <div className="flex items-stretch">
+                  <div className="flex items-stretch select-none">
                     <div className="flex flex-col items-center mr-4"><div className="w-px bg-white/10 flex-1"></div></div>
                     <div className="text-[15px] text-gray-700 font-mono italic shrink-0 mt-2 whitespace-nowrap">{(isSearchMode && searchTerm) ? "No results" : "Empty"}</div>
                   </div>
@@ -326,7 +332,7 @@ function App() {
       <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
         
         {dlProcessing && (
-          <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center">
+          <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center select-none">
             <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-10"></div>
             
             <div className="flex flex-col w-fit items-stretch px-4">
@@ -355,7 +361,7 @@ function App() {
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
               <div className="w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0">
-                <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
+                <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible select-none">
                   <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
                     <span className="text-white">ULC</span>
                     <span className="text-emerald-400">MP4</span>
@@ -371,7 +377,8 @@ function App() {
                     <input
                       type="text"
                       placeholder="INPUT MEDIA URL"
-                      className="flex-1 bg-black/60 border border-white/5 rounded-2xl px-4 py-4 md:px-8 md:py-5 focus:border-emerald-500/30 transition-all outline-none text-emerald-100 font-mono text-[10px] md:text-sm"
+                      onKeyDown={handleKeyDown}
+                      className="flex-1 bg-black/60 border border-white/5 rounded-2xl px-4 py-4 md:px-8 md:py-5 focus:border-emerald-500/30 transition-all outline-none text-emerald-100 font-mono text-[10px] md:text-sm placeholder:select-none"
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                     />
