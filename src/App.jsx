@@ -397,22 +397,19 @@ function App() {
                   {info && (
                     <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
-                        <div className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto">
+                        <div className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto select-none">
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
                               <img 
                                 key={info.thumbnail}
                                 src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
                                 referrerPolicy="no-referrer"
-                                className="w-full h-full object-cover shadow-2xl cursor-grab active:cursor-grabbing" 
+                                className="w-full h-full object-cover shadow-2xl" 
                                 alt="preview"
                                 draggable="true"
-                                onDragStart={(e) => {
-                                  e.dataTransfer.effectAllowed = "copy";
-                                }}
                               />
                             ) : (
-                              <div className="flex items-center justify-center h-full text-white/70 select-none">{getPlatformLogo(info.fetchedUrl)}</div>
+                              <div className="flex items-center justify-center h-full text-white/70">{getPlatformLogo(info.fetchedUrl)}</div>
                             )}
                           </div>
                         </div>
