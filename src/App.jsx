@@ -361,7 +361,7 @@ function App() {
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
               <div className="w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0">
-                <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible select-none">
+                <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
                   <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
                     <span className="text-white">ULC</span>
                     <span className="text-emerald-400">MP4</span>
@@ -382,7 +382,7 @@ function App() {
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                     />
-                    <button onClick={() => fetchInfo()} className="bg-white text-black px-4 md:px-10 py-4 rounded-2xl hover:bg-emerald-400 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center min-w-15 md:min-w-35">
+                    <button onClick={() => fetchInfo()} className="bg-white text-black px-4 md:px-10 py-4 rounded-2xl hover:bg-emerald-400 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center min-w-15 md:min-w-35 select-none">
                       {loading ? (
                         <svg className="animate-spin h-5 w-5 md:h-7 md:w-7 text-black" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
@@ -397,7 +397,7 @@ function App() {
                   {info && (
                     <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
-                        <div className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto">
+                        <div className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto select-none">
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
                               <img 
@@ -416,14 +416,14 @@ function App() {
 
                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                           <div className="overflow-hidden">
-                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">
+                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight select-none">
                               {info.title}
                             </h3>
                           </div>
-                          <div className="flex flex-col gap-3 mt-auto">
+                          <div className="flex flex-col gap-3 mt-auto select-none">
                             <button 
                               onClick={() => startDownload('mp4', '1080p')} 
-                              className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer shadow-lg shadow-emerald-500/10 active:scale-[0.98]"
+                              className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]"
                             >
                               Download MP4 (1080P)
                             </button>
