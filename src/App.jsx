@@ -179,20 +179,20 @@ function App() {
 
     if (lowerUrl.includes('linkedin.com')) {
       return (
-        <svg viewBox="0 0 24 24" fill="currentColor" className={iconClasses} draggable="true">
+        <svg viewBox="0 0 24 24" fill="currentColor" className={iconClasses} draggable="false">
           <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
         </svg>
       );
     }
     if (lowerUrl.includes('instagram.com')) {
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={iconClasses} draggable="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={iconClasses} draggable="false">
           <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
         </svg>
       );
     }
     if (lowerUrl.includes('tumblr.com')) {
-      return <img src="./tumblr.png" alt="tumblr" className={iconClasses} draggable="true" />; 
+      return <img src="./tumblr.png" alt="tumblr" className={iconClasses} draggable="false" />; 
     }
     return null;
   };
@@ -227,7 +227,7 @@ function App() {
         <div className="flex items-center mb-6 px-2 shrink-0 relative h-10 overflow-hidden">
           <button 
             onClick={handleHamburgerClick} 
-            className={`cursor-pointer shrink-0 z-50 bg-transparent transition-all duration-300 ${(isNavOpen || isSearchMode) ? 'text-emerald-400 opacity-100 delay-300' : 'opacity-0 md:opacity-100 md:delay-0 hover:text-emerald-600'}`}
+            className={`cursor-pointer shrink-0 z-50 bg-transparent hamburger-hover transition-none ${(isNavOpen || isSearchMode) ? 'text-emerald-400 opacity-100' : 'opacity-0 md:opacity-100'}`}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
           </button>
@@ -253,7 +253,7 @@ function App() {
                 transform: (isNavOpen && !isSearchMode) ? 'scale(1)' : 'scale(0.8)'
               }}
             >
-              <img src="/search.png" alt="search" className="w-5 h-5 icon-hover-trigger select-none pointer-events-none" style={{ WebkitUserDrag: 'none' }} />
+              <img src="/search.png" alt="search" draggable="false" className="w-5 h-5 icon-hover-trigger" />
             </button>
           </div>
         </div>
@@ -269,12 +269,12 @@ function App() {
             }}
           >
             <div onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8">
-              <img src="/home.png" alt="home" className={`w-6 h-6 shrink-0 transition-all duration-300 select-none pointer-events-none ${currentPage === 'home' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} style={{ WebkitUserDrag: 'none' }} />
-              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-emerald-600'}`} style={textTransitionStyle(isNavOpen)}>HOME</span>
+              <img src="/home.png" alt="home" draggable="false" className={`w-6 h-6 shrink-0 ${currentPage === 'home' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} />
+              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen)}>HOME</span>
             </div>
             <div onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group">
-              <img src="/about.png" alt="about" className={`w-6 h-6 shrink-0 transition-all duration-300 select-none pointer-events-none ${currentPage === 'about' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} style={{ WebkitUserDrag: 'none' }} />
-              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-emerald-600'}`} style={textTransitionStyle(isNavOpen)}>ABOUT</span>
+              <img src="/about.png" alt="about" draggable="false" className={`w-6 h-6 shrink-0 ${currentPage === 'about' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} />
+              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen)}>ABOUT</span>
             </div>
           </div>
 
@@ -282,8 +282,8 @@ function App() {
             <div onClick={() => { if(!isSearchMode) { setIsSearchMode(true); setIsNavOpen(true); } }}
               className={`shrink-0 flex items-center gap-6 cursor-pointer mb-4 group`}
             >
-              <img src="/recent.png" alt="history" className={`w-6 h-6 shrink-0 transition-transform duration-300 select-none pointer-events-none ${isSearchMode ? 'icon-emerald-active' : 'icon-hover-trigger'}`} style={{ WebkitUserDrag: 'none' }} />
-              <span className={`nico-font text-sm tracking-[0.2em] whitespace-nowrap transition-colors duration-300 ${isSearchMode ? 'text-emerald-400' : 'group-hover:text-emerald-600'}`} style={textTransitionStyle(isNavOpen || isSearchMode)}>RECENT</span>
+              <img src="/recent.png" alt="history" draggable="false" className={`w-6 h-6 shrink-0 ${isSearchMode ? 'icon-emerald-active' : 'icon-hover-trigger'}`} />
+              <span className={`nico-font text-sm tracking-[0.2em] whitespace-nowrap transition-colors duration-300 ${isSearchMode ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen || isSearchMode)}>RECENT</span>
             </div>
             <div className="ml-3 flex flex-col flex-1 min-h-0 transition-all duration-300"
               style={{ opacity: (isNavOpen || isSearchMode) ? 1 : 0, visibility: (isNavOpen || isSearchMode) ? 'visible' : 'hidden', overflow: 'hidden' }}
@@ -293,7 +293,7 @@ function App() {
                   filteredHistory.map((item, i) => (
                     <div key={i} className="flex items-stretch group">
                       <div className="flex flex-col items-center mr-4"><div className="w-px bg-white/10 flex-1"></div></div>
-                      <div onClick={() => handleHistoryClick(item)} className="text-[14px] py-1 text-gray-500 font-mono truncate group-hover:text-emerald-600 cursor-pointer shrink-0 transition-colors flex-1" title={item.title}>{item.title}</div>
+                      <div onClick={() => handleHistoryClick(item)} className="text-[14px] py-1 text-gray-500 font-mono truncate group-hover:text-gray-500 cursor-pointer shrink-0 transition-colors flex-1" title={item.title}>{item.title}</div>
                     </div>
                   ))
                 ) : (
@@ -310,13 +310,13 @@ function App() {
         <div className="mt-auto px-2 pt-4 pb-6 shrink-0 overflow-hidden">
           {isSearchMode ? (
             <div onClick={() => { setIsSearchMode(false); setSearchTerm(''); }} className="flex items-center gap-6 cursor-pointer group">
-              <img src="/back.png" alt="back" className="w-6 h-6 shrink-0 icon-hover-trigger select-none pointer-events-none" style={{ WebkitUserDrag: 'none' }} />
-              <span className="nico-font text-sm tracking-widest group-hover:text-emerald-600" style={textTransitionStyle(isNavOpen || isSearchMode)}>BACK</span>
+              <img src="/back.png" alt="back" draggable="false" className="w-6 h-6 shrink-0 icon-hover-trigger" />
+              <span className="nico-font text-sm tracking-widest transition-colors duration-300 group-hover:text-gray-500" style={textTransitionStyle(isNavOpen || isSearchMode)}>BACK</span>
             </div>
           ) : (
             <div onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group">
-              <img src="/contact.png" alt="contact" className={`w-6 h-6 shrink-0 transition-all duration-300 select-none pointer-events-none ${currentPage === 'contact' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} style={{ WebkitUserDrag: 'none' }} />
-              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-emerald-600'}`} style={textTransitionStyle(isNavOpen)}>CONTACT</span>
+              <img src="/contact.png" alt="contact" draggable="false" className={`w-6 h-6 shrink-0 ${currentPage === 'contact' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} />
+              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen)}>CONTACT</span>
             </div>
           )}
         </div>
@@ -324,7 +324,7 @@ function App() {
 
       <button 
         onClick={() => setIsNavOpen(true)} 
-        className={`fixed top-8 left-6 z-40 md:hidden text-white hover:text-emerald-400 transition-opacity duration-300 ${(!isNavOpen && !isSearchMode) ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed top-8 left-6 z-40 md:hidden text-white transition-none hamburger-hover ${(!isNavOpen && !isSearchMode) ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
       >
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
@@ -334,12 +334,8 @@ function App() {
         {dlProcessing && (
           <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center select-none">
             <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-10"></div>
-            
             <div className="flex flex-col w-fit items-stretch px-4">
-               <h2 className="nico-font text-2xl md:text-5xl text-emerald-400 tracking-widest text-center whitespace-nowrap">
-                 DOWNLOADING
-               </h2>
-               
+               <h2 className="nico-font text-2xl md:text-5xl text-emerald-400 tracking-widest text-center whitespace-nowrap">DOWNLOADING</h2>
                <div className="flex justify-between w-full mt-6 text-gray-500 text-[10px] md:text-xs font-mono uppercase tracking-widest">
                  {"PLEASE WAIT UNTIL THE FILE IS READY".split("").map((char, i) => (
                    <span key={i} className={char === " " ? "w-1" : ""}>{char}</span>
@@ -352,12 +348,7 @@ function App() {
         <AnimatePresence mode="wait">
           {currentPage === 'home' && (
             <motion.div 
-              key="home"
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              variants={pageVariants}
-              transition={pageVariants.transition}
+              key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
               <div className="w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0">
@@ -400,39 +391,19 @@ function App() {
                         <div className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto select-none">
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
-                              <img 
-                                key={info.thumbnail}
-                                src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
-                                referrerPolicy="no-referrer"
-                                className="w-full h-full object-cover shadow-2xl" 
-                                alt="preview"
-                                draggable="true"
-                              />
+                              <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover shadow-2xl" alt="preview" draggable="false" />
                             ) : (
                               <div className="flex items-center justify-center h-full text-white/70">{getPlatformLogo(info.fetchedUrl)}</div>
                             )}
                           </div>
                         </div>
-
                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                           <div className="overflow-hidden">
-                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">
-                              {info.title}
-                            </h3>
+                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
                           </div>
                           <div className="flex flex-col gap-3 mt-auto select-none">
-                            <button 
-                              onClick={() => startDownload('mp4', '1080p')} 
-                              className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]"
-                            >
-                              Download MP4 (1080P)
-                            </button>
-                            <button 
-                              onClick={() => startDownload('mp3')} 
-                              className="w-full py-4 bg-white/10 border border-white/10 text-white font-black rounded-xl hover:bg-white hover:text-black transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]"
-                            >
-                              Download MP3 (320kb/s)
-                            </button>
+                            <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP4 (1080P)</button>
+                            <button onClick={() => startDownload('mp3')} className="w-full py-4 bg-white/10 border border-white/10 text-white font-black rounded-xl hover:bg-white hover:text-black transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP3 (320kb/s)</button>
                           </div>
                         </div>
                       </div>
@@ -442,16 +413,11 @@ function App() {
               </div>
             </motion.div>
           )}
-
           {currentPage === 'about' && (
-            <motion.div key="about" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition} className="w-full flex justify-center">
-              <About />
-            </motion.div>
+            <motion.div key="about" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition} className="w-full flex justify-center"><About /></motion.div>
           )}
           {currentPage === 'contact' && (
-            <motion.div key="contact" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition} className="w-full flex justify-center">
-              <Contact />
-            </motion.div>
+            <motion.div key="contact" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition} className="w-full flex justify-center"><Contact /></motion.div>
           )}
         </AnimatePresence>
       </div>
