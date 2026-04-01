@@ -4,6 +4,35 @@ import { Toaster, toast } from 'sonner';
 import About from './About';
 import Contact from './Contact';
 
+// Custom Tooltip Component
+const CustomTooltip = ({ text, mousePos }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ 
+      opacity: 1, 
+      scale: 1,
+      transition: { 
+        delay: 0.4, // Shortened slightly for platform names
+        duration: 0.2,
+        ease: "easeOut"
+      } 
+    }}
+    exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.1 } }}
+    style={{
+      position: 'fixed',
+      left: mousePos.x + 15,
+      top: mousePos.y + 15,
+      pointerEvents: 'none',
+      zIndex: 9999,
+    }}
+    className="bg-white/10 border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl"
+  >
+    <p className="text-emerald-400 font-mono text-[10px] leading-tight tracking-[0.2em] uppercase font-bold">
+      {text}
+    </p>
+  </motion.div>
+);
+
 function App() {
   const [url, setUrl] = useState('');
   const [info, setInfo] = useState(null);
@@ -16,6 +45,25 @@ function App() {
   const [scrollbarVisible, setScrollbarVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
   
+  // Tooltip State
+  const [hoveredItem, setHoveredItem] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
+
+  // Helper to identify the platform name from URL
+  const getPlatformName = (link) => {
+    const lower = link.toLowerCase();
+    if (lower.includes('instagram.com')) return 'INSTAGRAM';
+    if (lower.includes('linkedin.com')) return 'LINKEDIN';
+    if (lower.includes('tumblr.com')) return 'TUMBLR';
+    if (lower.includes('pinterest.com') || lower.includes('pin.it')) return 'PINTEREST';
+    if (lower.includes('youtube.com') || lower.includes('youtu.be')) return 'YOUTUBE';
+    return 'SOURCE LINK';
+  };
+
   const isYouTube = (link) => {
     return link.toLowerCase().includes('youtube.com') || link.toLowerCase().includes('youtu.be');
   };
@@ -122,6 +170,7 @@ function App() {
     setCurrentPage('home'); 
     setUrl(item.url); 
     fetchInfo(item.url); 
+    setHoveredItem(null); 
   };
 
   const startDownload = (type, quality = '1080p') => {
@@ -198,8 +247,15 @@ function App() {
   };
 
   return (
-    <div className="h-screen w-screen bg-[#0a0a0a] text-white flex overflow-hidden fixed inset-0">
+    <div className="h-screen w-screen bg-[#0a0a0a] text-white flex overflow-hidden fixed inset-0" onMouseMove={handleMouseMove}>
       
+      {/* Tooltip AnimatePresence */}
+      <AnimatePresence>
+        {hoveredItem && (
+          <CustomTooltip text={hoveredItem} mousePos={mousePos} />
+        )}
+      </AnimatePresence>
+
       <Toaster theme="dark" position="bottom-right" toastOptions={{
         style: { 
           background: 'rgba(0,0,0,0.9)', 
@@ -316,6 +372,8 @@ function App() {
                     <div key={i} className="flex items-stretch group">
                       <div className="flex flex-col items-center mr-4"><div className="w-px bg-white/10 flex-1"></div></div>
                       <div 
+                        onMouseEnter={() => setHoveredItem(getPlatformName(item.url))}
+                        onMouseLeave={() => setHoveredItem(null)}
                         onClick={() => handleHistoryClick(item)} 
                         className="text-[14px] py-1 text-gray-500 font-mono truncate cursor-pointer shrink-0 flex-1 recent-link-hover"
                       >
