@@ -1,4 +1,14 @@
-@import url(https://db.onlinewebfonts.com/c/73c00071d90ecfb78bf0ccdeda529307?family=Nico+Moji);
+@font-face {
+  font-family: 'Nico Moji';
+  src: url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.eot');
+  src: url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.eot?#iefix') format('embedded-opentype'),
+       url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.woff2') format('woff2'),
+       url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.woff') format('woff'),
+       url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.ttf') format('truetype'),
+       url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.svg#Nico Moji') format('svg');
+  font-display: swap;
+}
+
 @import "tailwindcss";
 
 :root {
@@ -8,7 +18,8 @@
 body {
   margin: 0;
   background-color: #0a0a0a;
-  font-family: 'Nico Moji', sans-serif !important;
+  /* Added a system-ui fallback to prevent FOIT (Flash of Invisible Text) */
+  font-family: 'Nico Moji', system-ui, -apple-system, sans-serif !important;
   color: white;
 }
 
@@ -19,7 +30,7 @@ body {
 }
 
 .nico-font { 
-  font-family: 'Nico Moji', sans-serif !important; 
+  font-family: 'Nico Moji', system-ui, sans-serif !important; 
 }
 
 .icon-emerald-active,
