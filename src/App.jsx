@@ -4,7 +4,7 @@ import { Toaster, toast } from 'sonner';
 import About from './About';
 import Contact from './Contact';
 
-// Custom Tooltip Component
+// Custom Tooltip Component with updated UI
 const CustomTooltip = ({ text, mousePos }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.95 }}
@@ -17,9 +17,9 @@ const CustomTooltip = ({ text, mousePos }) => (
       pointerEvents: 'none',
       zIndex: 9999,
     }}
-    className="bg-black/90 border border-emerald-500/40 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl"
+    className="bg-white/10 border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl"
   >
-    <p className="text-emerald-400 font-mono text-[11px] leading-tight tracking-wider uppercase">
+    <p className="text-emerald-400 font-mono text-[11px] leading-tight tracking-wider uppercase font-bold">
       {text}
     </p>
   </motion.div>
@@ -151,7 +151,7 @@ function App() {
     setCurrentPage('home'); 
     setUrl(item.url); 
     fetchInfo(item.url); 
-    setHoveredItem(null); // Close tooltip on click
+    setHoveredItem(null); 
   };
 
   const startDownload = (type, quality = '1080p') => {
