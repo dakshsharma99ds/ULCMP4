@@ -4,12 +4,20 @@ import { Toaster, toast } from 'sonner';
 import About from './About';
 import Contact from './Contact';
 
-// Custom Tooltip Component with updated UI
+// Custom Tooltip Component with Entry Delay
 const CustomTooltip = ({ text, mousePos }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.95 }}
-    animate={{ opacity: 1, scale: 1 }}
-    exit={{ opacity: 0, scale: 0.95 }}
+    animate={{ 
+      opacity: 1, 
+      scale: 1,
+      transition: { 
+        delay: 0.5, // 0.5s delay before appearing
+        duration: 0.2,
+        ease: "easeOut"
+      } 
+    }}
+    exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.1 } }}
     style={{
       position: 'fixed',
       left: mousePos.x + 15,
