@@ -12,7 +12,7 @@ const CustomTooltip = ({ text, mousePos }) => (
       opacity: 1, 
       scale: 1,
       transition: { 
-        delay: 0.4, // Shortened slightly for platform names
+        delay: 0.4, 
         duration: 0.2,
         ease: "easeOut"
       } 
@@ -45,7 +45,6 @@ function App() {
   const [scrollbarVisible, setScrollbarVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
   
-  // Tooltip State
   const [hoveredItem, setHoveredItem] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -53,7 +52,6 @@ function App() {
     setMousePos({ x: e.clientX, y: e.clientY });
   };
 
-  // Helper to identify the platform name from URL
   const getPlatformName = (link) => {
     const lower = link.toLowerCase();
     if (lower.includes('instagram.com')) return 'INSTAGRAM';
@@ -61,6 +59,11 @@ function App() {
     if (lower.includes('tumblr.com')) return 'TUMBLR';
     if (lower.includes('pinterest.com') || lower.includes('pin.it')) return 'PINTEREST';
     if (lower.includes('youtube.com') || lower.includes('youtu.be')) return 'YOUTUBE';
+    if (lower.includes('reddit.com')) return 'REDDIT';
+    if (lower.includes('x.com') || lower.includes('twitter.com')) return 'X / TWITTER';
+    if (lower.includes('facebook.com') || lower.includes('fb.watch')) return 'FACEBOOK';
+    if (lower.includes('snapchat.com')) return 'SNAPCHAT';
+    if (lower.includes('bilibili.com') || lower.includes('b23.tv')) return 'BILIBILI';
     return 'SOURCE LINK';
   };
 
@@ -79,15 +82,7 @@ function App() {
         <div className="h-px w-full bg-emerald-500/30 my-2"></div>
         <span className="text-white/90 block">
           UNFORTUNATELY YOUTUBE IS RESTRICTED DUE TO PROVIDER LIMITS. ALL OTHER PLATFORMS ARE FULLY SUPPORTED! USE{" "}
-          <a 
-            href="https://cnvmp4.com" 
-            target="_blank" 
-            rel="noreferrer" 
-            className="text-emerald-400 hover:text-emerald-300 transition-colors duration-300 drop-shadow-[0_0_5px_rgba(52,211,153,0.5)] text-[12px] font-bold"
-            style={{ textDecoration: 'none' }}
-          >
-            CNVMP4
-          </a>{" "}
+          <a href="https://cnvmp4.com" target="_blank" rel="noreferrer" className="text-emerald-400 hover:text-emerald-300 transition-colors duration-300 drop-shadow-[0_0_5px_rgba(52,211,153,0.5)] text-[12px] font-bold" style={{ textDecoration: 'none' }}>CNVMP4</a>{" "}
           FOR YOUTUBE.
         </span>
       </div>,
@@ -102,15 +97,7 @@ function App() {
         <div className="h-px w-full bg-emerald-500/30 my-2"></div>
         <span className="text-white/90 block text-justify">
           UNFORTUNATELY INSTAGRAM STORIES ARE RESTRICTED DUE TO PROVIDER LIMITS. POSTS & REELS ARE FULLY SUPPORTED! USE{" "}
-          <a 
-            href="https://igram.world/story-saver" 
-            target="_blank" 
-            rel="noreferrer" 
-            className="text-emerald-400 hover:text-emerald-300 transition-colors duration-300 drop-shadow-[0_0_5px_rgba(52,211,153,0.5)] text-[11px] font-bold"
-            style={{ textDecoration: 'none' }}
-          >
-            IGRAM
-          </a>{" "}
+          <a href="https://igram.world/story-saver" target="_blank" rel="noreferrer" className="text-emerald-400 hover:text-emerald-300 transition-colors duration-300 drop-shadow-[0_0_5px_rgba(52,211,153,0.5)] text-[11px] font-bold" style={{ textDecoration: 'none' }}>IGRAM</a>{" "}
           FOR STORIES.
         </span>
       </div>,
@@ -249,7 +236,6 @@ function App() {
   return (
     <div className="h-screen w-screen bg-[#0a0a0a] text-white flex overflow-hidden fixed inset-0" onMouseMove={handleMouseMove}>
       
-      {/* Tooltip AnimatePresence */}
       <AnimatePresence>
         {hoveredItem && (
           <CustomTooltip text={hoveredItem} mousePos={mousePos} />
