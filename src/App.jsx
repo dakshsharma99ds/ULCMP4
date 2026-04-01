@@ -4,7 +4,7 @@ import { Toaster, toast } from 'sonner';
 import About from './About';
 import Contact from './Contact';
 
-// Custom Tooltip Component with Entry Delay
+// Custom Tooltip Component with White-Transparent UI and Delay
 const CustomTooltip = ({ text, mousePos }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.95 }}
@@ -12,7 +12,7 @@ const CustomTooltip = ({ text, mousePos }) => (
       opacity: 1, 
       scale: 1,
       transition: { 
-        delay: 0.5, // 0.5s delay before appearing
+        delay: 0.6, // Only appears if hovered for 0.6s
         duration: 0.2,
         ease: "easeOut"
       } 
@@ -51,6 +51,15 @@ function App() {
 
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
+  };
+
+  // Helper to check for truncation (Smart Title Logic)
+  const handleItemMouseEnter = (e, title) => {
+    const element = e.currentTarget;
+    // Only show tooltip if the text is actually cut off (overflowing)
+    if (element.scrollWidth > element.clientWidth) {
+      setHoveredItem(title);
+    }
   };
 
   const isYouTube = (link) => {
@@ -361,7 +370,7 @@ function App() {
                     <div key={i} className="flex items-stretch group">
                       <div className="flex flex-col items-center mr-4"><div className="w-px bg-white/10 flex-1"></div></div>
                       <div 
-                        onMouseEnter={() => setHoveredItem(item.title)}
+                        onMouseEnter={(e) => handleItemMouseEnter(e, item.title)}
                         onMouseLeave={() => setHoveredItem(null)}
                         onMouseMove={handleMouseMove}
                         onClick={() => handleHistoryClick(item)} 
