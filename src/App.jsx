@@ -4,6 +4,27 @@ import { Toaster, toast } from 'sonner';
 import About from './About';
 import Contact from './Contact';
 
+// Custom Tooltip Component
+const CustomTooltip = ({ text, mousePos }) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.95 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.95 }}
+    style={{
+      position: 'fixed',
+      left: mousePos.x + 15,
+      top: mousePos.y + 15,
+      pointerEvents: 'none',
+      zIndex: 9999,
+    }}
+    className="bg-black/90 border border-emerald-500/40 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl"
+  >
+    <p className="text-emerald-400 font-mono text-[11px] leading-tight tracking-wider uppercase">
+      {text}
+    </p>
+  </motion.div>
+);
+
 function App() {
   const [url, setUrl] = useState('');
   const [info, setInfo] = useState(null);
@@ -16,6 +37,14 @@ function App() {
   const [scrollbarVisible, setScrollbarVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
   
+  // Tooltip State
+  const [hoveredItem, setHoveredItem] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
+
   const isYouTube = (link) => {
     return link.toLowerCase().includes('youtube.com') || link.toLowerCase().includes('youtu.be');
   };
@@ -122,6 +151,7 @@ function App() {
     setCurrentPage('home'); 
     setUrl(item.url); 
     fetchInfo(item.url); 
+    setHoveredItem(null); // Close tooltip on click
   };
 
   const startDownload = (type, quality = '1080p') => {
@@ -199,6 +229,14 @@ function App() {
 
   return (
     <div className="h-screen w-screen bg-[#0a0a0a] text-white flex overflow-hidden fixed inset-0">
+      
+      {/* Tooltip AnimatePresence */}
+      <AnimatePresence>
+        {hoveredItem && (
+          <CustomTooltip text={hoveredItem} mousePos={mousePos} />
+        )}
+      </AnimatePresence>
+
       <Toaster theme="dark" position="bottom-right" toastOptions={{
         style: { 
           background: 'rgba(0,0,0,0.9)', 
@@ -314,7 +352,15 @@ function App() {
                   filteredHistory.map((item, i) => (
                     <div key={i} className="flex items-stretch group">
                       <div className="flex flex-col items-center mr-4"><div className="w-px bg-white/10 flex-1"></div></div>
-                      <div onClick={() => handleHistoryClick(item)} className="text-[14px] py-1 text-gray-500 font-mono truncate cursor-pointer shrink-0 flex-1 recent-link-hover" title={item.title}>{item.title}</div>
+                      <div 
+                        onMouseEnter={() => setHoveredItem(item.title)}
+                        onMouseLeave={() => setHoveredItem(null)}
+                        onMouseMove={handleMouseMove}
+                        onClick={() => handleHistoryClick(item)} 
+                        className="text-[14px] py-1 text-gray-500 font-mono truncate cursor-pointer shrink-0 flex-1 recent-link-hover"
+                      >
+                        {item.title}
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -368,7 +414,6 @@ function App() {
             <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-10"></div>
             <div className="flex flex-col w-fit items-stretch px-4">
                <h2 className="nico-font text-2xl md:text-5xl text-emerald-400 tracking-widest text-center whitespace-nowrap">DOWNLOADING</h2>
-               {/* Reduced gap on mobile using mt-2 instead of mt-6 */}
                <div className="flex justify-between w-full mt-2 md:mt-6 text-gray-500 text-[10px] md:text-xs font-mono uppercase tracking-widest">
                  {"PLEASE WAIT UNTIL THE FILE IS READY".split("").map((char, i) => (
                    <span key={i} className={char === " " ? "w-1" : ""}>{char}</span>
