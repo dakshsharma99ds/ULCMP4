@@ -368,7 +368,8 @@ function App() {
             <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-10"></div>
             <div className="flex flex-col w-fit items-stretch px-4">
                <h2 className="nico-font text-2xl md:text-5xl text-emerald-400 tracking-widest text-center whitespace-nowrap">DOWNLOADING</h2>
-               <div className="flex justify-between w-full mt-6 text-gray-500 text-[10px] md:text-xs font-mono uppercase tracking-widest">
+               {/* Reduced gap on mobile using mt-2 instead of mt-6 */}
+               <div className="flex justify-between w-full mt-2 md:mt-6 text-gray-500 text-[10px] md:text-xs font-mono uppercase tracking-widest">
                  {"PLEASE WAIT UNTIL THE FILE IS READY".split("").map((char, i) => (
                    <span key={i} className={char === " " ? "w-1" : ""}>{char}</span>
                  ))}
