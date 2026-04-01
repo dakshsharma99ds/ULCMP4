@@ -1,133 +1,122 @@
-@font-face {
-  font-family: 'Nico Moji';
-  src: url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.eot');
-  src: url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.eot?#iefix') format('embedded-opentype'),
-       url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.woff2') format('woff2'),
-       url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.woff') format('woff'),
-       url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.ttf') format('truetype'),
-       url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.svg#Nico Moji') format('svg');
-  font-display: swap;
-}
-
+@import url(https://db.onlinewebfonts.com/c/73c00071d90ecfb78bf0ccdeda529307?family=Nico+Moji);
 @import "tailwindcss";
 
 :root {
-  --bg-color: #0a0a0a;
+  --bg-color: #0a0a0a;
 }
 
 body {
-  margin: 0;
-  background-color: #0a0a0a;
-  /* Added a system-ui fallback to prevent FOIT (Flash of Invisible Text) */
-  font-family: 'Nico Moji', system-ui, -apple-system, sans-serif !important;
-  color: white;
+  margin: 0;
+  background-color: #0a0a0a;
+  font-family: 'Nico Moji', sans-serif !important;
+  color: white;
 }
 
 @media (max-width: 640px) {
-  body {
-    background-size: 16px 16px;
-  }
+  body {
+    background-size: 16px 16px;
+  }
 }
 
 .nico-font { 
-  font-family: 'Nico Moji', system-ui, sans-serif !important; 
+  font-family: 'Nico Moji', sans-serif !important; 
 }
 
 .icon-emerald-active,
 .icon-hover-trigger,
 nav img,
 .hamburger-hover {
-  user-select: none !important;
-  -webkit-user-select: none;
-  -ms-user-select: none;
-  -webkit-user-drag: none;
+  user-select: none !important;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  -webkit-user-drag: none;
 }
 
 .icon-emerald-active {
-  filter: brightness(0) invert(72%) sepia(50%) saturate(478%) hue-rotate(110deg) brightness(95%) contrast(92%) !important;
+  filter: brightness(0) invert(72%) sepia(50%) saturate(478%) hue-rotate(110deg) brightness(95%) contrast(92%) !important;
 }
 
 .group:hover .icon-hover-trigger,
 .hamburger-hover:hover:not(.text-emerald-400) {
-  filter: brightness(0) invert(50%) !important;
-  transition: none !important;
+  filter: brightness(0) invert(50%) !important;
+  transition: none !important;
 }
 
 .hamburger-hover {
-  transition: none !important;
+  transition: none !important;
 }
 
 nav img {
-  pointer-events: none;
+  pointer-events: none;
 }
 
 .recent-link-hover:hover {
-  color: #34d399 !important;
-  transition: none !important;
+  color: #34d399 !important;
+  transition: none !important;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
+  width: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.02);
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(52, 211, 153, 0.3);
-  border-radius: 10px;
+  background: rgba(52, 211, 153, 0.3);
+  border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(52, 211, 153, 0.6);
+  background: rgba(52, 211, 153, 0.6);
 }
 
 nav .custom-scrollbar {
-  opacity: 0;
-  transition: opacity 0.5s ease-in-out;
-  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+  pointer-events: none;
 }
 
 nav .scrollbar-visible.custom-scrollbar {
-  opacity: 1;
-  pointer-events: auto;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 textarea.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(52, 211, 153, 0.3) rgba(255, 255, 255, 0.02);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(52, 211, 153, 0.3) rgba(255, 255, 255, 0.02);
 }
 
 .logo-accent {
-  color: #7b81d6; 
+  color: #7b81d6; 
 }
 
 @keyframes float {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-20px) rotate(1deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { opacity: 0.3; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.1); }
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
 }
 
 .animate-float {
-  animation: float 6s ease-in-out infinite;
+  animation: float 6s ease-in-out infinite;
 }
 
 .animate-float-delayed {
-  animation: float 8s ease-in-out infinite;
-  animation-delay: 2s;
+  animation: float 8s ease-in-out infinite;
+  animation-delay: 2s;
 }
 
 .bg-mesh-glow {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at 50% 50%, rgba(52, 211, 153, 0.1) 0%, transparent 50%);
-  animation: pulse-glow 4s ease-in-out infinite;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(52, 211, 153, 0.1) 0%, transparent 50%);
+  animation: pulse-glow 4s ease-in-out infinite;
 }
