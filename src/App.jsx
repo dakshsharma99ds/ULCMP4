@@ -225,12 +225,33 @@ function App() {
         ${isNavOpen || isSearchMode ? 'w-72 translate-x-0' : 'w-0 -translate-x-full md:w-20 md:translate-x-0'}`}>
         
         <div className="flex items-center mb-6 px-2 shrink-0 relative h-10 overflow-hidden">
-          <button 
-            onClick={handleHamburgerClick} 
-            className={`cursor-pointer shrink-0 z-50 bg-transparent hamburger-hover transition-none ${(isNavOpen || isSearchMode) ? 'text-emerald-400 opacity-100' : 'opacity-0 md:opacity-100'}`}
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
+          <div className="shrink-0 z-50">
+            <button 
+              onClick={handleHamburgerClick} 
+              className={`hidden md:block cursor-pointer bg-transparent hamburger-hover transition-none ${isNavOpen || isSearchMode ? 'text-emerald-400' : 'opacity-100'}`}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+
+            <div className="md:hidden">
+              <AnimatePresence>
+                {(isNavOpen || isSearchMode) && (
+                  <motion.button 
+                    key="mobile-internal"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.4 }} 
+                    onClick={handleHamburgerClick} 
+                    className="cursor-pointer bg-transparent hamburger-hover text-emerald-400"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
           <div className="flex-1 ml-4 relative h-full flex items-center overflow-hidden">
             <div className={`absolute right-0 transition-all duration-400 ease-in-out ${isSearchMode ? 'opacity-100 translate-x-0 w-full' : 'opacity-0 translate-x-10 pointer-events-none w-0'}`}>
                 <div className="relative w-full pr-2">
@@ -322,12 +343,23 @@ function App() {
         </div>
       </nav>
 
-      <button 
-        onClick={() => setIsNavOpen(true)} 
-        className={`fixed top-8 left-6 z-40 md:hidden text-white transition-none hamburger-hover ${(!isNavOpen && !isSearchMode) ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-      >
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-      </button>
+      <div className="md:hidden">
+        <AnimatePresence>
+          {(!isNavOpen && !isSearchMode) && (
+            <motion.button 
+              key="mobile-external"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              onClick={() => setIsNavOpen(true)} 
+              className="fixed top-8 left-6 z-30 text-white transition-none hamburger-hover pointer-events-auto"
+            >
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </div>
       
       <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
         
