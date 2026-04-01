@@ -4,35 +4,6 @@ import { Toaster, toast } from 'sonner';
 import About from './About';
 import Contact from './Contact';
 
-// Custom Tooltip Component with White-Transparent UI and Delay
-const CustomTooltip = ({ text, mousePos }) => (
-  <motion.div
-    initial={{ opacity: 0, scale: 0.95 }}
-    animate={{ 
-      opacity: 1, 
-      scale: 1,
-      transition: { 
-        delay: 0.6, // Only appears if hovered for 0.6s
-        duration: 0.2,
-        ease: "easeOut"
-      } 
-    }}
-    exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.1 } }}
-    style={{
-      position: 'fixed',
-      left: mousePos.x + 15,
-      top: mousePos.y + 15,
-      pointerEvents: 'none',
-      zIndex: 9999,
-    }}
-    className="bg-white/10 border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl"
-  >
-    <p className="text-emerald-400 font-mono text-[11px] leading-tight tracking-wider uppercase font-bold">
-      {text}
-    </p>
-  </motion.div>
-);
-
 function App() {
   const [url, setUrl] = useState('');
   const [info, setInfo] = useState(null);
@@ -45,23 +16,6 @@ function App() {
   const [scrollbarVisible, setScrollbarVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
   
-  // Tooltip State
-  const [hoveredItem, setHoveredItem] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  const handleMouseMove = (e) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
-  };
-
-  // Helper to check for truncation (Smart Title Logic)
-  const handleItemMouseEnter = (e, title) => {
-    const element = e.currentTarget;
-    // Only show tooltip if the text is actually cut off (overflowing)
-    if (element.scrollWidth > element.clientWidth) {
-      setHoveredItem(title);
-    }
-  };
-
   const isYouTube = (link) => {
     return link.toLowerCase().includes('youtube.com') || link.toLowerCase().includes('youtu.be');
   };
@@ -168,7 +122,6 @@ function App() {
     setCurrentPage('home'); 
     setUrl(item.url); 
     fetchInfo(item.url); 
-    setHoveredItem(null); 
   };
 
   const startDownload = (type, quality = '1080p') => {
@@ -247,13 +200,6 @@ function App() {
   return (
     <div className="h-screen w-screen bg-[#0a0a0a] text-white flex overflow-hidden fixed inset-0">
       
-      {/* Tooltip AnimatePresence */}
-      <AnimatePresence>
-        {hoveredItem && (
-          <CustomTooltip text={hoveredItem} mousePos={mousePos} />
-        )}
-      </AnimatePresence>
-
       <Toaster theme="dark" position="bottom-right" toastOptions={{
         style: { 
           background: 'rgba(0,0,0,0.9)', 
@@ -370,9 +316,6 @@ function App() {
                     <div key={i} className="flex items-stretch group">
                       <div className="flex flex-col items-center mr-4"><div className="w-px bg-white/10 flex-1"></div></div>
                       <div 
-                        onMouseEnter={(e) => handleItemMouseEnter(e, item.title)}
-                        onMouseLeave={() => setHoveredItem(null)}
-                        onMouseMove={handleMouseMove}
                         onClick={() => handleHistoryClick(item)} 
                         className="text-[14px] py-1 text-gray-500 font-mono truncate cursor-pointer shrink-0 flex-1 recent-link-hover"
                       >
