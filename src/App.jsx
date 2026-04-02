@@ -80,7 +80,7 @@ function App() {
       <div className="font-mono text-[10px] leading-relaxed tracking-wider text-left w-full select-none">
         <span className="text-emerald-400 font-bold block text-[13px]">VALIDATION ERROR:</span>
         <div className="h-px w-full bg-emerald-500/30 my-2"></div>
-        <span className="text-white/90 block">PLEASE PUT A VALID LINK</span>
+        <span className="text-white/90 block">PLEASE PROVIDE A VALID MEDIA LINK TO PROCEED</span>
       </div>,
       { duration: 4000, icon: null }
     );
@@ -128,15 +128,16 @@ function App() {
   const fetchInfo = async (manualUrl = null) => {
     const targetUrl = manualUrl || url;
     
-    // 1. Basic Gibberish/Format Check
-    const urlPattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
-      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
-      '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
-      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
-      '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
-      '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    // 1. Improved Validation Logic
+    let isValid = false;
+    try {
+      const checkUrl = new URL(targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`);
+      isValid = checkUrl.hostname.includes('.');
+    } catch (_) {
+      isValid = false;
+    }
 
-    if (!targetUrl || !urlPattern.test(targetUrl)) {
+    if (!targetUrl || !isValid) {
       showInvalidLinkError();
       return;
     }
@@ -159,17 +160,10 @@ function App() {
         body: JSON.stringify({ url: targetUrl })
       });
       
-      // 2. Existence Check (If API returns error or 404)
-      if (!res.ok) {
-        showInvalidLinkError();
-        setLoading(false);
-        return;
-      }
-
       const data = await res.json();
-      
-      // If data is empty or indicates not found
-      if (!data || data.error || !data.title) {
+
+      // Check if API actually found media
+      if (!res.ok || !data || data.error || (!data.title && !data.thumbnail)) {
         showInvalidLinkError();
         setLoading(false);
         return;
