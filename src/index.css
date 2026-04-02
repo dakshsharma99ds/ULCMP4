@@ -1,16 +1,13 @@
-/* 1. Define font manually to enable 'font-display: swap' */
+/* 1. TAILWIND MUST BE FIRST */
+@import "tailwindcss";
+
 @font-face {
   font-family: 'Nico Moji';
-  src: url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.eot');
-  src: url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.eot?#iefix') format('embedded-opentype'),
-       url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.woff2') format('woff2'),
-       url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.woff') format('woff'),
-       url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.ttf') format('truetype'),
-       url('https://db.onlinewebfonts.com/t/73c00071d90ecfb78bf0ccdeda529307.svg#Nico Moji') format('svg');
-  font-display: swap; /* This ensures text is visible while the font loads */
+  src: url('/fonts/NicoMoji-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block; 
 }
-
-@import "tailwindcss";
 
 :root {
   --bg-color: #0a0a0a;
@@ -19,7 +16,6 @@
 body {
   margin: 0;
   background-color: #0a0a0a;
-  /* Added a system-ui fallback to prevent FOIT (Flash of Invisible Text) */
   font-family: 'Nico Moji', system-ui, -apple-system, sans-serif !important;
   color: white;
 }
@@ -34,6 +30,7 @@ body {
   font-family: 'Nico Moji', system-ui, sans-serif !important; 
 }
 
+/* Image & Icon Protection */
 .icon-emerald-active,
 .icon-hover-trigger,
 nav img,
@@ -67,6 +64,7 @@ nav img {
   transition: none !important;
 }
 
+/* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
 }
@@ -105,6 +103,7 @@ textarea.custom-scrollbar {
   color: #7b81d6; 
 }
 
+/* Animations */
 @keyframes float {
   0% { transform: translateY(0px) rotate(0deg); }
   50% { transform: translateY(-20px) rotate(1deg); }
@@ -114,7 +113,6 @@ textarea.custom-scrollbar {
 @keyframes pulse-glow {
   0%, 100% { opacity: 0.3; transform: scale(1); }
   50% { opacity: 0.6; transform: scale(1.1); }
-  
 }
 
 .animate-float {
