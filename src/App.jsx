@@ -82,7 +82,7 @@ function App() {
         <div className="h-px w-full bg-emerald-500/30 my-2"></div>
         <span className="text-white/90 block">THE PROVIDED MEDIA LINK IS INVALID. PLEASE VERIFY THE URL TO PROCEED.</span>
       </div>,
-      { duration: 4000, icon: null }
+      { duration: 6000, icon: null }
     );
   };
 
@@ -116,6 +116,17 @@ function App() {
     );
   };
 
+  const showEmptyUrlError = () => {
+    toast.error(
+      <div className="font-mono text-[10px] leading-relaxed tracking-wider text-left w-full select-none">
+        <span className="text-emerald-400 font-bold block text-[13px]">INPUT ERROR:</span>
+        <div className="h-px w-full bg-emerald-500/30 my-2"></div>
+        <span className="text-white/90 block uppercase">PLEASE PROVIDE A VALID VIDEO URL FROM ANY SUPPORTED PLATFORM TO PROCEED.</span>
+      </div>,
+      { duration: 5000, icon: null }
+    );
+  };
+
   useEffect(() => {
     if (isNavOpen || isSearchMode) {
       const timer = setTimeout(() => setScrollbarVisible(true), 300);
@@ -128,6 +139,11 @@ function App() {
   const fetchInfo = async (manualUrl = null) => {
     let targetUrl = (manualUrl || url).trim();
     
+    if (!targetUrl) {
+      showEmptyUrlError();
+      return;
+    }
+
     if (targetUrl && !/^https?:\/\//i.test(targetUrl)) {
       targetUrl = 'https://' + targetUrl;
     }
@@ -140,7 +156,7 @@ function App() {
       isValid = false;
     }
 
-    if (!targetUrl || !isValid) {
+    if (!isValid) {
       showInvalidLinkError();
       return;
     }
