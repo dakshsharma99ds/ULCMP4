@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'self-framer-motion';
 import { Toaster, toast } from 'sonner';
 import About from './About';
 import Contact from './Contact';
@@ -80,7 +80,7 @@ function App() {
       <div className="font-mono text-[10px] leading-relaxed tracking-wider text-left w-full select-none">
         <span className="text-emerald-400 font-bold block text-[13px]">VALIDATION ERROR:</span>
         <div className="h-px w-full bg-emerald-500/30 my-2"></div>
-        <span className="text-white/90 block">PLEASE PROVIDE A VALID MEDIA LINK TO PROCEED</span>
+        <span className="text-white/90 block">PLEASE PROVIDE A VALID MEDIA LINK TO PROCEED WITH THE FETCH</span>
       </div>,
       { duration: 4000, icon: null }
     );
@@ -126,13 +126,18 @@ function App() {
   }, [isNavOpen, isSearchMode]);
 
   const fetchInfo = async (manualUrl = null) => {
-    const targetUrl = manualUrl || url;
+    let targetUrl = (manualUrl || url).trim();
     
-    // 1. Improved Validation Logic
+    // Ensure URL has a protocol for validation
+    if (targetUrl && !/^https?:\/\//i.test(targetUrl)) {
+      targetUrl = 'https://' + targetUrl;
+    }
+
     let isValid = false;
     try {
-      const checkUrl = new URL(targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`);
-      isValid = checkUrl.hostname.includes('.');
+      const parsed = new URL(targetUrl);
+      // Check if it has a proper domain structure
+      isValid = parsed.hostname.includes('.') && parsed.hostname.length > 3;
     } catch (_) {
       isValid = false;
     }
@@ -161,9 +166,9 @@ function App() {
       });
       
       const data = await res.json();
-
-      // Check if API actually found media
-      if (!res.ok || !data || data.error || (!data.title && !data.thumbnail)) {
+      
+      // If API returns an error or no usable data, show notification
+      if (!res.ok || data.error || (!data.title && !data.thumbnail)) {
         showInvalidLinkError();
         setLoading(false);
         return;
