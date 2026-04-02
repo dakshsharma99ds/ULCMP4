@@ -44,17 +44,9 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [scrollbarVisible, setScrollbarVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
-  const [fontLoaded, setFontLoaded] = useState(false); // New state for font tracking
   
   const [hoveredItem, setHoveredItem] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  // Handle Font Loading
-  useEffect(() => {
-    document.fonts.ready.then(() => {
-      setFontLoaded(true);
-    });
-  }, []);
 
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
@@ -244,18 +236,6 @@ function App() {
   return (
     <div className="h-screen w-screen bg-[#0a0a0a] text-white flex overflow-hidden fixed inset-0" onMouseMove={handleMouseMove}>
       
-      {/* INITIAL FONT LOADING OVERLAY */}
-      <AnimatePresence>
-        {!fontLoaded && (
-          <motion.div 
-            exit={{ opacity: 0 }} 
-            className="fixed inset-0 z-[100] bg-[#0a0a0a] flex items-center justify-center"
-          >
-            <div className="w-10 h-10 border-2 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <AnimatePresence>
         {hoveredItem && (
           <CustomTooltip text={hoveredItem} mousePos={mousePos} />
@@ -526,5 +506,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;
