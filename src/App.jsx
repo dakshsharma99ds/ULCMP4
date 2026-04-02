@@ -80,7 +80,7 @@ function App() {
       <div className="font-mono text-[10px] leading-relaxed tracking-wider text-left w-full select-none">
         <span className="text-emerald-400 font-bold block text-[13px]">VALIDATION ERROR:</span>
         <div className="h-px w-full bg-emerald-500/30 my-2"></div>
-        <span className="text-white/90 block">THE PROVIDED URL APPEARS TO BE INVALID. PLEASE ENSURE YOU ARE PASTING A VALID MEDIA LINK FROM A SUPPORTED PLATFORM.</span>
+        <span className="text-white/90 block">THE PROVIDED MEDIA LINK IS INVALID. PLEASE VERIFY THE URL TO PROCEED.</span>
       </div>,
       { duration: 4000, icon: null }
     );
