@@ -1,9 +1,8 @@
-/* 1. TAILWIND MUST BE FIRST */
 @import "tailwindcss";
 
 @font-face {
   font-family: 'Nico Moji';
-  src: url('/fonts/NicoMoji-Regular.ttf') format('truetype'); /* Match the html href exactly */
+  src: url('/fonts/NicoMoji-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: block; 
@@ -30,7 +29,6 @@ body {
   font-family: 'Nico Moji', system-ui, sans-serif !important; 
 }
 
-/* Image & Icon Protection */
 .icon-emerald-active,
 .icon-hover-trigger,
 nav img,
@@ -64,7 +62,6 @@ nav img {
   transition: none !important;
 }
 
-/* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px;
 }
@@ -103,7 +100,7 @@ textarea.custom-scrollbar {
   color: #7b81d6; 
 }
 
-/* Animations */
+
 @keyframes float {
   0% { transform: translateY(0px) rotate(0deg); }
   50% { transform: translateY(-20px) rotate(1deg); }
