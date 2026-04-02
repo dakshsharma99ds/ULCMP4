@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'self-framer-motion';
+import { motion, AnimatePresence } from 'framer-motion'; // Fixed: changed back from self-framer-motion
 import { Toaster, toast } from 'sonner';
 import About from './About';
 import Contact from './Contact';
@@ -128,7 +128,6 @@ function App() {
   const fetchInfo = async (manualUrl = null) => {
     let targetUrl = (manualUrl || url).trim();
     
-    // Ensure URL has a protocol for validation
     if (targetUrl && !/^https?:\/\//i.test(targetUrl)) {
       targetUrl = 'https://' + targetUrl;
     }
@@ -136,7 +135,6 @@ function App() {
     let isValid = false;
     try {
       const parsed = new URL(targetUrl);
-      // Check if it has a proper domain structure
       isValid = parsed.hostname.includes('.') && parsed.hostname.length > 3;
     } catch (_) {
       isValid = false;
@@ -167,7 +165,6 @@ function App() {
       
       const data = await res.json();
       
-      // If API returns an error or no usable data, show notification
       if (!res.ok || data.error || (!data.title && !data.thumbnail)) {
         showInvalidLinkError();
         setLoading(false);
