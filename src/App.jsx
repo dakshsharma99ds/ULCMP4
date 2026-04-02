@@ -105,6 +105,19 @@ function App() {
     );
   };
 
+  const showValidationError = () => {
+    toast.error(
+      <div className="font-mono text-[10px] leading-relaxed tracking-wider w-full select-none">
+        <span className="text-red-400 font-bold block text-[13px]">INVALID LINK:</span>
+        <div className="h-px w-full bg-red-500/30 my-2"></div>
+        <span className="text-white/90 block text-justify uppercase">
+          PLEASE PUT A VALID LINK. THE PROVIDED URL IS EITHER GIBBERISH OR THE MEDIA DOES NOT EXIST.
+        </span>
+      </div>,
+      { duration: 5000, icon: null }
+    );
+  };
+
   useEffect(() => {
     if (isNavOpen || isSearchMode) {
       const timer = setTimeout(() => setScrollbarVisible(true), 300);
@@ -115,8 +128,12 @@ function App() {
   }, [isNavOpen, isSearchMode]);
 
   const fetchInfo = async (manualUrl = null) => {
-    const targetUrl = manualUrl || url;
-    if (!targetUrl) return;
+    const targetUrl = (manualUrl || url).trim();
+    
+    // CHANGE: Only block if the input is completely empty or way too short
+    if (!targetUrl || targetUrl.length < 5) {
+      return;
+    }
 
     if (isYouTube(targetUrl)) {
       showYoutubeError();
@@ -129,21 +146,35 @@ function App() {
     }
     
     setLoading(true);
+    setInfo(null); // Clear previous results to avoid confusion
+
     try {
       const res = await fetch('/api/info', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: targetUrl })
       });
+      
       const data = await res.json();
-      setInfo({ ...data, fetchedUrl: targetUrl });
-      if (data.title) {
-        setHistory(prev => {
-            const filtered = prev.filter(item => item.url !== targetUrl);
-            return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
-        });
+
+      // CHANGE: Only show "Invalid" notification if the server explicitly fails to find content
+      if (!res.ok || !data || !data.title) {
+        showValidationError();
+        setLoading(false);
+        return;
       }
-    } catch (err) { alert("Error fetching info"); }
+
+      setInfo({ ...data, fetchedUrl: targetUrl });
+      
+      setHistory(prev => {
+          const filtered = prev.filter(item => item.url !== targetUrl);
+          return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
+      });
+      
+    } catch (err) { 
+      // Network/Server error
+      showValidationError(); 
+    }
     setLoading(false);
   };
 
