@@ -75,6 +75,17 @@ function App() {
     return link.toLowerCase().includes('instagram.com/stories/');
   };
 
+  const showInvalidLinkError = () => {
+    toast.error(
+      <div className="font-mono text-[10px] leading-relaxed tracking-wider text-left w-full select-none">
+        <span className="text-emerald-400 font-bold block text-[13px]">VALIDATION ERROR:</span>
+        <div className="h-px w-full bg-emerald-500/30 my-2"></div>
+        <span className="text-white/90 block">PLEASE PUT A VALID LINK</span>
+      </div>,
+      { duration: 4000, icon: null }
+    );
+  };
+
   const showYoutubeError = () => {
     toast.error(
       <div className="font-mono text-[10px] leading-relaxed tracking-wider text-left w-full select-none">
@@ -116,7 +127,19 @@ function App() {
 
   const fetchInfo = async (manualUrl = null) => {
     const targetUrl = manualUrl || url;
-    if (!targetUrl) return;
+    
+    // 1. Basic Gibberish/Format Check
+    const urlPattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+      '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // domain name
+      '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+      '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+      '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+      '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+
+    if (!targetUrl || !urlPattern.test(targetUrl)) {
+      showInvalidLinkError();
+      return;
+    }
 
     if (isYouTube(targetUrl)) {
       showYoutubeError();
@@ -135,7 +158,23 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: targetUrl })
       });
+      
+      // 2. Existence Check (If API returns error or 404)
+      if (!res.ok) {
+        showInvalidLinkError();
+        setLoading(false);
+        return;
+      }
+
       const data = await res.json();
+      
+      // If data is empty or indicates not found
+      if (!data || data.error || !data.title) {
+        showInvalidLinkError();
+        setLoading(false);
+        return;
+      }
+
       setInfo({ ...data, fetchedUrl: targetUrl });
       if (data.title) {
         setHistory(prev => {
@@ -143,7 +182,9 @@ function App() {
             return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
         });
       }
-    } catch (err) { alert("Error fetching info"); }
+    } catch (err) { 
+      showInvalidLinkError(); 
+    }
     setLoading(false);
   };
 
