@@ -3,7 +3,7 @@
 
 @font-face {
   font-family: 'Nico Moji';
-  src: url('/fonts/NicoMoji-Regular.ttf') format('truetype');
+  src: url('/fonts/NicoMoji-Regular.ttf') format('truetype'); /* Match the html href exactly */
   font-weight: normal;
   font-style: normal;
   font-display: block; 
