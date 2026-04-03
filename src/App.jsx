@@ -187,11 +187,42 @@ function App() {
         return;
       }
 
-      setInfo({ ...data, fetchedUrl: targetUrl });
-      if (data.title) {
+      /* --- START CHANGE AREA: Accurate Instagram Title Extraction --- */
+      let finalTitle = data.title || "Untitled Media";
+      
+      if (targetUrl.includes('instagram.com')) {
+          // If it's a generic title like "Video by username", try to get a better one
+          const isGeneric = /^video by|^post by/i.test(finalTitle);
+          
+          if (isGeneric && data.description) {
+              // Use description but remove typical Instagram meta info (likes, followers, etc.)
+              // This leaves just the actual caption text
+              finalTitle = data.description
+                  .replace(/^[0-9]+[K|M]?\s+(Likes|Followers).*?\-?\s?/gi, '')
+                  .replace(/Instagram photos and videos/gi, '')
+                  .trim();
+          }
+
+          // Strip common trailing branding
+          finalTitle = finalTitle
+              .replace(/• Instagram$/i, '')
+              .replace(/on Instagram$/i, '')
+              .replace(/Instagram:?.*/gi, '')
+              .trim();
+
+          // If cleanup results in empty string, fallback to a clean username format
+          if (!finalTitle || finalTitle.length < 2) {
+              const usernameMatch = data.title.match(/(?:by|from)\s+([a-zA-Z0-9._]+)/i);
+              finalTitle = usernameMatch ? `INSTAGRAM: @${usernameMatch[1]}` : "INSTAGRAM MEDIA";
+          }
+      }
+      /* --- END CHANGE AREA --- */
+
+      setInfo({ ...data, title: finalTitle, fetchedUrl: targetUrl });
+      if (finalTitle) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
-            return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
+            return [{ title: finalTitle, url: targetUrl }, ...filtered].slice(0, 100);
         });
       }
     } catch (err) { 
@@ -486,7 +517,6 @@ function App() {
               key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
-              {/* CHANGE APPLIED: Increased pt-6 to pt-8 on mobile when info is present */}
               <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${info ? 'pt-8 md:pt-0' : ''}`}>
                 
                 <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
