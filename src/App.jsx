@@ -187,36 +187,30 @@ function App() {
         return;
       }
 
-      /* --- START CHANGE AREA: Accurate Instagram Title Extraction --- */
+      // ACCURATE TITLE EXTRACTION LOGIC
       let finalTitle = data.title || "Untitled Media";
-      
       if (targetUrl.includes('instagram.com')) {
-          // If it's a generic title like "Video by username", try to get a better one
-          const isGeneric = /^video by|^post by/i.test(finalTitle);
-          
-          if (isGeneric && data.description) {
-              // Use description but remove typical Instagram meta info (likes, followers, etc.)
-              // This leaves just the actual caption text
-              finalTitle = data.description
-                  .replace(/^[0-9]+[K|M]?\s+(Likes|Followers).*?\-?\s?/gi, '')
-                  .replace(/Instagram photos and videos/gi, '')
-                  .trim();
+          const isGenericTitle = /^(Video|Post) by/i.test(finalTitle);
+          let caption = data.description || "";
+
+          // Clean the caption: remove likes/follower stats and bullet-point metadata
+          caption = caption
+            .replace(/^[0-9,.]+[KM]?\s+(Likes|Followers|Comments).*?Instagram:.*?\n/gi, '')
+            .split('•')[0] 
+            .trim();
+
+          if (caption && caption.length > 5) {
+            finalTitle = caption;
+          } else if (data.uploader) {
+            finalTitle = `INSTAGRAM: @${data.uploader}`;
           }
 
-          // Strip common trailing branding
+          // Strip platform branding
           finalTitle = finalTitle
-              .replace(/• Instagram$/i, '')
-              .replace(/on Instagram$/i, '')
-              .replace(/Instagram:?.*/gi, '')
-              .trim();
-
-          // If cleanup results in empty string, fallback to a clean username format
-          if (!finalTitle || finalTitle.length < 2) {
-              const usernameMatch = data.title.match(/(?:by|from)\s+([a-zA-Z0-9._]+)/i);
-              finalTitle = usernameMatch ? `INSTAGRAM: @${usernameMatch[1]}` : "INSTAGRAM MEDIA";
-          }
+            .replace(/\s*on Instagram\s*:?.*/gi, '')
+            .replace(/\s*• Instagram$/i, '')
+            .trim();
       }
-      /* --- END CHANGE AREA --- */
 
       setInfo({ ...data, title: finalTitle, fetchedUrl: targetUrl });
       if (finalTitle) {
