@@ -187,23 +187,11 @@ function App() {
         return;
       }
 
-      /* --- START CHANGE AREA: Improved Title Logic for Instagram --- */
-      // If title is generic (starts with Video by or Post by), try to use the description or a cleaned-up version
-      let displayTitle = data.title;
-      if (targetUrl.includes('instagram.com')) {
-        const isGeneric = /^video by|^post by/i.test(data.title);
-        // Prioritize data.description if the title is just a placeholder
-        if (isGeneric && data.description && data.description.trim().length > 0) {
-          displayTitle = data.description;
-        }
-      }
-      /* --- END CHANGE AREA --- */
-
-      setInfo({ ...data, title: displayTitle, fetchedUrl: targetUrl });
-      if (displayTitle) {
+      setInfo({ ...data, fetchedUrl: targetUrl });
+      if (data.title) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
-            return [{ title: displayTitle, url: targetUrl }, ...filtered].slice(0, 100);
+            return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
         });
       }
     } catch (err) { 
@@ -498,6 +486,7 @@ function App() {
               key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
+              {/* CHANGE APPLIED: Increased pt-6 to pt-8 on mobile when info is present */}
               <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${info ? 'pt-8 md:pt-0' : ''}`}>
                 
                 <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
