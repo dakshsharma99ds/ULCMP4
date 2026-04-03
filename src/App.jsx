@@ -488,8 +488,12 @@ function App() {
             >
               <div className="w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0">
                 
-                {/* COMMENT: Reduced gap to mt-4 (mobile only) triggered only after processing */}
-                <div id="header-section" className={`z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible transition-all duration-500 ${info ? 'mt-1 md:mt-0' : ''}`}>
+                {/* HEADER SECTION - FIXED TOP MARGIN TO PREVENT JUMPING */}
+                <div 
+                  id="header-section" 
+                  className={`z-10 text-center flex flex-col items-center pt-2 md:pt-0 overflow-visible transition-all duration-500 
+                    ${info ? 'mb-4 md:mb-8 -mt-12 md:mt-0' : 'mb-6 md:mb-8 -mt-12 md:mt-0'}`}
+                >
                   <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
                     <span className="text-white">ULC</span>
                     <span className="text-emerald-400">MP4</span>
@@ -501,7 +505,7 @@ function App() {
                 </div>
 
                 <div className={`z-10 w-full max-w-85 md:max-w-2xl bg-white/2 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-6 md:p-8 shadow-2xl transition-all duration-500`}>
-                  <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${info ? 'mb-6' : 'mb-0'}`}>
+                  <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${info ? 'mb-4 md:mb-6' : 'mb-0'}`}>
                     <input
                       type="text"
                       placeholder="INPUT MEDIA URL"
