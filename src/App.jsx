@@ -489,7 +489,7 @@ function App() {
               <div className="w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0">
                 
                 {/* COMMENT: Reduced gap to mt-4 (mobile only) triggered only after processing */}
-                <div id="header-section" className={`z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible transition-all duration-500 ${info ? 'mt-166 md:mt-0' : ''}`}>
+                <div id="header-section" className={`z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible transition-all duration-500 ${info ? 'mt-1 md:mt-0' : ''}`}>
                   <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
                     <span className="text-white">ULC</span>
                     <span className="text-emerald-400">MP4</span>
