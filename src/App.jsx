@@ -148,15 +148,11 @@ function App() {
       targetUrl = 'https://' + targetUrl;
     }
 
-    let isValid = false;
     try {
       const parsed = new URL(targetUrl);
-      isValid = parsed.hostname.includes('.') && parsed.hostname.length > 3;
+      const isValid = parsed.hostname.includes('.') && parsed.hostname.length > 3;
+      if (!isValid) throw new Error("Invalid hostname");
     } catch (_) {
-      isValid = false;
-    }
-
-    if (!isValid) {
       showInvalidLinkError();
       return;
     }
@@ -181,44 +177,21 @@ function App() {
       
       const data = await res.json();
       
-      if (!res.ok || data.error || (!data.title && !data.thumbnail)) {
+      // Removed strict requirement for data.title and data.thumbnail to handle edge cases
+      if (!res.ok || data.error) {
         showInvalidLinkError();
         setLoading(false);
         return;
       }
 
-      // ACCURATE TITLE EXTRACTION LOGIC
-      let finalTitle = data.title || "Untitled Media";
-      if (targetUrl.includes('instagram.com')) {
-          const isGenericTitle = /^(Video|Post) by/i.test(finalTitle);
-          let caption = data.description || "";
-
-          // Clean the caption: remove likes/follower stats and bullet-point metadata
-          caption = caption
-            .replace(/^[0-9,.]+[KM]?\s+(Likes|Followers|Comments).*?Instagram:.*?\n/gi, '')
-            .split('•')[0] 
-            .trim();
-
-          if (caption && caption.length > 5) {
-            finalTitle = caption;
-          } else if (data.uploader) {
-            finalTitle = `INSTAGRAM: @${data.uploader}`;
-          }
-
-          // Strip platform branding
-          finalTitle = finalTitle
-            .replace(/\s*on Instagram\s*:?.*/gi, '')
-            .replace(/\s*• Instagram$/i, '')
-            .trim();
-      }
-
-      setInfo({ ...data, title: finalTitle, fetchedUrl: targetUrl });
-      if (finalTitle) {
-        setHistory(prev => {
-            const filtered = prev.filter(item => item.url !== targetUrl);
-            return [{ title: finalTitle, url: targetUrl }, ...filtered].slice(0, 100);
-        });
-      }
+      // Use extracted title or fallback to a generic name
+      const displayTitle = data.title || "Media Content";
+      setInfo({ ...data, title: displayTitle, fetchedUrl: targetUrl });
+      
+      setHistory(prev => {
+          const filtered = prev.filter(item => item.url !== targetUrl);
+          return [{ title: displayTitle, url: targetUrl }, ...filtered].slice(0, 100);
+      });
     } catch (err) { 
       showInvalidLinkError(); 
     }
