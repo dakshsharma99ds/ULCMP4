@@ -22,7 +22,13 @@ app.post('/api/info', async (req, res) => {
   if (!url) return res.status(400).json({ error: "No URL provided" });
   try {
     const info = await youtubedl(url, { dumpSingleJson: true, ...COMMON_FLAGS });
-    res.json({ title: info.title || "Video", thumbnail: info.thumbnail || "" });
+    // Updated to return description and uploader for better title accuracy
+    res.json({ 
+      title: info.title || "Video", 
+      description: info.description || "", 
+      uploader: info.uploader || info.uploader_id || "",
+      thumbnail: info.thumbnail || "" 
+    });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch media info." });
   }
@@ -65,15 +71,12 @@ app.get('/api/download', async (req, res) => {
       console.error("yt-dlp Execution Error:", err.message);
       if (!res.headersSent) res.status(500).end();
     });
-
     ytProcess.stderr.on('data', (data) => {
       console.log(`yt-dlp Log: ${data.toString()}`);
     });
-
     res.on('close', () => {
       if (ytProcess.kill) ytProcess.kill();
     });
-
   } catch (error) {
     console.error("Critical Error:", error.message);
     if (!res.headersSent) res.status(500).send("Server error.");
