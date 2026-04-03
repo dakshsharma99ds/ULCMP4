@@ -464,7 +464,8 @@ function App() {
         </AnimatePresence>
       </div>
       
-      <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
+      {/* FIXED: Removed justify-center on mobile to prevent layout thrashing */}
+      <div className={`flex-1 flex flex-col items-center justify-start md:justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-y-auto custom-scrollbar pt-24 md:pt-6 ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
         
         {dlProcessing && (
           <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center select-none">
@@ -484,15 +485,14 @@ function App() {
           {currentPage === 'home' && (
             <motion.div 
               key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
-              className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
+              className="w-full flex flex-col items-center justify-start md:justify-center md:max-h-none overflow-visible"
             >
               <div className="w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0">
                 
-                {/* HEADER SECTION - FIXED TOP MARGIN TO PREVENT JUMPING */}
+                {/* FIXED: Removed dynamic margins that caused movement */}
                 <div 
                   id="header-section" 
-                  className={`z-10 text-center flex flex-col items-center pt-2 md:pt-0 overflow-visible transition-all duration-500 
-                    ${info ? 'mb-4 md:mb-8 -mt-12 md:mt-0' : 'mb-6 md:mb-8 -mt-12 md:mt-0'}`}
+                  className="z-10 text-center flex flex-col items-center pt-2 md:pt-0 overflow-visible mb-12 md:mb-8"
                 >
                   <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
                     <span className="text-white">ULC</span>
