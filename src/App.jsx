@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion'; 
+import { motion, AnimatePresence } from 'framer-motion'; // Fixed: changed back from self-framer-motion
 import { Toaster, toast } from 'sonner';
 import About from './About';
 import Contact from './Contact';
@@ -486,12 +486,7 @@ function App() {
               key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
-              {/* CHANGE APPLIED BELOW: 
-                  Wrapped the inner content with a dynamic padding to create the gap instantly without transitions.
-                  The gap is static once info exists, preventing the 'swipe' or 'slide' glitch.
-              */}
-              <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${info ? 'pt-6 md:pt-0' : ''}`}>
-                
+              <div className="w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0">
                 <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
                   <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
                     <span className="text-white">ULC</span>
