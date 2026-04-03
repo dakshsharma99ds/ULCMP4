@@ -187,26 +187,23 @@ function App() {
         return;
       }
 
-      /* --- CHANGE AREA START: Cleaning Instagram titles while keeping UI/Logic intact --- */
-      let cleanTitle = data.title || "Untitled Media";
+      /* --- START CHANGE AREA: Improved Title Logic for Instagram --- */
+      // If title is generic (starts with Video by or Post by), try to use the description or a cleaned-up version
+      let displayTitle = data.title;
       if (targetUrl.includes('instagram.com')) {
-        // Check if title is generic "Video by..." or "Post by..."
-        const isGeneric = /^video by|^post by/i.test(cleanTitle);
-        if (isGeneric && data.description) {
-            // If it's generic but we have a description, use the description as the title
-            cleanTitle = data.description;
-        } else if (isGeneric) {
-            // Fallback: If still generic, extract the ID and make it look cleaner or use platform name
-            cleanTitle = `INSTAGRAM MEDIA - ${cleanTitle.split(' ').pop()}`;
+        const isGeneric = /^video by|^post by/i.test(data.title);
+        // Prioritize data.description if the title is just a placeholder
+        if (isGeneric && data.description && data.description.trim().length > 0) {
+          displayTitle = data.description;
         }
       }
-      /* --- CHANGE AREA END --- */
+      /* --- END CHANGE AREA --- */
 
-      setInfo({ ...data, title: cleanTitle, fetchedUrl: targetUrl });
-      if (cleanTitle) {
+      setInfo({ ...data, title: displayTitle, fetchedUrl: targetUrl });
+      if (displayTitle) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
-            return [{ title: cleanTitle, url: targetUrl }, ...filtered].slice(0, 100);
+            return [{ title: displayTitle, url: targetUrl }, ...filtered].slice(0, 100);
         });
       }
     } catch (err) { 
