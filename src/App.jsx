@@ -492,7 +492,7 @@ function App() {
                 */}
                 <div 
                   id="header-section" 
-                  className={`z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible transition-all duration-500 ${info ? 'mt-12 md:mt-0' : ''}`}
+                  className={`z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible transition-all duration-500 ${info ? 'mt-5 md:mt-0' : ''}`}
                 >
                 {/* CHANGE END */}
                   <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
