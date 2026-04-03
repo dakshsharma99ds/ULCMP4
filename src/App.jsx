@@ -187,11 +187,26 @@ function App() {
         return;
       }
 
-      setInfo({ ...data, fetchedUrl: targetUrl });
-      if (data.title) {
+      /* --- CHANGE AREA START: Cleaning Instagram titles while keeping UI/Logic intact --- */
+      let cleanTitle = data.title || "Untitled Media";
+      if (targetUrl.includes('instagram.com')) {
+        // Check if title is generic "Video by..." or "Post by..."
+        const isGeneric = /^video by|^post by/i.test(cleanTitle);
+        if (isGeneric && data.description) {
+            // If it's generic but we have a description, use the description as the title
+            cleanTitle = data.description;
+        } else if (isGeneric) {
+            // Fallback: If still generic, extract the ID and make it look cleaner or use platform name
+            cleanTitle = `INSTAGRAM MEDIA - ${cleanTitle.split(' ').pop()}`;
+        }
+      }
+      /* --- CHANGE AREA END --- */
+
+      setInfo({ ...data, title: cleanTitle, fetchedUrl: targetUrl });
+      if (cleanTitle) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
-            return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
+            return [{ title: cleanTitle, url: targetUrl }, ...filtered].slice(0, 100);
         });
       }
     } catch (err) { 
@@ -486,7 +501,6 @@ function App() {
               key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
-              {/* CHANGE APPLIED: Increased pt-6 to pt-8 on mobile when info is present */}
               <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${info ? 'pt-8 md:pt-0' : ''}`}>
                 
                 <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
