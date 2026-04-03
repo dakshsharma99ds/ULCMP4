@@ -487,19 +487,19 @@ function App() {
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
               <div className="w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0">
-                <div id="header-section" className={`z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 overflow-visible transition-all duration-500 ${info ? 'mt-2 md:mt-0' : 'mt-0'}`}>
-                  <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
+                <div id="header-section" className={`z-10 text-center mb-4 md:mb-6 flex flex-col items-center pt-0 md:pt-0 overflow-visible transition-all duration-500 mt-0`}>
+                  <h1 className="nico-font text-6xl md:text-8xl mb-0 md:mb-1 pt-4 md:pt-2 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
                     <span className="text-white">ULC</span>
                     <span className="text-emerald-400">MP4</span>
                   </h1>
                   <div className="relative inline-block">
                     <p className="text-emerald-500/80 tracking-[0.65em] md:tracking-[0.95em] text-[8px] md:text-[11px] uppercase font-bold">link to mp4 in seconds</p>
-                    <div className="h-0.5 w-full bg-linear-to-r from-transparent via-emerald-500 to-transparent mt-3 opacity-50"></div>
+                    <div className="h-0.5 w-full bg-linear-to-r from-transparent via-emerald-500 to-transparent mt-2 opacity-50"></div>
                   </div>
                 </div>
 
                 <div className={`z-10 w-full max-w-85 md:max-w-2xl bg-white/2 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-6 md:p-8 shadow-2xl transition-all duration-500`}>
-                  <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${info ? 'mb-6' : 'mb-0'}`}>
+                  <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${info ? 'mb-4 md:mb-6' : 'mb-0'}`}>
                     <input
                       type="text"
                       placeholder="INPUT MEDIA URL"
