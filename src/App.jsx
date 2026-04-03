@@ -464,7 +464,7 @@ function App() {
         </AnimatePresence>
       </div>
       
-      <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
+      <div className={`flex-1 flex flex-col items-center justify-center p-0 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
         
         {dlProcessing && (
           <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center select-none">
@@ -486,9 +486,9 @@ function App() {
               key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
-              <div className="w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0">
-                <div id="header-section" className={`z-10 text-center mb-4 md:mb-6 flex flex-col items-center pt-0 md:pt-0 overflow-visible transition-all duration-500 mt-0`}>
-                  <h1 className="nico-font text-6xl md:text-8xl mb-0 md:mb-1 pt-4 md:pt-2 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
+              <div className="w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-0 md:py-0">
+                <div id="header-section" className="z-10 text-center mb-4 md:mb-6 flex flex-col items-center pt-0 md:pt-0 overflow-visible transition-all duration-500 mt-0">
+                  <h1 className="nico-font text-6xl md:text-8xl mb-0 md:mb-1 pt-2 md:pt-0 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
                     <span className="text-white">ULC</span>
                     <span className="text-emerald-400">MP4</span>
                   </h1>
@@ -498,7 +498,7 @@ function App() {
                   </div>
                 </div>
 
-                <div className={`z-10 w-full max-w-85 md:max-w-2xl bg-white/2 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-6 md:p-8 shadow-2xl transition-all duration-500`}>
+                <div className="z-10 w-full max-w-85 md:max-w-2xl bg-white/2 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-6 md:p-8 shadow-2xl transition-all duration-500">
                   <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${info ? 'mb-4 md:mb-6' : 'mb-0'}`}>
                     <input
                       type="text"
