@@ -375,7 +375,7 @@ function App() {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col px-2 min-h-0 relative overflow-hidden">
+        <div className="flex-1-f-col px-2 min-h-0 relative overflow-hidden">
           <div className="flex flex-col transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) overflow-hidden shrink-0"
             style={{ 
               maxHeight: isSearchMode ? '0px' : '150px',
@@ -487,7 +487,14 @@ function App() {
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
               <div className="w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0">
-                <div id="header-section" className={`z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 overflow-visible transition-all duration-500 ${info ? 'mt-6 md:mt-0' : '-mt-20 md:mt-0'}`}>
+                {/* CHANGE START: Added conditional margin-top only on mobile when 'info' is present.
+                   This creates the requested gap above the logo after processing finishes.
+                */}
+                <div 
+                  id="header-section" 
+                  className={`z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible transition-all duration-500 ${info ? 'mt-12 md:mt-0' : ''}`}
+                >
+                {/* CHANGE END */}
                   <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
                     <span className="text-white">ULC</span>
                     <span className="text-emerald-400">MP4</span>
