@@ -4,17 +4,18 @@ import { Toaster, toast } from 'sonner';
 import About from './About';
 import Contact from './Contact';
 
-/**
- * CUSTOM TOOLTIP COMPONENT
- * Renders platform metadata on mouse hover
- */
+// Custom Tooltip Component
 const CustomTooltip = ({ text, mousePos }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.95 }}
     animate={{ 
       opacity: 1, 
       scale: 1,
-      transition: { delay: 0.4, duration: 0.2, ease: "easeOut" } 
+      transition: { 
+        delay: 0.4, 
+        duration: 0.2,
+        ease: "easeOut"
+      } 
     }}
     exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.1 } }}
     style={{
@@ -33,7 +34,6 @@ const CustomTooltip = ({ text, mousePos }) => (
 );
 
 function App() {
-  // --- STATE ---
   const [url, setUrl] = useState('');
   const [info, setInfo] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -44,129 +44,88 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [scrollbarVisible, setScrollbarVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
+  
   const [hoveredItem, setHoveredItem] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // --- MOUSE TRACKING ---
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
   };
 
-  // --- HELPERS ---
   const getPlatformName = (link) => {
-    const low = link.toLowerCase();
-    if (low.includes('instagram.com')) return 'INSTAGRAM';
-    if (low.includes('linkedin.com')) return 'LINKEDIN';
-    if (low.includes('tumblr.com')) return 'TUMBLR';
-    if (low.includes('pinterest.com') || low.includes('pin.it')) return 'PINTEREST';
-    if (low.includes('youtube.com') || low.includes('youtu.be')) return 'YOUTUBE';
-    if (low.includes('reddit.com')) return 'REDDIT';
-    if (low.includes('x.com') || low.includes('twitter.com')) return 'X / TWITTER';
-    if (low.includes('facebook.com') || low.includes('fb.watch')) return 'FACEBOOK';
+    const lower = link.toLowerCase();
+    if (lower.includes('instagram.com')) return 'INSTAGRAM';
+    if (lower.includes('linkedin.com')) return 'LINKEDIN';
+    if (lower.includes('tumblr.com')) return 'TUMBLR';
+    if (lower.includes('pinterest.com') || lower.includes('pin.it')) return 'PINTEREST';
+    if (lower.includes('youtube.com') || lower.includes('youtu.be')) return 'YOUTUBE';
+    if (lower.includes('reddit.com')) return 'REDDIT';
+    if (lower.includes('x.com') || lower.includes('twitter.com')) return 'X / TWITTER';
+    if (lower.includes('facebook.com') || lower.includes('fb.watch')) return 'FACEBOOK';
+    if (lower.includes('snapchat.com')) return 'SNAPCHAT';
+    if (lower.includes('bilibili.com') || lower.includes('b23.tv')) return 'BILIBILI';
     return 'SOURCE LINK';
   };
 
-  const isYouTube = (link) => /youtube\.com|youtu\.be/i.test(link);
-  const isInstagramStory = (link) => /instagram\.com\/stories\//i.test(link);
-
-  // --- URL SANITIZATION ---
-  const sanitizeUrl = (input) => {
-    let target = input.trim();
-    if (!target) return "";
-    if (!/^https?:\/\//i.test(target)) target = 'https://' + target;
-    
-    try {
-      const urlObj = new URL(target);
-      // Remove Instagram tracking tokens that break extractors
-      if (urlObj.hostname.includes('instagram.com')) {
-        return urlObj.origin + urlObj.pathname;
-      }
-      return target;
-    } catch (e) {
-      return target;
-    }
+  const isYouTube = (link) => {
+    return link.toLowerCase().includes('youtube.com') || link.toLowerCase().includes('youtu.be');
   };
 
-  // --- CORE: FETCH INFO ---
-  const fetchInfo = async (manualUrl = null) => {
-    const targetUrl = sanitizeUrl(manualUrl || url);
-    
-    if (!targetUrl || targetUrl === 'https://') {
-      toast.error("PLEASE ENTER A VALID URL");
-      return;
-    }
-
-    if (isYouTube(targetUrl)) {
-      toast.error("YOUTUBE IS RESTRICTED. USE CNVMP4.COM");
-      return;
-    }
-
-    if (isInstagramStory(targetUrl)) {
-      toast.error("INSTAGRAM STORIES ARE NOT SUPPORTED");
-      return;
-    }
-    
-    setLoading(true);
-    setInfo(null);
-
-    try {
-      const res = await fetch('/api/info', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: targetUrl })
-      });
-      
-      const data = await res.json();
-      
-      // If server error or empty data
-      if (!res.ok || data.error) {
-        toast.error("UNABLE TO PROCESS LINK. IT MAY BE PRIVATE.");
-        setLoading(false);
-        return;
-      }
-
-      // FALLBACK LOGIC: Ensure we always have a title and a display
-      const finalTitle = data.title && data.title !== "Video" 
-        ? data.title 
-        : `Instagram_Media_${new Date().getTime().toString().slice(-6)}`;
-
-      const finalThumbnail = data.thumbnail || "";
-
-      setInfo({ ...data, title: finalTitle, thumbnail: finalThumbnail, fetchedUrl: targetUrl });
-
-      setHistory(prev => {
-          const filtered = prev.filter(item => item.url !== targetUrl);
-          return [{ title: finalTitle, url: targetUrl }, ...filtered].slice(0, 100);
-      });
-      
-    } catch (err) { 
-      toast.error("SERVER CONNECTION FAILED");
-    } finally {
-      setLoading(false);
-    }
+  const isInstagramStory = (link) => {
+    return link.toLowerCase().includes('instagram.com/stories/');
   };
 
-  // --- CORE: DOWNLOAD ---
-  const startDownload = (type) => {
-    if (!info) return;
-    setDlProcessing(true);
-    
-    const downloadUrl = `/api/download?url=${encodeURIComponent(info.fetchedUrl)}&type=${type}&title=${encodeURIComponent(info.title)}`; 
-    
-    // Create hidden trigger
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.setAttribute('download', '');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-   
-    // Auto-clear overlay after timeout
-    setTimeout(() => setDlProcessing(false), 12000); 
+  const showInvalidLinkError = () => {
+    toast.error(
+      <div className="font-mono text-[10px] leading-relaxed tracking-wider text-left w-full select-none">
+        <span className="text-emerald-400 font-bold block text-[13px]">VALIDATION ERROR:</span>
+        <div className="h-px w-full bg-emerald-500/30 my-2"></div>
+        <span className="text-white/90 block">THE PROVIDED MEDIA LINK IS INVALID. PLEASE VERIFY THE URL TO PROCEED.</span>
+      </div>,
+      { duration: 6000, icon: null }
+    );
   };
 
-  // --- INTERFACE ---
-  const handleKeyDown = (e) => e.key === 'Enter' && fetchInfo();
+  const showYoutubeError = () => {
+    toast.error(
+      <div className="font-mono text-[10px] leading-relaxed tracking-wider text-left w-full select-none">
+        <span className="text-emerald-400 font-bold block text-[13px]">SERVER ERROR:</span>
+        <div className="h-px w-full bg-emerald-500/30 my-2"></div>
+        <span className="text-white/90 block">
+          UNFORTUNATELY YOUTUBE IS RESTRICTED DUE TO PROVIDER LIMITS. ALL OTHER PLATFORMS ARE FULLY SUPPORTED! USE{" "}
+          <a href="https://cnvmp4.com" target="_blank" rel="noreferrer" className="text-emerald-400 hover:text-emerald-300 transition-colors duration-300 drop-shadow-[0_0_5px_rgba(52,211,153,0.5)] text-[12px] font-bold" style={{ textDecoration: 'none' }}>CNVMP4</a>{" "}
+          FOR YOUTUBE.
+        </span>
+      </div>,
+      { duration: 8000, icon: null }
+    );
+  };
+
+  const showInstagramStoryError = () => {
+    toast.error(
+      <div className="font-mono text-[10px] leading-relaxed tracking-wider w-full select-none">
+        <span className="text-emerald-400 font-bold block text-[13px]">SERVER ERROR:</span>
+        <div className="h-px w-full bg-emerald-500/30 my-2"></div>
+        <span className="text-white/90 block text-justify">
+          UNFORTUNATELY INSTAGRAM STORIES ARE RESTRICTED DUE TO PROVIDER LIMITS. POSTS & REELS ARE FULLY SUPPORTED! USE{" "}
+          <a href="https://igram.world/story-saver" target="_blank" rel="noreferrer" className="text-emerald-400 hover:text-emerald-300 transition-colors duration-300 drop-shadow-[0_0_5px_rgba(52,211,153,0.5)] text-[11px] font-bold" style={{ textDecoration: 'none' }}>IGRAM</a>{" "}
+          FOR STORIES.
+        </span>
+      </div>,
+      { duration: 8000, icon: null }
+    );
+  };
+
+  const showEmptyUrlError = () => {
+    toast.error(
+      <div className="font-mono text-[10px] leading-relaxed tracking-wider text-left w-full select-none">
+        <span className="text-emerald-400 font-bold block text-[13px]">INPUT ERROR:</span>
+        <div className="h-px w-full bg-emerald-500/30 my-2"></div>
+        <span className="text-white/90 block uppercase">PLEASE PROVIDE A VALID VIDEO URL FROM ANY SUPPORTED PLATFORM TO PROCEED.</span>
+      </div>,
+      { duration: 5000, icon: null }
+    );
+  };
 
   useEffect(() => {
     if (isNavOpen || isSearchMode) {
@@ -176,6 +135,97 @@ function App() {
       setScrollbarVisible(false);
     }
   }, [isNavOpen, isSearchMode]);
+
+  const fetchInfo = async (manualUrl = null) => {
+    let targetUrl = (manualUrl || url).trim();
+    
+    if (!targetUrl) {
+      showEmptyUrlError();
+      return;
+    }
+
+    if (targetUrl && !/^https?:\/\//i.test(targetUrl)) {
+      targetUrl = 'https://' + targetUrl;
+    }
+
+    // FIX: Sanitize Instagram links before validation
+    try {
+      const urlObj = new URL(targetUrl);
+      if (urlObj.hostname.includes('instagram.com')) {
+        targetUrl = urlObj.origin + urlObj.pathname;
+      }
+    } catch (_) {
+      showInvalidLinkError();
+      return;
+    }
+
+    if (isYouTube(targetUrl)) {
+      showYoutubeError();
+      return;
+    }
+
+    if (isInstagramStory(targetUrl)) {
+      showInstagramStoryError();
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const res = await fetch('/api/info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: targetUrl })
+      });
+      
+      const data = await res.json();
+      
+      // Changed logic to be less restrictive with title/thumbnail requirements
+      if (!res.ok || data.error) {
+        showInvalidLinkError();
+        setLoading(false);
+        return;
+      }
+
+      setInfo({ ...data, fetchedUrl: targetUrl });
+
+      setHistory(prev => {
+          const filtered = prev.filter(item => item.url !== targetUrl);
+          return [{ title: data.title || "Media", url: targetUrl }, ...filtered].slice(0, 100);
+      });
+      
+    } catch (err) { 
+      showInvalidLinkError(); 
+    }
+    setLoading(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      fetchInfo();
+    }
+  };
+
+  const handleHistoryClick = (item) => {
+    setCurrentPage('home'); 
+    setUrl(item.url); 
+    fetchInfo(item.url); 
+    setHoveredItem(null); 
+  };
+
+  const startDownload = (type, quality = '1080p') => {
+    setDlProcessing(true);
+    const downloadUrl = `/api/download?url=${encodeURIComponent(info.fetchedUrl)}&type=${type}&quality=${quality}&title=${encodeURIComponent(info.title)}`; 
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.setAttribute('download', '');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+   
+    setTimeout(() => {
+        setDlProcessing(false);
+    }, 12000); 
+  };
 
   const textTransitionStyle = (isVisible) => ({
     clipPath: isVisible ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)',
@@ -188,213 +238,325 @@ function App() {
     item.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getPlatformLogo = (fetchedUrl) => {
-    const iconClasses = "w-12 h-12 text-white/50"; 
-    if (fetchedUrl?.includes('instagram.com')) {
-      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={iconClasses}><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>;
+  const handleHamburgerClick = () => {
+    if (isNavOpen || isSearchMode) {
+      setIsNavOpen(false);
+      setIsSearchMode(false);
+      setSearchTerm('');
+    } else {
+      setIsNavOpen(true);
     }
-    return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={iconClasses}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
+  };
+
+  const closeMobileNav = () => {
+    setIsNavOpen(false);
+    setIsSearchMode(false);
+    setSearchTerm('');
   };
 
   const pageVariants = {
-    initial: { opacity: 0, y: 20 },
+    initial: { opacity: 0, y: 30 },
     animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 },
-    transition: { duration: 0.4 }
+    exit: { opacity: 0, y: 30 },
+    transition: { duration: 0.5, ease: "easeOut" }
+  };
+
+  const getPlatformLogo = (fetchedUrl) => {
+    const lowerUrl = fetchedUrl?.toLowerCase() || "";
+    const iconClasses = "w-12 h-12 text-white/70"; 
+
+    if (lowerUrl.includes('linkedin.com')) {
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className={iconClasses} draggable="true">
+          <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+        </svg>
+      );
+    }
+    if (lowerUrl.includes('instagram.com')) {
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={iconClasses} draggable="true">
+          <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+        </svg>
+      );
+    }
+    if (lowerUrl.includes('tumblr.com')) {
+      return <img src="./tumblr.png" alt="tumblr" className={iconClasses} draggable="true" />; 
+    }
+    return null;
   };
 
   return (
     <div className="h-screen w-screen bg-[#0a0a0a] text-white flex overflow-hidden fixed inset-0" onMouseMove={handleMouseMove}>
       
-      {/* TOOLTIP */}
-      <AnimatePresence>{hoveredItem && <CustomTooltip text={hoveredItem} mousePos={mousePos} />}</AnimatePresence>
+      <AnimatePresence>
+        {hoveredItem && (
+          <CustomTooltip text={hoveredItem} mousePos={mousePos} />
+        )}
+      </AnimatePresence>
 
-      <Toaster theme="dark" position="bottom-right" />
+      <Toaster theme="dark" position="bottom-right" toastOptions={{
+        style: { 
+          background: 'rgba(0,0,0,0.9)', 
+          border: '1px solid rgba(16, 185, 129, 0.4)', 
+          color: '#10b981', 
+          fontFamily: 'monospace',
+          textTransform: 'uppercase',
+          fontSize: '11px',
+          letterSpacing: '0.1em'
+        },
+      }} />
 
-      {/* AMBIENT BACKGROUND */}
-      <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-emerald-500/10 rounded-full blur-[150px] pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-blue-500/10 rounded-full blur-[150px] pointer-events-none"></div>
+      <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[40%] md:top-[-15%] md:left-[-10%] md:w-[60%] md:h-[60%] bg-emerald-500/20 rounded-full blur-[120px] md:blur-[180px] pointer-events-none"></div>
+      <div className="absolute bottom-[-20%] right-[-20%] w-[80%] h-[40%] md:bottom-[-15%] md:right-[-10%] md:w-[60%] md:h-[60%] bg-blue-500/20 rounded-full blur-[120px] md:blur-[180px] pointer-events-none"></div>
       
-      {/* SIDEBAR NAVIGATION */}
-      <nav className={`fixed left-0 top-0 h-full z-50 bg-black/50 backdrop-blur-3xl border-r border-white/5 transition-all duration-500 flex flex-col p-4 pt-8 rounded-tr-[3rem] rounded-br-[3rem] 
+      <div 
+        onClick={closeMobileNav}
+        className={`fixed inset-0 z-40 bg-black/60 transition-opacity duration-500 ease-in-out md:hidden ${
+          isNavOpen || isSearchMode ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      />
+
+      <nav className={`fixed left-0 top-0 h-full z-50 bg-black/40 backdrop-blur-2xl md:backdrop-blur-xl border-r border-white/10 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) flex flex-col p-4 pt-8 rounded-tr-[40px] rounded-br-[40px] 
         ${isNavOpen || isSearchMode ? 'w-72 translate-x-0' : 'w-0 -translate-x-full md:w-20 md:translate-x-0'}`}>
         
-        {/* Toggle & Search UI */}
-        <div className="flex items-center mb-10 px-2 shrink-0 h-10">
-          <button onClick={() => setIsNavOpen(!isNavOpen)} className="shrink-0 text-emerald-400 hover:scale-110 transition-transform">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
-          
-          <div className="flex-1 ml-4 overflow-hidden">
-            <AnimatePresence>
-              {(isNavOpen || isSearchMode) && (
-                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="flex items-center">
+        <div className="flex items-center mb-6 px-2 shrink-0 relative h-10 overflow-hidden">
+          <div className="shrink-0 z-50">
+            <button 
+              onClick={handleHamburgerClick} 
+              className={`hidden md:block cursor-pointer bg-transparent hamburger-hover transition-none ${isNavOpen || isSearchMode ? 'text-emerald-400' : 'opacity-100'}`}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+
+            <div className="md:hidden">
+              <AnimatePresence>
+                {(isNavOpen || isSearchMode) && (
+                  <motion.button 
+                    key="mobile-internal"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.4 }} 
+                    onClick={handleHamburgerClick} 
+                    className="cursor-pointer bg-transparent hamburger-hover text-emerald-400"
+                  >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                  </motion.button>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          <div className="flex-1 ml-4 relative h-full flex items-center overflow-hidden">
+            <div className={`absolute right-0 transition-all duration-400 ease-in-out ${isSearchMode ? 'opacity-100 translate-x-0 w-full' : 'opacity-0 translate-x-10 pointer-events-none w-0'}`}>
+                <div className="relative w-full pr-2">
                   <input 
-                    className="w-full bg-white/5 border border-white/10 rounded-full px-4 py-1 text-[10px] font-mono outline-none focus:border-emerald-500/40" 
-                    placeholder="Search history..." 
+                    type="text" 
+                    autoFocus={isSearchMode}
+                    placeholder="Search..." 
+                    className="w-full bg-white/5 border border-white/20 rounded-full px-4 py-1.5 text-xs font-mono outline-none focus:border-emerald-500/50 transition-all placeholder:select-none"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* Links Area */}
-        <div className="flex-1 flex flex-col px-2 min-h-0">
-          <div className={`space-y-8 mb-12 transition-opacity ${isSearchMode ? 'opacity-20' : 'opacity-100'}`}>
-            <div onClick={() => {setCurrentPage('home'); setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group">
-              <div className={`w-5 h-5 rounded-full border-2 transition-all ${currentPage === 'home' ? 'border-emerald-400 bg-emerald-400' : 'border-white/20'}`} />
-              <span className="nico-font text-xs tracking-[0.2em] uppercase" style={textTransitionStyle(isNavOpen)}>HOME</span>
-            </div>
-            <div onClick={() => {setCurrentPage('about'); setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group">
-              <div className={`w-5 h-5 rounded-full border-2 transition-all ${currentPage === 'about' ? 'border-emerald-400 bg-emerald-400' : 'border-white/20'}`} />
-              <span className="nico-font text-xs tracking-[0.2em] uppercase" style={textTransitionStyle(isNavOpen)}>ABOUT</span>
-            </div>
-          </div>
-
-          {/* Dynamic History */}
-          <div className="flex-1 flex flex-col min-h-0">
-            <p className="text-[9px] text-white/20 font-mono mb-4 tracking-[0.3em] uppercase" style={textTransitionStyle(isNavOpen || isSearchMode)}>History</p>
-            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-4">
-              {filteredHistory.map((item, i) => (
-                <div 
-                  key={i} 
-                  onClick={() => {setUrl(item.url); fetchInfo(item.url); setIsNavOpen(false);}}
-                  onMouseEnter={() => setHoveredItem(getPlatformName(item.url))}
-                  onMouseLeave={() => setHoveredItem(null)}
-                  className="text-[11px] font-mono text-white/30 hover:text-emerald-400 cursor-pointer truncate border-l border-white/5 pl-4 py-1 hover:border-emerald-400 transition-all"
-                >
-                  {item.title}
                 </div>
-              ))}
+            </div>
+            <button 
+              onClick={() => setIsSearchMode(true)} 
+              className="ml-auto block cursor-pointer group transition-all duration-300"
+              style={{ 
+                opacity: (isNavOpen && !isSearchMode) ? 1 : 0, 
+                pointerEvents: (isNavOpen && !isSearchMode) ? 'auto' : 'none',
+                transform: (isNavOpen && !isSearchMode) ? 'scale(1)' : 'scale(0.8)'
+              }}
+            >
+              <img src="/search.png" alt="search" draggable="false" className="w-5 h-5 icon-hover-trigger" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 flex flex-col px-2 min-h-0 relative overflow-hidden">
+          <div className="flex flex-col transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) overflow-hidden shrink-0"
+            style={{ 
+              maxHeight: isSearchMode ? '0px' : '150px',
+              opacity: isSearchMode ? 0 : 1,
+              marginBottom: isSearchMode ? '0px' : '32px',
+              transform: isSearchMode ? 'translateY(-20px)' : 'translateY(0px)',
+              pointerEvents: isSearchMode ? 'none' : 'auto'
+            }}
+          >
+            <div onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8">
+              <img src="/home.png" alt="home" draggable="false" className={`w-6 h-6 shrink-0 ${currentPage === 'home' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} />
+              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen)}>HOME</span>
+            </div>
+            <div onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group">
+              <img src="/about.png" alt="about" draggable="false" className={`w-6 h-6 shrink-0 ${currentPage === 'about' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} />
+              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen)}>ABOUT</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div onClick={() => { if(!isSearchMode) { setIsSearchMode(true); setIsNavOpen(true); } }}
+              className={`shrink-0 flex items-center gap-6 cursor-pointer mb-4 group`}
+            >
+              <img src="/recent.png" alt="history" draggable="false" className={`w-6 h-6 shrink-0 ${isSearchMode ? 'icon-emerald-active' : 'icon-hover-trigger'}`} />
+              <span className={`nico-font text-sm tracking-[0.2em] whitespace-nowrap transition-colors duration-300 ${isSearchMode ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen || isSearchMode)}>RECENT</span>
+            </div>
+            <div className="ml-3 flex flex-col flex-1 min-h-0 transition-all duration-300"
+              style={{ opacity: (isNavOpen || isSearchMode) ? 1 : 0, visibility: (isNavOpen || isSearchMode) ? 'visible' : 'hidden', overflow: 'hidden' }}
+            >
+              <div className={`pr-4 flex flex-col h-full pb-4 custom-scrollbar overflow-y-auto ${scrollbarVisible ? 'scrollbar-visible' : ''}`}>
+                {filteredHistory.length > 0 ? (
+                  filteredHistory.map((item, i) => (
+                    <div key={i} className="flex items-stretch group">
+                      <div className="flex flex-col items-center mr-4"><div className="w-px bg-white/10 flex-1"></div></div>
+                      <div 
+                        onMouseEnter={() => setHoveredItem(getPlatformName(item.url))}
+                        onMouseLeave={() => setHoveredItem(null)}
+                        onClick={() => handleHistoryClick(item)} 
+                        className="text-[14px] py-1 text-gray-500 font-mono truncate cursor-pointer shrink-0 flex-1 recent-link-hover"
+                      >
+                        {item.title}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-stretch select-none">
+                    <div className="flex flex-col items-center mr-4"><div className="w-px bg-white/10 flex-1"></div></div>
+                    <div className="text-[15px] text-gray-700 font-mono italic shrink-0 mt-2 whitespace-nowrap">{(isSearchMode && searchTerm) ? "No results" : "Empty"}</div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Footer Link */}
-        <div className="mt-auto px-2 pb-8">
-           <div onClick={() => {setCurrentPage('contact'); setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group opacity-40 hover:opacity-100 transition-opacity">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-              <span className="nico-font text-xs tracking-[0.2em]" style={textTransitionStyle(isNavOpen)}>CONTACT</span>
-           </div>
+        <div className="mt-auto px-2 pt-4 pb-6 shrink-0 overflow-hidden">
+          {isSearchMode ? (
+            <div onClick={() => { setIsSearchMode(false); setSearchTerm(''); }} className="flex items-center gap-6 cursor-pointer group">
+              <img src="/back.png" alt="back" draggable="false" className="w-6 h-6 shrink-0 icon-hover-trigger" />
+              <span className="nico-font text-sm tracking-widest transition-colors duration-300 group-hover:text-gray-500" style={textTransitionStyle(isNavOpen || isSearchMode)}>BACK</span>
+            </div>
+          ) : (
+            <div onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group">
+              <img src="/contact.png" alt="contact" draggable="false" className={`w-6 h-6 shrink-0 ${currentPage === 'contact' ? 'icon-emerald-active' : 'icon-hover-trigger'}`} />
+              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen)}>CONTACT</span>
+            </div>
+          )}
         </div>
       </nav>
 
-      {/* MOBILE TRIGGER */}
-      {!isNavOpen && !isSearchMode && (
-        <button onClick={() => setIsNavOpen(true)} className="fixed top-8 left-6 z-40 md:hidden text-white/80">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-        </button>
-      )}
-
-      {/* MAIN VIEWPORT */}
-      <main className={`flex-1 flex flex-col items-center justify-center p-6 transition-all duration-500 ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
-        
-        {/* DOWNLOAD LOADER */}
+      <div className="md:hidden">
         <AnimatePresence>
-          {dlProcessing && (
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex flex-col items-center justify-center"
+          {(!isNavOpen && !isSearchMode) && (
+            <motion.button 
+              key="mobile-external"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              onClick={() => setIsNavOpen(true)} 
+              className="fixed top-8 left-6 z-30 text-white transition-none hamburger-hover pointer-events-auto"
             >
-              <div className="w-16 h-16 border-4 border-emerald-400/20 border-t-emerald-400 rounded-full animate-spin mb-8"></div>
-              <h2 className="nico-font text-2xl text-emerald-400 tracking-[0.4em] animate-pulse">GENERATING_DOWNLOAD</h2>
-              <p className="text-white/30 font-mono text-[9px] mt-4 tracking-widest">PLEASE DO NOT REFRESH THE PAGE</p>
-            </motion.div>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </motion.button>
           )}
         </AnimatePresence>
+      </div>
+      
+      <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
+        
+        {dlProcessing && (
+          <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center select-none">
+            <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-10"></div>
+            <div className="flex flex-col w-fit items-stretch px-4">
+               <h2 className="nico-font text-2xl md:text-5xl text-emerald-400 tracking-widest text-center whitespace-nowrap">DOWNLOADING</h2>
+               <div className="flex justify-between w-full mt-2 md:mt-6 text-gray-500 text-[10px] md:text-xs font-mono uppercase tracking-widest">
+                 {"PLEASE WAIT UNTIL THE FILE IS READY".split("").map((char, i) => (
+                   <span key={i} className={char === " " ? "w-1" : ""}>{char}</span>
+                 ))}
+               </div>
+            </div>
+          </div>
+        )}
 
         <AnimatePresence mode="wait">
           {currentPage === 'home' && (
-            <motion.div key="home" {...pageVariants} className="w-full max-w-4xl flex flex-col items-center">
-              
-              {/* Header */}
-              <div className="text-center mb-16">
-                <h1 className="nico-font text-7xl md:text-[9rem] leading-none mb-4 drop-shadow-[0_0_40px_rgba(52,211,153,0.2)]">
-                  ULC<span className="text-emerald-400">MP4</span>
-                </h1>
-                <p className="text-emerald-500/40 tracking-[1em] text-[10px] uppercase font-bold ml-4">Universal Link Converter</p>
-              </div>
-
-              {/* Interaction Box */}
-              <div className="w-full bg-white/[0.02] border border-white/10 backdrop-blur-2xl rounded-[3rem] p-4 md:p-10 shadow-3xl">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <input
-                    type="text"
-                    placeholder="PASTE MEDIA LINK HERE..."
-                    onKeyDown={handleKeyDown}
-                    className="flex-1 bg-black/40 border border-white/5 rounded-2xl px-6 py-5 focus:border-emerald-500/40 transition-all outline-none text-emerald-100 font-mono text-sm"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                  />
-                  <button 
-                    onClick={() => fetchInfo()} 
-                    disabled={loading}
-                    className="bg-white text-black px-12 py-5 rounded-2xl hover:bg-emerald-400 hover:scale-[1.02] active:scale-95 transition-all font-black text-sm disabled:opacity-30"
-                  >
-                    {loading ? "SEARCHING..." : "CONVERT"}
-                  </button>
+            <motion.div 
+              key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
+              className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
+            >
+              <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${info ? 'pt-8 md:pt-0' : ''}`}>
+                
+                <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
+                  <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
+                    <span className="text-white">ULC</span>
+                    <span className="text-emerald-400">MP4</span>
+                  </h1>
+                  <div className="relative inline-block">
+                    <p className="text-emerald-500/80 tracking-[0.65em] md:tracking-[0.95em] text-[8px] md:text-[11px] uppercase font-bold">link to mp4 in seconds</p>
+                    <div className="h-0.5 w-full bg-linear-to-r from-transparent via-emerald-500 to-transparent mt-3 opacity-50"></div>
+                  </div>
                 </div>
 
-                {/* Info Display Card */}
-                <AnimatePresence>
+                <div className={`z-10 w-full max-w-85 md:max-w-2xl bg-white/2 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-6 md:p-8 shadow-2xl transition-all duration-500`}>
+                  <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${info ? 'mb-6' : 'mb-0'}`}>
+                    <input
+                      type="text"
+                      placeholder="INPUT MEDIA URL"
+                      onKeyDown={handleKeyDown}
+                      className="flex-1 bg-black/60 border border-white/5 rounded-2xl px-4 py-4 md:px-8 md:py-5 focus:border-emerald-500/30 transition-all outline-none text-emerald-100 font-mono text-[10px] md:text-sm placeholder:select-none"
+                      value={url}
+                      onChange={(e) => setUrl(e.target.value)}
+                    />
+                    <button onClick={() => fetchInfo()} className="bg-white text-black px-4 md:px-10 py-4 rounded-2xl hover:bg-emerald-400 hover:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center min-w-15 md:min-w-35 select-none">
+                      {loading ? (
+                        <svg className="animate-spin h-5 w-5 md:h-7 md:w-7 text-black" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <svg className="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                      )}
+                    </button>
+                  </div>
+
                   {info && (
-                    <motion.div 
-                      initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-                      className="mt-10 overflow-hidden"
-                    >
-                      <div className="bg-white/[0.03] border border-white/5 rounded-[2rem] p-6 flex flex-col md:flex-row gap-8 items-center">
-                        <div className="w-full md:w-64 aspect-video rounded-2xl overflow-hidden bg-black flex items-center justify-center border border-white/10">
-                           {info.thumbnail ? (
-                             <img 
-                               src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}&w=400&output=webp`} 
-                               className="w-full h-full object-cover" 
-                               alt="Preview" 
-                               onError={(e) => e.target.style.display='none'}
-                             />
-                           ) : getPlatformLogo(info.fetchedUrl)}
+                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
+                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
+                        <div className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto">
+                          <div className="relative z-10 w-full h-full flex items-center justify-center">
+                            {info.thumbnail ? (
+                              <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover shadow-2xl" alt="preview" draggable="true" />
+                            ) : (
+                              <div className="flex items-center justify-center h-full text-white/70">{getPlatformLogo(info.fetchedUrl)}</div>
+                            )}
+                          </div>
                         </div>
-                        
-                        <div className="flex-1 text-center md:text-left">
-                          <h3 className="text-xl font-bold text-white mb-2 line-clamp-2">{info.title}</h3>
-                          <p className="text-emerald-400/50 font-mono text-[9px] tracking-[0.2em] uppercase mb-8">Metadata_Verified</p>
-                          
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <button 
-                              onClick={() => startDownload('mp4')} 
-                              className="py-4 bg-emerald-500 text-black nico-font text-[9px] rounded-xl hover:bg-emerald-400 transition-all font-black active:scale-95"
-                            >
-                              VIDEO (.MP4)
-                            </button>
-                            <button 
-                              onClick={() => startDownload('mp3')} 
-                              className="py-4 bg-white/5 border border-white/10 text-white nico-font text-[9px] rounded-xl hover:bg-white hover:text-black transition-all active:scale-95"
-                            >
-                              AUDIO (.MP3)
-                            </button>
+                        <div className="flex-1 min-w-0 flex flex-col justify-between">
+                          <div className="overflow-hidden">
+                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
+                          </div>
+                          <div className="flex flex-col gap-3 mt-auto select-none">
+                            <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP4 (1080P)</button>
+                            <button onClick={() => startDownload('mp3')} className="w-full py-4 bg-white/10 border border-white/10 text-white font-black rounded-xl hover:bg-white hover:text-black transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP3 (320kb/s)</button>
                           </div>
                         </div>
                       </div>
-                    </motion.div>
+                    </div>
                   )}
-                </AnimatePresence>
+                </div>
               </div>
             </motion.div>
           )}
-
           {currentPage === 'about' && (
-            <motion.div key="about" {...pageVariants} className="w-full max-w-2xl"><About /></motion.div>
+            <motion.div key="about" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition} className="w-full flex justify-center"><About /></motion.div>
           )}
-
           {currentPage === 'contact' && (
-            <motion.div key="contact" {...pageVariants} className="w-full max-w-2xl"><Contact /></motion.div>
+            <motion.div key="contact" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition} className="w-full flex justify-center"><Contact /></motion.div>
           )}
         </AnimatePresence>
-      </main>
+      </div>
 
-      {/* STYLES */}
       <style dangerouslySetInnerHTML={{ __html: `
         .custom-scrollbar::-webkit-scrollbar { width: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.2); border-radius: 10px; }
