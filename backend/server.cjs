@@ -11,43 +11,27 @@ const COMMON_FLAGS = {
   noCheckCertificates: true,
   noWarnings: true,
   noPlaylist: true,
+  // ADD THE REFERER AND A SPECIFIC USER AGENT
   addHeader: [
-    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
     'Accept-Language: en-US,en;q=0.9',
     'Referer: https://www.instagram.com/'
   ]
 };
 
-// CRITICAL: This strips the tracking junk that breaks the conversion
-const sanitizeUrl = (url) => {
-  try {
-    const u = new URL(url);
-    if (u.hostname.includes('instagram.com')) {
-      return `${u.origin}${u.pathname}`; // Keeps only the /reel/ID/ part
-    }
-    return url;
-  } catch (e) {
-    return url;
-  }
-};
-
 app.post('/api/info', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: "No URL provided" });
-  
-  const cleanUrl = sanitizeUrl(url);
-  console.log(`Processing Info for: ${cleanUrl}`);
-
   try {
-    const info = await youtubedl(cleanUrl, { dumpSingleJson: true, ...COMMON_FLAGS });
+    const info = await youtubedl(url, { dumpSingleJson: true, ...COMMON_FLAGS });
     res.json({ 
-      title: info.title || info.description?.slice(0, 50) || "Instagram Media", 
+      title: info.title || "Instagram Video", 
       thumbnail: info.thumbnail || "",
-      uploader: info.uploader || ""
+      duration: info.duration || 0 
     });
   } catch (error) {
     console.error("Scraper Error:", error.message);
-    res.status(500).json({ error: "Failed to extract media info." });
+    res.status(500).json({ error: "Failed to fetch media info." });
   }
 });
 
@@ -55,7 +39,6 @@ app.get('/api/download', async (req, res) => {
   const { url, type, title } = req.query;
   if (!url) return res.status(400).send("No URL provided");
 
-  const cleanUrl = sanitizeUrl(url);
   const isMp3 = type === 'mp3';
   const fileName = `${encodeURIComponent(title || 'download')}.${isMp3 ? 'mp3' : 'mp4'}`;
 
@@ -63,9 +46,9 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
 
   try {
-    const ytProcess = youtubedl.exec(cleanUrl, {
+    const ytProcess = youtubedl.exec(url, {
       output: '-',
-      format: isMp3 ? 'bestaudio' : 'best[ext=mp4]/best',
+      format: isMp3 ? 'bestaudio/best' : 'best[ext=mp4]/b/best',
       ...COMMON_FLAGS,
       noPart: true,
       noMtime: true
@@ -79,6 +62,7 @@ app.get('/api/download', async (req, res) => {
   }
 });
 
+// Serve Frontend
 const distPath = path.resolve(process.cwd(), 'dist');
 app.use(express.static(distPath));
 app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
