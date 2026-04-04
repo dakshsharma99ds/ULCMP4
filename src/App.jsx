@@ -148,7 +148,7 @@ function App() {
       targetUrl = 'https://' + targetUrl;
     }
 
-    // FIX: Sanitize Instagram links before validation
+    // Surgical Fix: Sanitize Instagram URL to strip tracking junk
     try {
       const urlObj = new URL(targetUrl);
       if (urlObj.hostname.includes('instagram.com')) {
@@ -179,7 +179,6 @@ function App() {
       
       const data = await res.json();
       
-      // Changed logic to be less restrictive with title/thumbnail requirements
       if (!res.ok || data.error) {
         showInvalidLinkError();
         setLoading(false);
@@ -187,7 +186,7 @@ function App() {
       }
 
       setInfo({ ...data, fetchedUrl: targetUrl });
-
+      
       setHistory(prev => {
           const filtered = prev.filter(item => item.url !== targetUrl);
           return [{ title: data.title || "Media", url: targetUrl }, ...filtered].slice(0, 100);
@@ -561,7 +560,6 @@ function App() {
         .custom-scrollbar::-webkit-scrollbar { width: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.2); border-radius: 10px; }
         .nico-font { font-family: 'Nico Moji', sans-serif; letter-spacing: 0.15em; }
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       `}} />
     </div>
   );
