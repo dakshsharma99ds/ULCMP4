@@ -148,13 +148,15 @@ function App() {
       targetUrl = 'https://' + targetUrl;
     }
 
-    // Surgical Fix: Sanitize Instagram URL to strip tracking junk
+    let isValid = false;
     try {
-      const urlObj = new URL(targetUrl);
-      if (urlObj.hostname.includes('instagram.com')) {
-        targetUrl = urlObj.origin + urlObj.pathname;
-      }
+      const parsed = new URL(targetUrl);
+      isValid = parsed.hostname.includes('.') && parsed.hostname.length > 3;
     } catch (_) {
+      isValid = false;
+    }
+
+    if (!isValid) {
       showInvalidLinkError();
       return;
     }
@@ -179,19 +181,19 @@ function App() {
       
       const data = await res.json();
       
-      if (!res.ok || data.error) {
+      if (!res.ok || data.error || (!data.title && !data.thumbnail)) {
         showInvalidLinkError();
         setLoading(false);
         return;
       }
 
       setInfo({ ...data, fetchedUrl: targetUrl });
-      
-      setHistory(prev => {
-          const filtered = prev.filter(item => item.url !== targetUrl);
-          return [{ title: data.title || "Media", url: targetUrl }, ...filtered].slice(0, 100);
-      });
-      
+      if (data.title) {
+        setHistory(prev => {
+            const filtered = prev.filter(item => item.url !== targetUrl);
+            return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
+        });
+      }
     } catch (err) { 
       showInvalidLinkError(); 
     }
@@ -213,7 +215,7 @@ function App() {
 
   const startDownload = (type, quality = '1080p') => {
     setDlProcessing(true);
-    const downloadUrl = `/api/download?url=${encodeURIComponent(info.fetchedUrl)}&type=${type}&quality=${quality}&title=${encodeURIComponent(info.title)}`; 
+    const downloadUrl = `/api/download?url=${encodeURIComponent(url)}&type=${type}&quality=${quality}&title=${encodeURIComponent(info.title)}`; 
     const link = document.createElement('a');
     link.href = downloadUrl;
     link.setAttribute('download', '');
@@ -484,6 +486,7 @@ function App() {
               key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
+              {/* CHANGE APPLIED: Increased pt-6 to pt-8 on mobile when info is present */}
               <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${info ? 'pt-8 md:pt-0' : ''}`}>
                 
                 <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
@@ -555,12 +558,6 @@ function App() {
           )}
         </AnimatePresence>
       </div>
-
-      <style dangerouslySetInnerHTML={{ __html: `
-        .custom-scrollbar::-webkit-scrollbar { width: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.2); border-radius: 10px; }
-        .nico-font { font-family: 'Nico Moji', sans-serif; letter-spacing: 0.15em; }
-      `}} />
     </div>
   );
 }
