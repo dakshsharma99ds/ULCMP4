@@ -5,20 +5,19 @@ import About from './About';
 import Contact from './Contact';
 
 // Custom Tooltip Component
-// CHANGE: Added isThumbnail param to toggle background style
-const CustomTooltip = ({ text, mousePos, isThumbnail }) => (
+const CustomTooltip = ({ text, mousePos }) => (
   <motion.div
-    initial={{ opacity: 0, scale: 0.98 }}
+    initial={{ opacity: 0, scale: 0.95 }}
     animate={{ 
       opacity: 1, 
       scale: 1,
       transition: { 
-        delay: 0, // CHANGE: Removed delay for instant feedback
-        duration: 0.1,
+        delay: 0.4, 
+        duration: 0.2,
         ease: "easeOut"
       } 
     }}
-    exit={{ opacity: 0, transition: { duration: 0.1 } }}
+    exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.1 } }}
     style={{
       position: 'fixed',
       left: mousePos.x + 15,
@@ -26,8 +25,7 @@ const CustomTooltip = ({ text, mousePos, isThumbnail }) => (
       pointerEvents: 'none',
       zIndex: 9999,
     }}
-    // CHANGE: Conditional background class for thumbnail area
-    className={`${isThumbnail ? 'bg-gray-900/60' : 'bg-white/10'} border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl`}
+    className="bg-white/10 border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl"
   >
     <p className="text-emerald-400 font-mono text-[10px] leading-tight tracking-[0.2em] uppercase font-bold">
       {text}
@@ -49,8 +47,6 @@ function App() {
   
   const [hoveredItem, setHoveredItem] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
@@ -232,15 +228,6 @@ function App() {
     }, 12000); 
   };
 
-  const downloadThumbnail = (imageUrl) => {
-    const link = document.createElement('a');
-    link.href = `https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}&output=jpg`;
-    link.setAttribute('download', 'thumbnail.jpg');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const textTransitionStyle = (isVisible) => ({
     clipPath: isVisible ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)',
     opacity: isVisible ? 1 : 0,
@@ -304,12 +291,7 @@ function App() {
       
       <AnimatePresence>
         {hoveredItem && (
-          <CustomTooltip 
-            text={hoveredItem} 
-            mousePos={mousePos} 
-            // CHANGE: Pass true if the hovered item is related to the thumbnail area
-            isThumbnail={['VIEW THUMBNAIL', 'DOWNLOAD THUMBNAIL', 'CLOSE WINDOW'].includes(hoveredItem)}
-          />
+          <CustomTooltip text={hoveredItem} mousePos={mousePos} />
         )}
       </AnimatePresence>
 
@@ -388,6 +370,7 @@ function App() {
                 transform: (isNavOpen && !isSearchMode) ? 'scale(1)' : 'scale(0.8)'
               }}
             >
+              {/* CHANGE: Replaced search.png with SVG code icon */}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 icon-hover-trigger">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -407,6 +390,7 @@ function App() {
             }}
           >
             <div onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8">
+              {/* CHANGE: Replaced home.png with SVG code icon */}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-6 h-6 shrink-0 ${currentPage === 'home' ? 'icon-emerald-active' : 'icon-hover-trigger'}`}>
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -414,6 +398,7 @@ function App() {
               <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen)}>HOME</span>
             </div>
             <div onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group">
+              {/* CHANGE: Replaced about.png with SVG code icon */}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className={`w-7 h-7 shrink-0 ml-[-2px] ${currentPage === 'about' ? 'icon-emerald-active' : 'icon-hover-trigger'}`}>
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
@@ -426,6 +411,7 @@ function App() {
             <div onClick={() => { if(!isSearchMode) { setIsSearchMode(true); setIsNavOpen(true); } }}
               className={`shrink-0 flex items-center gap-6 cursor-pointer mb-4 group`}
             >
+              {/* CHANGE: Replaced recent.png with SVG code icon */}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-6 h-6 shrink-0 ${isSearchMode ? 'icon-emerald-active' : 'icon-hover-trigger'}`}>
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
@@ -464,6 +450,7 @@ function App() {
         <div className="mt-auto px-2 pt-4 pb-6 shrink-0 overflow-hidden">
           {isSearchMode ? (
             <div onClick={() => { setIsSearchMode(false); setSearchTerm(''); }} className="flex items-center gap-6 cursor-pointer group">
+              {/* CHANGE: Replaced back.png with SVG code icon */}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 shrink-0 icon-hover-trigger">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
@@ -472,6 +459,7 @@ function App() {
             </div>
           ) : (
             <div onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group">
+              {/* CHANGE: Replaced contact.png with SVG code icon */}
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-6 h-6 shrink-0 ${currentPage === 'contact' ? 'icon-emerald-active' : 'icon-hover-trigger'}`}>
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
               </svg>
@@ -514,47 +502,6 @@ function App() {
             </div>
           </div>
         )}
-
-        <AnimatePresence>
-          {isModalOpen && info?.thumbnail && (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 bg-black/90 backdrop-blur-xl"
-              onClick={() => setIsModalOpen(false)}
-            >
-              <div className="relative max-w-5xl w-full h-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
-                <div className="absolute top-4 right-4 flex gap-4 z-[110]">
-                  <button 
-                    onMouseEnter={() => setHoveredItem('DOWNLOAD THUMBNAIL')}
-                    onMouseLeave={() => setHoveredItem(null)}
-                    onClick={() => downloadThumbnail(info.thumbnail)}
-                    className="p-3 bg-white/10 hover:bg-emerald-500/20 border border-white/20 rounded-full text-emerald-400 transition-all active:scale-90"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  </button>
-                  <button 
-                    onMouseEnter={() => setHoveredItem('CLOSE WINDOW')}
-                    onMouseLeave={() => setHoveredItem(null)}
-                    onClick={() => setIsModalOpen(false)}
-                    className="p-3 bg-white/10 hover:bg-red-500/20 border border-white/20 rounded-full text-white transition-all active:scale-90"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                  </button>
-                </div>
-                <motion.img 
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.9, opacity: 0 }}
-                  src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
-                  className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl border border-white/10"
-                  alt="Full view"
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         <AnimatePresence mode="wait">
           {currentPage === 'home' && (
@@ -600,13 +547,7 @@ function App() {
                   {info && (
                     <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
-                        <div 
-                          // CHANGE: Updated hovered text to trigger the gray tooltip background
-                          onClick={() => info.thumbnail && setIsModalOpen(true)}
-                          onMouseEnter={() => info.thumbnail && setHoveredItem('VIEW THUMBNAIL')}
-                          onMouseLeave={() => setHoveredItem(null)}
-                          className={`relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto ${info.thumbnail ? 'cursor-pointer hover:border-emerald-500/50 transition-colors' : ''}`}
-                        >
+                        <div className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto">
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
                               <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover shadow-2xl" alt="preview" draggable="true" />
