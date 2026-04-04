@@ -5,19 +5,20 @@ import About from './About';
 import Contact from './Contact';
 
 // Custom Tooltip Component
-const CustomTooltip = ({ text, mousePos }) => (
+// CHANGE: Added isThumbnail param to toggle background style
+const CustomTooltip = ({ text, mousePos, isThumbnail }) => (
   <motion.div
-    initial={{ opacity: 0, scale: 0.95 }}
+    initial={{ opacity: 0, scale: 0.98 }}
     animate={{ 
       opacity: 1, 
       scale: 1,
       transition: { 
-        delay: 0.4, 
-        duration: 0.2,
+        delay: 0, // CHANGE: Removed delay for instant feedback
+        duration: 0.1,
         ease: "easeOut"
       } 
     }}
-    exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.1 } }}
+    exit={{ opacity: 0, transition: { duration: 0.1 } }}
     style={{
       position: 'fixed',
       left: mousePos.x + 15,
@@ -25,7 +26,8 @@ const CustomTooltip = ({ text, mousePos }) => (
       pointerEvents: 'none',
       zIndex: 9999,
     }}
-    className="bg-white/10 border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl"
+    // CHANGE: Conditional background class for thumbnail area
+    className={`${isThumbnail ? 'bg-gray-900/60' : 'bg-white/10'} border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl`}
   >
     <p className="text-emerald-400 font-mono text-[10px] leading-tight tracking-[0.2em] uppercase font-bold">
       {text}
@@ -48,9 +50,7 @@ function App() {
   const [hoveredItem, setHoveredItem] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // --- NEW CHANGE: MODAL STATE ---
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // -------------------------------
 
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
@@ -232,7 +232,6 @@ function App() {
     }, 12000); 
   };
 
-  // --- NEW CHANGE: DOWNLOAD THUMBNAIL LOGIC ---
   const downloadThumbnail = (imageUrl) => {
     const link = document.createElement('a');
     link.href = `https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}&output=jpg`;
@@ -241,7 +240,6 @@ function App() {
     link.click();
     document.body.removeChild(link);
   };
-  // --------------------------------------------
 
   const textTransitionStyle = (isVisible) => ({
     clipPath: isVisible ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)',
@@ -306,7 +304,12 @@ function App() {
       
       <AnimatePresence>
         {hoveredItem && (
-          <CustomTooltip text={hoveredItem} mousePos={mousePos} />
+          <CustomTooltip 
+            text={hoveredItem} 
+            mousePos={mousePos} 
+            // CHANGE: Pass true if the hovered item is related to the thumbnail area
+            isThumbnail={['VIEW THUMBNAIL', 'DOWNLOAD THUMBNAIL', 'CLOSE WINDOW'].includes(hoveredItem)}
+          />
         )}
       </AnimatePresence>
 
@@ -512,7 +515,6 @@ function App() {
           </div>
         )}
 
-        {/* --- NEW CHANGE: THUMBNAIL POPUP MODAL --- */}
         <AnimatePresence>
           {isModalOpen && info?.thumbnail && (
             <motion.div 
@@ -553,7 +555,6 @@ function App() {
             </motion.div>
           )}
         </AnimatePresence>
-        {/* --------------------------------------- */}
 
         <AnimatePresence mode="wait">
           {currentPage === 'home' && (
@@ -599,8 +600,8 @@ function App() {
                   {info && (
                     <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
-                        {/* --- NEW CHANGE: THUMBNAIL WRAPPER CLICKABLE --- */}
                         <div 
+                          // CHANGE: Updated hovered text to trigger the gray tooltip background
                           onClick={() => info.thumbnail && setIsModalOpen(true)}
                           onMouseEnter={() => info.thumbnail && setHoveredItem('VIEW THUMBNAIL')}
                           onMouseLeave={() => setHoveredItem(null)}
@@ -614,7 +615,6 @@ function App() {
                             )}
                           </div>
                         </div>
-                        {/* --------------------------------------------- */}
                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                           <div className="overflow-hidden">
                             <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
