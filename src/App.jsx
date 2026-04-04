@@ -148,15 +148,11 @@ function App() {
       targetUrl = 'https://' + targetUrl;
     }
 
-    let isValid = false;
     try {
       const parsed = new URL(targetUrl);
-      isValid = parsed.hostname.includes('.') && parsed.hostname.length > 3;
+      const isValid = parsed.hostname.includes('.') && parsed.hostname.length > 3;
+      if (!isValid) throw new Error("Invalid hostname");
     } catch (_) {
-      isValid = false;
-    }
-
-    if (!isValid) {
       showInvalidLinkError();
       return;
     }
@@ -181,19 +177,21 @@ function App() {
       
       const data = await res.json();
       
-      if (!res.ok || data.error || (!data.title && !data.thumbnail)) {
+      // Removed strict requirement for data.title and data.thumbnail to handle edge cases
+      if (!res.ok || data.error) {
         showInvalidLinkError();
         setLoading(false);
         return;
       }
 
-      setInfo({ ...data, fetchedUrl: targetUrl });
-      if (data.title) {
-        setHistory(prev => {
-            const filtered = prev.filter(item => item.url !== targetUrl);
-            return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
-        });
-      }
+      // Use extracted title or fallback to a generic name
+      const displayTitle = data.title || "Media Content";
+      setInfo({ ...data, title: displayTitle, fetchedUrl: targetUrl });
+      
+      setHistory(prev => {
+          const filtered = prev.filter(item => item.url !== targetUrl);
+          return [{ title: displayTitle, url: targetUrl }, ...filtered].slice(0, 100);
+      });
     } catch (err) { 
       showInvalidLinkError(); 
     }
@@ -486,7 +484,6 @@ function App() {
               key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
-              {/* CHANGE APPLIED: Increased pt-6 to pt-8 on mobile when info is present */}
               <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${info ? 'pt-8 md:pt-0' : ''}`}>
                 
                 <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
