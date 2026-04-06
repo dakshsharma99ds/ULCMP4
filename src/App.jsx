@@ -4,7 +4,7 @@ import { Toaster, toast } from 'sonner';
 import About from './About';
 import Contact from './Contact';
 
-// Custom Tooltip Component
+// Custom Tooltip Component - Logic updated to prevent flickering
 const CustomTooltip = ({ text, mousePos }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0.95 }}
@@ -12,8 +12,7 @@ const CustomTooltip = ({ text, mousePos }) => (
       opacity: 1, 
       scale: 1,
       transition: { 
-        delay: 0.4, 
-        duration: 0.2,
+        duration: 0.1, // Reduced duration to fix flickering
         ease: "easeOut"
       } 
     }}
@@ -48,11 +47,18 @@ function App() {
   const [hoveredItem, setHoveredItem] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // NEW CHANGE: State for Thumbnail Modal
+  // NEW CHANGE: State for Modal and Aspect Ratio detection
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isVertical, setIsVertical] = useState(false);
 
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
+  };
+
+  // Logic to detect if the image is 9:16 or 16:9
+  const handleImageLoad = (e) => {
+    const { naturalWidth, naturalHeight } = e.target;
+    setIsVertical(naturalHeight > naturalWidth);
   };
 
   const getPlatformName = (link) => {
@@ -231,16 +237,6 @@ function App() {
     }, 12000); 
   };
 
-  // NEW CHANGE: Logic to download the thumbnail image
-  const downloadThumbnail = (imgUrl) => {
-    const link = document.createElement('a');
-    link.href = imgUrl;
-    link.download = `thumbnail_${Date.now()}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const textTransitionStyle = (isVisible) => ({
     clipPath: isVisible ? 'inset(0 0 0 0)' : 'inset(0 100% 0 0)',
     opacity: isVisible ? 1 : 0,
@@ -320,40 +316,52 @@ function App() {
         },
       }} />
 
-      {/* NEW CHANGE: Thumbnail Preview Modal */}
+      {/* NEW CHANGE: Updated Thumbnail Popup Logic */}
       <AnimatePresence>
         {isModalOpen && info?.thumbnail && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl flex items-center justify-center p-4"
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-2xl flex items-center justify-center p-6"
             onClick={() => setIsModalOpen(false)}
           >
-            <div className="relative max-w-5xl w-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
-              <div className="absolute -top-14 right-0 flex gap-4">
+            <div 
+              className={`relative bg-[#d6d6d6] overflow-hidden transition-all duration-500 shadow-[0_0_80px_rgba(0,0,0,0.5)]
+                ${isVertical ? 'h-[75vh] aspect-[9/16] rounded-[3rem] border-[6px]' : 'w-[75vw] md:w-[65vw] aspect-video rounded-[3.5rem] border-[8px]'}
+                border-emerald-500/30`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Responsive Icon Positioning */}
+              <div className={`absolute z-20 flex gap-3 ${isVertical ? 'top-6 right-6' : 'top-8 right-10'}`}>
                 <button 
-                  onMouseEnter={() => setHoveredItem("DOWNLOAD THUMBNAIL")}
+                  onMouseEnter={() => setHoveredItem("DOWNLOAD")}
                   onMouseLeave={() => setHoveredItem(null)}
-                  onClick={() => downloadThumbnail(`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`)}
-                  className="p-3 bg-white/10 border border-white/20 rounded-full text-emerald-400 hover:bg-emerald-400 hover:text-black transition-all cursor-pointer"
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = `https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`;
+                    link.download = "thumbnail.jpg";
+                    link.click();
+                  }}
+                  className="w-10 h-10 md:w-12 md:h-12 bg-black/20 hover:bg-emerald-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 </button>
                 <button 
-                  onMouseEnter={() => setHoveredItem("CLOSE WINDOW")}
+                  onMouseEnter={() => setHoveredItem("CLOSE")}
                   onMouseLeave={() => setHoveredItem(null)}
                   onClick={() => setIsModalOpen(false)}
-                  className="p-3 bg-white/10 border border-white/20 rounded-full text-white hover:bg-red-500/80 transition-all cursor-pointer"
+                  className="w-10 h-10 md:w-12 md:h-12 bg-black/20 hover:bg-red-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
               </div>
-              <motion.img 
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
+              
+              {/* Dynamic Image Content */}
+              <img 
+                onLoad={handleImageLoad}
                 src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
-                className="w-full h-auto max-h-[80vh] object-contain rounded-3xl border border-white/10 shadow-2xl shadow-emerald-500/10"
+                className="w-full h-full object-cover select-none"
                 alt="Full Preview"
               />
             </div>
@@ -596,28 +604,22 @@ function App() {
                     <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
                         
-                        {/* CHANGE: Added onClick to thumbnail container and hover states */}
+                        {/* CHANGE: Added shadow and simplified hover interaction for main thumbnail */}
                         <div 
                           onClick={() => setIsModalOpen(true)}
-                          onMouseEnter={() => setHoveredItem("VIEW FULL THUMBNAIL")}
+                          onMouseEnter={() => setHoveredItem("OPEN POPUP")}
                           onMouseLeave={() => setHoveredItem(null)}
-                          className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto cursor-pointer group/thumb"
+                          className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-[0.98] transition-transform"
                         >
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
-                              <div className="relative w-full h-full">
-                                <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover shadow-2xl transition-transform duration-500 group-hover/thumb:scale-110" alt="preview" draggable="true" />
-                                {/* Overlay icon on hover */}
-                                <div className="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover/thumb:opacity-100 transition-opacity flex items-center justify-center">
-                                  <svg className="text-white w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                                </div>
-                              </div>
+                              <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover" alt="preview" draggable="true" />
                             ) : (
                               <div className="flex items-center justify-center h-full text-white/70">{getPlatformLogo(info.fetchedUrl)}</div>
                             )}
                           </div>
                         </div>
-                        
+
                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                           <div className="overflow-hidden">
                             <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
