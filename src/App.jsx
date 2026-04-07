@@ -7,13 +7,13 @@ import Contact from './Contact';
 // Custom Tooltip Component - Logic updated for delay and clean exit
 const CustomTooltip = ({ text, mousePos, isThumbnailOption }) => (
   <motion.div
-    key={text} // CHANGE: Added key so Framer Motion treats each text change as a unique element for independent delays
+    key={text} // CHANGE: Key added for independent delays
     initial={{ opacity: 0, scale: 0.8 }}
     animate={{ 
       opacity: 1, 
       scale: 1,
       transition: { 
-        delay: 0.5, // Explicit delay for every hover
+        delay: 0.5, 
         duration: 0.2,
         ease: "easeOut"
       } 
@@ -26,7 +26,7 @@ const CustomTooltip = ({ text, mousePos, isThumbnailOption }) => (
       pointerEvents: 'none',
       zIndex: 9999,
     }}
-    // CHANGE: Added conditional class for darker bg on thumbnail options
+    // CHANGE: Conditional class for darker bg on thumbnail options
     className={`${isThumbnailOption ? 'bg-black/60' : 'bg-white/10'} border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl`}
   >
     <p className="text-emerald-400 font-mono text-[10px] leading-tight tracking-[0.2em] uppercase font-bold">
@@ -296,6 +296,7 @@ function App() {
     return null;
   };
 
+  // Function to handle direct image download
   const downloadThumbnailFile = async (imageUrl) => {
     try {
       const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`);
@@ -352,9 +353,9 @@ function App() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              // CHANGE: Reverted border to original width/color (white/10) while keeping emerald glow
-              className={`relative bg-[#1a1a1a] overflow-hidden shadow-[0_0_50px_-10px_rgba(16,185,129,0.5)]
-                max-h-[85vh] max-w-[90vw] w-auto h-auto rounded-[2rem] border border-white/10`}
+              // CHANGE: Reverted border to original white/10, no glow, original width. 
+              // Kept dynamic h-auto/w-auto for resolution following.
+              className={`relative bg-[#1a1a1a] overflow-hidden max-h-[85vh] max-w-[90vw] w-auto h-auto rounded-[2rem] border border-white/10`}
               onClick={(e) => e.stopPropagation()}
             >
               <div className={`absolute z-20 flex gap-3 top-6 right-6`}>
