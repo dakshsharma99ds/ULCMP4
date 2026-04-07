@@ -52,7 +52,7 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
 
-  // State to track if at least one link has been processed in this session
+  // Track if a link has been processed to manage skeleton visibility
   const [hasProcessedOnce, setHasProcessedOnce] = useState(false);
 
   const handleMouseMove = (e) => {
@@ -184,9 +184,10 @@ function App() {
     }
     
     setLoading(true);
-    
+    // Clear info ONLY if we've already had a successful result before, 
+    // triggering the skeleton for subsequent searches.
     if (hasProcessedOnce) {
-       setInfo(null);
+      setInfo(null);
     }
     
     try {
@@ -595,7 +596,7 @@ function App() {
               key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
-              <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${(info || (loading && url && hasProcessedOnce)) ? 'pt-8 md:pt-0' : ''}`}>
+              <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${(info || (loading && hasProcessedOnce)) ? 'pt-8 md:pt-0' : ''}`}>
                 
                 <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
                   <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
@@ -609,7 +610,7 @@ function App() {
                 </div>
 
                 <div className={`z-10 w-full max-w-85 md:max-w-2xl bg-white/2 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-6 md:p-8 shadow-2xl transition-all duration-500`}>
-                  <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${(info || (loading && url && hasProcessedOnce)) ? 'mb-6' : 'mb-0'}`}>
+                  <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${(info || (loading && hasProcessedOnce)) ? 'mb-6' : 'mb-0'}`}>
                     <input
                       type="text"
                       placeholder="INPUT MEDIA URL"
@@ -630,15 +631,13 @@ function App() {
                     </button>
                   </div>
 
-                  {/* SKELETON LOADER (Synchronized sizing) */}
+                  {/* SKELETON LOADER - Fixed height to match metadata */}
                   {loading && !info && hasProcessedOnce && (
-                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse min-h-[200px] md:min-h-[180px]">
+                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse h-[350px] md:h-[180px]">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch h-full">
-                        <div className="shrink-0 w-full md:w-56 aspect-video rounded-xl bg-white/5 border border-white/5 shadow-inner"></div>
-                        <div className="flex-1 min-w-0 flex flex-col py-1">
-                          {/* Title skeleton - matches height of real title */}
-                          <div className="h-[20px] bg-white/10 rounded-md w-3/4 mb-4"></div>
-                          {/* Button skeletons - matches size/gap of real buttons */}
+                        <div className="shrink-0 w-full md:w-56 aspect-video rounded-xl bg-white/5 border border-white/5"></div>
+                        <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                          <div className="h-6 bg-white/10 rounded-md w-3/4 mb-4"></div>
                           <div className="flex flex-col gap-3 mt-auto">
                             <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
                             <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
@@ -648,14 +647,13 @@ function App() {
                     </div>
                   )}
 
-                  {/* METADATA INFO (Synchronized sizing) */}
+                  {/* METADATA INFO - Fixed height to match skeleton */}
                   {info && (
-                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[200px] md:min-h-[180px]">
+                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500 h-[350px] md:h-[180px]">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch h-full">
-                        
                         <div 
                           onClick={() => setIsModalOpen(true)}
-                          className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-[0.98] transition-all group/main-thumb"
+                          className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-full cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-[0.98] transition-all group/main-thumb"
                         >
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
@@ -671,10 +669,9 @@ function App() {
                           </div>
                         </div>
 
-                        <div className="flex-1 min-w-0 flex flex-col">
+                        <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                           <div className="overflow-hidden">
-                            {/* Matches skeleton height */}
-                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight h-[20px]">{info.title}</h3>
+                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight h-6">{info.title}</h3>
                           </div>
                           <div className="flex flex-col gap-3 mt-auto select-none">
                             <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP4 (1080P)</button>
@@ -699,6 +696,5 @@ function App() {
     </div>
   );
 }
-
 
 export default App;
