@@ -52,6 +52,9 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
 
+  // State to track if at least one link has been processed in this session
+  const [hasProcessedOnce, setHasProcessedOnce] = useState(false);
+
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
   };
@@ -181,6 +184,11 @@ function App() {
     }
     
     setLoading(true);
+    
+    if (hasProcessedOnce) {
+       setInfo(null);
+    }
+    
     try {
       const res = await fetch('/api/info', {
         method: 'POST',
@@ -197,6 +205,8 @@ function App() {
       }
 
       setInfo({ ...data, fetchedUrl: targetUrl });
+      setHasProcessedOnce(true);
+
       if (data.title) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
@@ -295,7 +305,6 @@ function App() {
     return null;
   };
 
-  // Logic to handle direct image download with custom title
   const downloadThumbnailFile = async (imageUrl, title) => {
     try {
       const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`);
@@ -303,7 +312,6 @@ function App() {
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
-      // CHANGE: Filename now includes "Thumbnail - " and the video title
       link.download = `Thumbnail - ${title || 'Image'}.jpg`;
       document.body.appendChild(link);
       link.click();
@@ -345,7 +353,6 @@ function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            // CHANGE: Darker background (bg-black/70 instead of /40)
             className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-xl flex items-center justify-center p-6"
             onClick={() => {setIsModalOpen(false); setHoveredItem(null);}}
           >
@@ -364,7 +371,6 @@ function App() {
                   onMouseEnter={() => setHoveredItem("DOWNLOAD")}
                   onMouseLeave={() => setHoveredItem(null)}
                   onClick={() => {
-                    // CHANGE: Passing info.title to the download function
                     downloadThumbnailFile(info.thumbnail, info.title);
                     setHoveredItem(null);
                   }}
@@ -589,7 +595,7 @@ function App() {
               key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
-              <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${info ? 'pt-8 md:pt-0' : ''}`}>
+              <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${(info || (loading && url && hasProcessedOnce)) ? 'pt-8 md:pt-0' : ''}`}>
                 
                 <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
                   <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
@@ -603,7 +609,7 @@ function App() {
                 </div>
 
                 <div className={`z-10 w-full max-w-85 md:max-w-2xl bg-white/2 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-6 md:p-8 shadow-2xl transition-all duration-500`}>
-                  <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${info ? 'mb-6' : 'mb-0'}`}>
+                  <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${(info || (loading && url && hasProcessedOnce)) ? 'mb-6' : 'mb-0'}`}>
                     <input
                       type="text"
                       placeholder="INPUT MEDIA URL"
@@ -624,9 +630,28 @@ function App() {
                     </button>
                   </div>
 
+                  {/* SKELETON LOADER (Synchronized sizing) */}
+                  {loading && !info && hasProcessedOnce && (
+                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse min-h-[200px] md:min-h-[180px]">
+                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch h-full">
+                        <div className="shrink-0 w-full md:w-56 aspect-video rounded-xl bg-white/5 border border-white/5 shadow-inner"></div>
+                        <div className="flex-1 min-w-0 flex flex-col py-1">
+                          {/* Title skeleton - matches height of real title */}
+                          <div className="h-[20px] bg-white/10 rounded-md w-3/4 mb-4"></div>
+                          {/* Button skeletons - matches size/gap of real buttons */}
+                          <div className="flex flex-col gap-3 mt-auto">
+                            <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
+                            <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* METADATA INFO (Synchronized sizing) */}
                   {info && (
-                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
-                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
+                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[200px] md:min-h-[180px]">
+                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch h-full">
                         
                         <div 
                           onClick={() => setIsModalOpen(true)}
@@ -646,9 +671,10 @@ function App() {
                           </div>
                         </div>
 
-                        <div className="flex-1 min-w-0 flex flex-col justify-between">
+                        <div className="flex-1 min-w-0 flex flex-col">
                           <div className="overflow-hidden">
-                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
+                            {/* Matches skeleton height */}
+                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight h-[20px]">{info.title}</h3>
                           </div>
                           <div className="flex flex-col gap-3 mt-auto select-none">
                             <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP4 (1080P)</button>
