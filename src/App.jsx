@@ -5,19 +5,20 @@ import About from './About';
 import Contact from './Contact';
 
 // Custom Tooltip Component - Logic updated for delay and clean exit
-const CustomTooltip = ({ text, mousePos }) => (
+const CustomTooltip = ({ text, mousePos, isThumbnailOption }) => (
   <motion.div
+    key={text} // CHANGE: Added key so Framer Motion treats each text change as a unique element for independent delays
     initial={{ opacity: 0, scale: 0.8 }}
     animate={{ 
       opacity: 1, 
       scale: 1,
       transition: { 
-        delay: 0.5, // Delay for long hovers
+        delay: 0.5, // Explicit delay for every hover
         duration: 0.2,
         ease: "easeOut"
       } 
     }}
-    exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.1 } }} // Fast exit to prevent "staying"
+    exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.1 } }}
     style={{
       position: 'fixed',
       left: mousePos.x + 15,
@@ -25,7 +26,8 @@ const CustomTooltip = ({ text, mousePos }) => (
       pointerEvents: 'none',
       zIndex: 9999,
     }}
-    className="bg-white/10 border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl"
+    // CHANGE: Added conditional class for darker bg on thumbnail options
+    className={`${isThumbnailOption ? 'bg-black/60' : 'bg-white/10'} border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl`}
   >
     <p className="text-emerald-400 font-mono text-[10px] leading-tight tracking-[0.2em] uppercase font-bold">
       {text}
@@ -294,12 +296,35 @@ function App() {
     return null;
   };
 
+  // CHANGE: Separate function to handle actual image download without opening tab
+  const downloadThumbnailFile = async (imageUrl) => {
+    try {
+      const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = "thumbnail.jpg";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed", error);
+    }
+  };
+
   return (
     <div className="h-screen w-screen bg-[#0a0a0a] text-white flex overflow-hidden fixed inset-0" onMouseMove={handleMouseMove}>
       
       <AnimatePresence>
         {hoveredItem && (
-          <CustomTooltip text={hoveredItem} mousePos={mousePos} />
+          // CHANGE: Added isThumbnailOption prop to trigger darker bg
+          <CustomTooltip 
+            text={hoveredItem} 
+            mousePos={mousePos} 
+            isThumbnailOption={hoveredItem === "DOWNLOAD" || hoveredItem === "CLOSE"} 
+          />
         )}
       </AnimatePresence>
 
@@ -315,7 +340,6 @@ function App() {
         },
       }} />
 
-      {/* NEW CHANGE: Synchronized Pop Animation for entry/exit */}
       <AnimatePresence>
         {isModalOpen && info?.thumbnail && (
           <motion.div 
@@ -330,24 +354,22 @@ function App() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className={`relative bg-[#d6d6d6] overflow-hidden shadow-[0_0_80px_rgba(0,0,0,0.5)]
-                ${isVertical ? 'h-[75vh] aspect-[9/16] rounded-[3rem] border-[6px]' : 'w-[75vw] md:w-[65vw] aspect-video rounded-[3.5rem] border-[8px]'}
-                border-emerald-500/30`}
+              // CHANGE: Removed fixed aspect ratios and added shadow-emerald for glow. 
+              // Used max-h and max-w with w-auto/h-auto to ensure it follows the image resolution exactly.
+              className={`relative bg-[#1a1a1a] overflow-hidden shadow-[0_0_50px_-10px_rgba(16,185,129,0.5)]
+                max-h-[85vh] max-w-[90vw] w-auto h-auto rounded-[2rem] border-[4px] border-emerald-500/30`}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Tooltip delay applied via state logic in icons */}
-              <div className={`absolute z-20 flex gap-3 ${isVertical ? 'top-6 right-6' : 'top-8 right-10'}`}>
+              <div className={`absolute z-20 flex gap-3 top-6 right-6`}>
                 <button 
                   onMouseEnter={() => setHoveredItem("DOWNLOAD")}
                   onMouseLeave={() => setHoveredItem(null)}
                   onClick={() => {
-                    const link = document.createElement('a');
-                    link.href = `https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`;
-                    link.download = "thumbnail.jpg";
-                    link.click();
+                    downloadThumbnailFile(info.thumbnail); // CHANGE: Now calls direct download function
                     setHoveredItem(null);
                   }}
-                  className="w-10 h-10 md:w-12 md:h-12 bg-black/20 hover:bg-emerald-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
+                  // CHANGE: bg-black/60 for darker glass
+                  className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-emerald-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 </button>
@@ -355,7 +377,8 @@ function App() {
                   onMouseEnter={() => setHoveredItem("CLOSE")}
                   onMouseLeave={() => setHoveredItem(null)}
                   onClick={() => {setIsModalOpen(false); setHoveredItem(null);}}
-                  className="w-10 h-10 md:w-12 md:h-12 bg-black/20 hover:bg-red-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
+                  // CHANGE: bg-black/60 for darker glass
+                  className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-red-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
@@ -364,7 +387,7 @@ function App() {
               <img 
                 onLoad={handleImageLoad}
                 src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
-                className="w-full h-full object-cover select-none"
+                className="max-h-[85vh] w-auto block select-none object-contain" // CHANGE: object-contain to preserve resolution ratio
                 alt="Full Preview"
               />
             </motion.div>
@@ -607,7 +630,6 @@ function App() {
                     <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
                         
-                        {/* NEW CHANGE: Darken on hover with Fullscreen icon, no tooltip */}
                         <div 
                           onClick={() => setIsModalOpen(true)}
                           className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-[0.98] transition-all group/main-thumb"
@@ -616,7 +638,6 @@ function App() {
                             {info.thumbnail ? (
                               <>
                                 <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true" />
-                                {/* Hover Overlay */}
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/main-thumb:opacity-100 transition-opacity flex items-center justify-center">
                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
                                 </div>
