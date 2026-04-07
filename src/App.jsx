@@ -295,14 +295,16 @@ function App() {
     return null;
   };
 
-  const downloadThumbnailFile = async (imageUrl) => {
+  // Logic to handle direct image download with custom title
+  const downloadThumbnailFile = async (imageUrl, title) => {
     try {
       const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = "thumbnail.jpg";
+      // CHANGE: Filename now includes "Thumbnail - " and the video title
+      link.download = `Thumbnail - ${title || 'Image'}.jpg`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -343,8 +345,8 @@ function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            // CHANGE: bg-black/40 with backdrop-blur-xl for a darkish transparent blur background
-            className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-xl flex items-center justify-center p-6"
+            // CHANGE: Darker background (bg-black/70 instead of /40)
+            className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-xl flex items-center justify-center p-6"
             onClick={() => {setIsModalOpen(false); setHoveredItem(null);}}
           >
             <motion.div 
@@ -352,10 +354,9 @@ function App() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              // CHANGE: border color set to #97CEBB, thickness border-[8px], no shadow glow
               className={`relative bg-[#1a1a1a] overflow-hidden shadow-none
                 max-h-[85vh] max-w-[90vw] w-auto h-auto rounded-[2rem] border-[8px]`}
-              style={{ borderColor: '#97CEBB' }} // Inline style for custom hex
+              style={{ borderColor: '#97CEBB' }}
               onClick={(e) => e.stopPropagation()}
             >
               <div className={`absolute z-20 flex gap-3 top-6 right-6`}>
@@ -363,7 +364,8 @@ function App() {
                   onMouseEnter={() => setHoveredItem("DOWNLOAD")}
                   onMouseLeave={() => setHoveredItem(null)}
                   onClick={() => {
-                    downloadThumbnailFile(info.thumbnail);
+                    // CHANGE: Passing info.title to the download function
+                    downloadThumbnailFile(info.thumbnail, info.title);
                     setHoveredItem(null);
                   }}
                   className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-emerald-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
