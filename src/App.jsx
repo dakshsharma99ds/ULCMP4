@@ -184,8 +184,6 @@ function App() {
     }
     
     setLoading(true);
-    // Clear info ONLY if we've already had a successful result before, 
-    // triggering the skeleton for subsequent searches.
     if (hasProcessedOnce) {
       setInfo(null);
     }
@@ -631,13 +629,13 @@ function App() {
                     </button>
                   </div>
 
-                  {/* SKELETON LOADER - Fixed height to match metadata */}
+                  {/* SKELETON LOADER - Fixed height for stability */}
                   {loading && !info && hasProcessedOnce && (
-                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse h-[350px] md:h-[180px]">
+                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse h-[380px] md:h-[180px]">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch h-full">
                         <div className="shrink-0 w-full md:w-56 aspect-video rounded-xl bg-white/5 border border-white/5"></div>
                         <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                          <div className="h-6 bg-white/10 rounded-md w-3/4 mb-4"></div>
+                          <div className="h-6 bg-white/10 rounded-md w-3/4"></div>
                           <div className="flex flex-col gap-3 mt-auto">
                             <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
                             <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
@@ -647,9 +645,9 @@ function App() {
                     </div>
                   )}
 
-                  {/* METADATA INFO - Fixed height to match skeleton */}
+                  {/* METADATA INFO - Matching static height */}
                   {info && (
-                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500 h-[350px] md:h-[180px]">
+                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500 h-[380px] md:h-[180px]">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch h-full">
                         <div 
                           onClick={() => setIsModalOpen(true)}
@@ -670,8 +668,8 @@ function App() {
                         </div>
 
                         <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                          <div className="overflow-hidden">
-                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight h-6">{info.title}</h3>
+                          <div className="flex-1 min-h-[40px]">
+                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-2 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
                           </div>
                           <div className="flex flex-col gap-3 mt-auto select-none">
                             <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP4 (1080P)</button>
