@@ -7,13 +7,13 @@ import Contact from './Contact';
 // Custom Tooltip Component
 const CustomTooltip = ({ text, mousePos, isThumbnailOption }) => (
   <motion.div
-    key={text} // Key ensures each text change treats the tooltip as a new element for separate delays
+    key={text} 
     initial={{ opacity: 0, scale: 0.8 }}
     animate={{ 
       opacity: 1, 
       scale: 1,
       transition: { 
-        delay: 0.5, // 0.5s delay for each individual tooltip
+        delay: 0.5, 
         duration: 0.2,
         ease: "easeOut"
       } 
@@ -26,7 +26,6 @@ const CustomTooltip = ({ text, mousePos, isThumbnailOption }) => (
       pointerEvents: 'none',
       zIndex: 9999,
     }}
-    // CHANGE: Darker background for thumbnail tooltips
     className={`${isThumbnailOption ? 'bg-black/80' : 'bg-white/10'} border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl`}
   >
     <p className="text-emerald-400 font-mono text-[10px] leading-tight tracking-[0.2em] uppercase font-bold">
@@ -296,7 +295,6 @@ function App() {
     return null;
   };
 
-  // Logic to handle direct image download as a file
   const downloadThumbnailFile = async (imageUrl) => {
     try {
       const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`);
@@ -345,7 +343,8 @@ function App() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-2xl flex items-center justify-center p-6"
+            // CHANGE: bg-black/40 with backdrop-blur-xl for a darkish transparent blur background
+            className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-xl flex items-center justify-center p-6"
             onClick={() => {setIsModalOpen(false); setHoveredItem(null);}}
           >
             <motion.div 
@@ -353,10 +352,10 @@ function App() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              // CHANGE: Updated border to white, thicker width (border-8), removed emerald glow (shadow-none)
-              // Dynamically follows image aspect ratio
+              // CHANGE: border color set to #97CEBB, thickness border-[8px], no shadow glow
               className={`relative bg-[#1a1a1a] overflow-hidden shadow-none
-                max-h-[85vh] max-w-[90vw] w-auto h-auto rounded-[2rem] border-[8px] border-white`}
+                max-h-[85vh] max-w-[90vw] w-auto h-auto rounded-[2rem] border-[8px]`}
+              style={{ borderColor: '#97CEBB' }} // Inline style for custom hex
               onClick={(e) => e.stopPropagation()}
             >
               <div className={`absolute z-20 flex gap-3 top-6 right-6`}>
