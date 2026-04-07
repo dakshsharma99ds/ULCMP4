@@ -4,16 +4,16 @@ import { Toaster, toast } from 'sonner';
 import About from './About';
 import Contact from './Contact';
 
-// Custom Tooltip Component - Logic updated for delay and clean exit
+// Custom Tooltip Component
 const CustomTooltip = ({ text, mousePos, isThumbnailOption }) => (
   <motion.div
-    key={text} // CHANGE: Key added for independent delays
+    key={text} // Key ensures each text change treats the tooltip as a new element for separate delays
     initial={{ opacity: 0, scale: 0.8 }}
     animate={{ 
       opacity: 1, 
       scale: 1,
       transition: { 
-        delay: 0.5, 
+        delay: 0.5, // 0.5s delay for each individual tooltip
         duration: 0.2,
         ease: "easeOut"
       } 
@@ -26,8 +26,8 @@ const CustomTooltip = ({ text, mousePos, isThumbnailOption }) => (
       pointerEvents: 'none',
       zIndex: 9999,
     }}
-    // CHANGE: Conditional class for darker bg on thumbnail options
-    className={`${isThumbnailOption ? 'bg-black/60' : 'bg-white/10'} border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl`}
+    // CHANGE: Darker background for thumbnail tooltips
+    className={`${isThumbnailOption ? 'bg-black/80' : 'bg-white/10'} border border-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-2xl`}
   >
     <p className="text-emerald-400 font-mono text-[10px] leading-tight tracking-[0.2em] uppercase font-bold">
       {text}
@@ -296,7 +296,7 @@ function App() {
     return null;
   };
 
-  // Function to handle direct image download
+  // Logic to handle direct image download as a file
   const downloadThumbnailFile = async (imageUrl) => {
     try {
       const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`);
@@ -353,9 +353,10 @@ function App() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              // CHANGE: Reverted border to original white/10, no glow, original width. 
-              // Kept dynamic h-auto/w-auto for resolution following.
-              className={`relative bg-[#1a1a1a] overflow-hidden max-h-[85vh] max-w-[90vw] w-auto h-auto rounded-[2rem] border border-white/10`}
+              // CHANGE: Updated border to white, thicker width (border-8), removed emerald glow (shadow-none)
+              // Dynamically follows image aspect ratio
+              className={`relative bg-[#1a1a1a] overflow-hidden shadow-none
+                max-h-[85vh] max-w-[90vw] w-auto h-auto rounded-[2rem] border-[8px] border-white`}
               onClick={(e) => e.stopPropagation()}
             >
               <div className={`absolute z-20 flex gap-3 top-6 right-6`}>
