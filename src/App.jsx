@@ -52,7 +52,6 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
 
-  // CHANGE: State to track if at least one link has been processed in this session
   const [hasProcessedOnce, setHasProcessedOnce] = useState(false);
 
   const handleMouseMove = (e) => {
@@ -185,7 +184,6 @@ function App() {
     
     setLoading(true);
     
-    // CHANGE: We clear info to trigger the skeleton, but only if it's not the first time
     if (hasProcessedOnce) {
        setInfo(null);
     }
@@ -206,8 +204,6 @@ function App() {
       }
 
       setInfo({ ...data, fetchedUrl: targetUrl });
-      
-      // CHANGE: Mark as processed so subsequent links show skeleton
       setHasProcessedOnce(true);
 
       if (data.title) {
@@ -598,7 +594,7 @@ function App() {
               key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
               className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
             >
-              <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${(info || (loading && url)) ? 'pt-8 md:pt-0' : ''}`}>
+              <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${(info || (loading && url && hasProcessedOnce)) ? 'pt-8 md:pt-0' : ''}`}>
                 
                 <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
                   <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
@@ -633,56 +629,59 @@ function App() {
                     </button>
                   </div>
 
-                  {/* CHANGE: Skeleton now only shows if loading is true AND it's NOT the first time processing (hasProcessedOnce is true) */}
-                  {loading && !info && hasProcessedOnce && (
-                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse">
-                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
-                        <div className="shrink-0 w-full md:w-56 aspect-video rounded-xl bg-white/5 border border-white/5 shadow-inner"></div>
-                        <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                          <div className="h-5 bg-white/10 rounded-md w-3/4 mb-4"></div>
-                          <div className="flex flex-col gap-3 mt-auto">
-                            <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
-                            <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
+                  {/* INFO & LOADING AREA: Consistent Width & Height for no-jump transition */}
+                  <div className="relative min-h-0 md:min-h-[180px]">
+                    {loading && !info && hasProcessedOnce && (
+                      <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse w-full">
+                        <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
+                          {/* Fixed width for skeleton thumbnail matches actual info thumbnail */}
+                          <div className="shrink-0 w-full md:w-56 aspect-video rounded-xl bg-white/5 border border-white/5 shadow-inner"></div>
+                          <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                            <div className="h-5 bg-white/10 rounded-md w-3/4 mb-4"></div>
+                            <div className="flex flex-col gap-3 mt-auto">
+                              <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
+                              <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {info && (
-                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
-                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
-                        
-                        <div 
-                          onClick={() => setIsModalOpen(true)}
-                          className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-[0.98] transition-all group/main-thumb"
-                        >
-                          <div className="relative z-10 w-full h-full flex items-center justify-center">
-                            {info.thumbnail ? (
-                              <>
-                                <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/main-thumb:opacity-100 transition-opacity flex items-center justify-center">
-                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                                </div>
-                              </>
-                            ) : (
-                              <div className="flex items-center justify-center h-full text-white/70">{getPlatformLogo(info.fetchedUrl)}</div>
-                            )}
+                    {info && (
+                      <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
+                        <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
+                          
+                          <div 
+                            onClick={() => setIsModalOpen(true)}
+                            className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-[0.98] transition-all group/main-thumb"
+                          >
+                            <div className="relative z-10 w-full h-full flex items-center justify-center">
+                              {info.thumbnail ? (
+                                <>
+                                  <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true" />
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/main-thumb:opacity-100 transition-opacity flex items-center justify-center">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                                  </div>
+                                </>
+                              ) : (
+                                <div className="flex items-center justify-center h-full text-white/70">{getPlatformLogo(info.fetchedUrl)}</div>
+                              )}
+                            </div>
                           </div>
-                        </div>
 
-                        <div className="flex-1 min-w-0 flex flex-col justify-between">
-                          <div className="overflow-hidden">
-                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
-                          </div>
-                          <div className="flex flex-col gap-3 mt-auto select-none">
-                            <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP4 (1080P)</button>
-                            <button onClick={() => startDownload('mp3')} className="w-full py-4 bg-white/10 border border-white/10 text-white font-black rounded-xl hover:bg-white hover:text-black transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP3 (320kb/s)</button>
+                          <div className="flex-1 min-w-0 flex flex-col justify-between">
+                            <div className="overflow-hidden">
+                              <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
+                            </div>
+                            <div className="flex flex-col gap-3 mt-auto select-none">
+                              <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP4 (1080P)</button>
+                              <button onClick={() => startDownload('mp3')} className="w-full py-4 bg-white/10 border border-white/10 text-white font-black rounded-xl hover:bg-white hover:text-black transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP3 (320kb/s)</button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             </motion.div>
