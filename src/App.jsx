@@ -296,7 +296,6 @@ function App() {
     return null;
   };
 
-  // CHANGE: Separate function to handle actual image download without opening tab
   const downloadThumbnailFile = async (imageUrl) => {
     try {
       const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`);
@@ -319,7 +318,6 @@ function App() {
       
       <AnimatePresence>
         {hoveredItem && (
-          // CHANGE: Added isThumbnailOption prop to trigger darker bg
           <CustomTooltip 
             text={hoveredItem} 
             mousePos={mousePos} 
@@ -354,10 +352,9 @@ function App() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.5, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              // CHANGE: Removed fixed aspect ratios and added shadow-emerald for glow. 
-              // Used max-h and max-w with w-auto/h-auto to ensure it follows the image resolution exactly.
+              // CHANGE: Reverted border to original width/color (white/10) while keeping emerald glow
               className={`relative bg-[#1a1a1a] overflow-hidden shadow-[0_0_50px_-10px_rgba(16,185,129,0.5)]
-                max-h-[85vh] max-w-[90vw] w-auto h-auto rounded-[2rem] border-[4px] border-emerald-500/30`}
+                max-h-[85vh] max-w-[90vw] w-auto h-auto rounded-[2rem] border border-white/10`}
               onClick={(e) => e.stopPropagation()}
             >
               <div className={`absolute z-20 flex gap-3 top-6 right-6`}>
@@ -365,10 +362,9 @@ function App() {
                   onMouseEnter={() => setHoveredItem("DOWNLOAD")}
                   onMouseLeave={() => setHoveredItem(null)}
                   onClick={() => {
-                    downloadThumbnailFile(info.thumbnail); // CHANGE: Now calls direct download function
+                    downloadThumbnailFile(info.thumbnail);
                     setHoveredItem(null);
                   }}
-                  // CHANGE: bg-black/60 for darker glass
                   className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-emerald-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -377,7 +373,6 @@ function App() {
                   onMouseEnter={() => setHoveredItem("CLOSE")}
                   onMouseLeave={() => setHoveredItem(null)}
                   onClick={() => {setIsModalOpen(false); setHoveredItem(null);}}
-                  // CHANGE: bg-black/60 for darker glass
                   className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-red-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -387,7 +382,7 @@ function App() {
               <img 
                 onLoad={handleImageLoad}
                 src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
-                className="max-h-[85vh] w-auto block select-none object-contain" // CHANGE: object-contain to preserve resolution ratio
+                className="max-h-[85vh] w-auto block select-none object-contain"
                 alt="Full Preview"
               />
             </motion.div>
