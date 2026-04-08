@@ -423,7 +423,7 @@ function App() {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.4 }} 
                     onClick={handleHamburgerClick} 
-                    className="cursor-pointer bg-transparent text-emerald-400 active:text-emerald-400"
+                    className="cursor-pointer bg-transparent text-emerald-400 active:text-gray-500"
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                   </motion.button>
@@ -447,11 +447,11 @@ function App() {
             </div>
             <button 
               onClick={() => setIsSearchMode(true)} 
-              className="ml-auto block cursor-pointer group"
+              className="ml-auto block cursor-pointer group transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)"
               style={{ 
                 opacity: (isNavOpen && !isSearchMode) ? 1 : 0, 
                 pointerEvents: (isNavOpen && !isSearchMode) ? 'auto' : 'none',
-                transform: (isNavOpen && !isSearchMode) ? 'scale(1)' : 'scale(0.8)'
+                transform: (isNavOpen && !isSearchMode) ? 'translateX(0) scale(1)' : 'translateX(30px) scale(0.8)'
               }}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 group-hover:text-gray-500 group-active:text-gray-500">
@@ -580,7 +580,7 @@ function App() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
               onClick={() => setIsNavOpen(true)} 
-              className="fixed top-8 left-6 z-30 text-white transition-none pointer-events-auto active:text-emerald-400"
+              className="fixed top-8 left-6 z-30 text-white transition-none pointer-events-auto active:text-gray-500"
             >
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </motion.button>
