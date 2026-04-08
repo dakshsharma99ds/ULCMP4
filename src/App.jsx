@@ -52,6 +52,8 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
 
+  const [hasProcessedOnce, setHasProcessedOnce] = useState(false);
+
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
   };
@@ -181,8 +183,9 @@ function App() {
     }
     
     setLoading(true);
-    // CHANGE: Clear existing info when loading starts for a new link to allow skeleton to show
-    setInfo(null); 
+    if (hasProcessedOnce) {
+       setInfo(null);
+    }
     
     try {
       const res = await fetch('/api/info', {
@@ -200,6 +203,8 @@ function App() {
       }
 
       setInfo({ ...data, fetchedUrl: targetUrl });
+      setHasProcessedOnce(true);
+
       if (data.title) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
@@ -602,7 +607,7 @@ function App() {
                 </div>
 
                 <div className={`z-10 w-full max-w-85 md:max-w-2xl bg-white/2 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-6 md:p-8 shadow-2xl transition-all duration-500`}>
-                  <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${(info || (loading && url)) ? 'mb-6' : 'mb-0'}`}>
+                  <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${(info || (loading && url && hasProcessedOnce)) ? 'mb-6' : 'mb-0'}`}>
                     <input
                       type="text"
                       placeholder="INPUT MEDIA URL"
@@ -623,13 +628,13 @@ function App() {
                     </button>
                   </div>
 
-                  {/* CHANGE: Added Skeleton Loader that appears when loading is true and info is null */}
-                  {loading && !info && (
-                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse">
-                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
+                  {/* SKELETON LOADER - Fixed height to prevent jumping */}
+                  {loading && !info && hasProcessedOnce && (
+                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse h-[380px] md:h-[180px]">
+                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch h-full">
                         <div className="shrink-0 w-full md:w-56 aspect-video rounded-xl bg-white/5 border border-white/5 shadow-inner"></div>
                         <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                          <div className="h-5 bg-white/10 rounded-md w-3/4 mb-4"></div>
+                          <div className="h-5 bg-white/10 rounded-md w-3/4"></div>
                           <div className="flex flex-col gap-3 mt-auto">
                             <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
                             <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
@@ -639,13 +644,14 @@ function App() {
                     </div>
                   )}
 
+                  {/* INFO CARD - Matches skeleton height and layout stability */}
                   {info && (
-                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
-                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
+                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500 h-[380px] md:h-[180px]">
+                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch h-full">
                         
                         <div 
                           onClick={() => setIsModalOpen(true)}
-                          className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-[0.98] transition-all group/main-thumb"
+                          className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-full cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-[0.98] transition-all group/main-thumb"
                         >
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
@@ -661,9 +667,9 @@ function App() {
                           </div>
                         </div>
 
-                        <div className="flex-1 min-w-0 flex flex-col justify-between">
-                          <div className="overflow-hidden">
-                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
+                        <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                          <div className="flex-1 min-h-0">
+                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-2 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
                           </div>
                           <div className="flex flex-col gap-3 mt-auto select-none">
                             <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP4 (1080P)</button>
