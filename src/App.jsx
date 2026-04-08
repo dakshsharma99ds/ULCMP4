@@ -318,8 +318,8 @@ function App() {
     <div className="h-screen w-screen bg-[#0a0a0a] text-white flex overflow-hidden fixed inset-0" onMouseMove={handleMouseMove}>
       
       <AnimatePresence>
-        {/* Only show tooltip on desktop (md and up) */}
-        {hoveredItem && window.innerWidth >= 768 && (
+        {/* Tooltip disabled for mobile based on window width */}
+        {hoveredItem && typeof window !== 'undefined' && window.innerWidth >= 768 && (
           <CustomTooltip 
             text={hoveredItem} 
             mousePos={mousePos} 
@@ -367,7 +367,6 @@ function App() {
                     downloadThumbnailFile(info.thumbnail, info.title);
                     setHoveredItem(null);
                   }}
-                  /* CHANGE: Added active:bg-emerald-500 for mobile tap feel */
                   className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-emerald-500 active:bg-emerald-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -376,7 +375,6 @@ function App() {
                   onMouseEnter={() => setHoveredItem("CLOSE")}
                   onMouseLeave={() => setHoveredItem(null)}
                   onClick={() => {setIsModalOpen(false); setHoveredItem(null);}}
-                  /* CHANGE: Added active:bg-red-500 for mobile tap feel */
                   className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-red-500 active:bg-red-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -426,7 +424,6 @@ function App() {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.4 }} 
                     onClick={handleHamburgerClick} 
-                    /* CHANGE: Added active:text-emerald-400 for mobile tap feedback */
                     className="cursor-pointer bg-transparent hamburger-hover text-emerald-400 active:text-emerald-400"
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
@@ -476,33 +473,32 @@ function App() {
               pointerEvents: isSearchMode ? 'none' : 'auto'
             }}
           >
-            {/* CHANGE: Added active states for mobile touch interaction on Home and About */}
-            <div onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8 active:opacity-70">
+            {/* RESTORED: Removed active: opacity to keep original hover/click transition logic */}
+            <div onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-6 h-6 shrink-0 ${currentPage === 'home' ? 'icon-emerald-active' : 'icon-hover-trigger'}`}>
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
               </svg>
-              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-emerald-400'}`} style={textTransitionStyle(isNavOpen)}>HOME</span>
+              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen)}>HOME</span>
             </div>
-            <div onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group active:opacity-70">
+            <div onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className={`w-7 h-7 shrink-0 ml-[-2px] ${currentPage === 'about' ? 'icon-emerald-active' : 'icon-hover-trigger'}`}>
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
-              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-emerald-400'}`} style={textTransitionStyle(isNavOpen)}>ABOUT</span>
+              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen)}>ABOUT</span>
             </div>
           </div>
 
           <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
             <div onClick={() => { if(!isSearchMode) { setIsSearchMode(true); setIsNavOpen(true); } }}
-              /* CHANGE: Added active:opacity-70 for mobile search button */
-              className={`shrink-0 flex items-center gap-6 cursor-pointer mb-4 group active:opacity-70`}
+              className={`shrink-0 flex items-center gap-6 cursor-pointer mb-4 group`}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-6 h-6 shrink-0 ${isSearchMode ? 'icon-emerald-active' : 'icon-hover-trigger'}`}>
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
-              <span className={`nico-font text-sm tracking-[0.2em] whitespace-nowrap transition-colors duration-300 ${isSearchMode ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-emerald-400'}`} style={textTransitionStyle(isNavOpen || isSearchMode)}>RECENT</span>
+              <span className={`nico-font text-sm tracking-[0.2em] whitespace-nowrap transition-colors duration-300 ${isSearchMode ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen || isSearchMode)}>RECENT</span>
             </div>
             <div className="ml-3 flex flex-col flex-1 min-h-0 transition-all duration-300"
               style={{ opacity: (isNavOpen || isSearchMode) ? 1 : 0, visibility: (isNavOpen || isSearchMode) ? 'visible' : 'hidden', overflow: 'hidden' }}
@@ -516,7 +512,6 @@ function App() {
                         onMouseEnter={() => setHoveredItem(getPlatformName(item.url))}
                         onMouseLeave={() => setHoveredItem(null)}
                         onClick={() => handleHistoryClick(item)} 
-                        /* CHANGE: Added active:text-white for mobile feedback on history items */
                         className="text-[14px] py-1 text-gray-500 font-mono truncate cursor-pointer shrink-0 flex-1 recent-link-hover active:text-white"
                       >
                         {item.title}
@@ -536,8 +531,7 @@ function App() {
 
         <div className="mt-auto px-2 pt-4 pb-6 shrink-0 overflow-hidden">
           {isSearchMode ? (
-            /* CHANGE: Added active:opacity-70 for back button mobile */
-            <div onClick={() => { setIsSearchMode(false); setSearchTerm(''); }} className="flex items-center gap-6 cursor-pointer group active:opacity-70">
+            <div onClick={() => { setIsSearchMode(false); setSearchTerm(''); }} className="flex items-center gap-6 cursor-pointer group">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 shrink-0 icon-hover-trigger">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
@@ -545,12 +539,11 @@ function App() {
               <span className="nico-font text-sm tracking-widest transition-colors duration-300 group-hover:text-gray-500 group-active:text-white" style={textTransitionStyle(isNavOpen || isSearchMode)}>BACK</span>
             </div>
           ) : (
-            /* CHANGE: Added active:opacity-70 for contact mobile */
-            <div onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group active:opacity-70">
+            <div onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-6 h-6 shrink-0 ${currentPage === 'contact' ? 'icon-emerald-active' : 'icon-hover-trigger'}`}>
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
               </svg>
-              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-emerald-400'}`} style={textTransitionStyle(isNavOpen)}>CONTACT</span>
+              <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen)}>CONTACT</span>
             </div>
           )}
         </div>
@@ -566,7 +559,6 @@ function App() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3, delay: 0.1 }}
               onClick={() => setIsNavOpen(true)} 
-              /* CHANGE: Added active:text-emerald-400 for external mobile hamburger */
               className="fixed top-8 left-6 z-30 text-white transition-none hamburger-hover pointer-events-auto active:text-emerald-400"
             >
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
@@ -620,7 +612,6 @@ function App() {
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                     />
-                    {/* CHANGE: Added active:bg-emerald-400 and active:scale-105 for mobile search button tap */}
                     <button onClick={() => fetchInfo()} className="bg-white text-black px-4 md:px-10 py-4 rounded-2xl hover:bg-emerald-400 hover:scale-105 active:bg-emerald-400 active:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center min-w-15 md:min-w-35 select-none">
                       {loading ? (
                         <svg className="animate-spin h-5 w-5 md:h-7 md:w-7 text-black" viewBox="0 0 24 24">
@@ -660,7 +651,8 @@ function App() {
                             {info.thumbnail ? (
                               <>
                                 <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true" />
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/main-thumb:opacity-100 transition-opacity flex items-center justify-center">
+                                {/* CHANGE: Added 'opacity-100 md:opacity-0' to make the icon visible on mobile without hover */}
+                                <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover/main-thumb:opacity-100 transition-opacity flex items-center justify-center">
                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
                                 </div>
                               </>
@@ -675,7 +667,6 @@ function App() {
                             <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
                           </div>
                           <div className="flex flex-col gap-3 mt-auto select-none">
-                            {/* CHANGE: Added active:bg-emerald-300 for mobile download buttons */}
                             <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 active:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP4 (1080P)</button>
                             <button onClick={() => startDownload('mp3')} className="w-full py-4 bg-white/10 border border-white/10 text-white font-black rounded-xl hover:bg-white active:bg-white hover:text-black active:text-black transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP3 (320kb/s)</button>
                           </div>
