@@ -11,10 +11,12 @@ const COMMON_FLAGS = {
   noCheckCertificates: true,
   noWarnings: true,
   noPlaylist: true,
-  /* CHANGE: Added specific flags to ensure the best metadata/title extraction for social platforms like Instagram */
+  /* CHANGE: Enhanced headers to look more like a real user to Instagram's servers */
   addHeader: [
-    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-    'Accept-Language: en-US,en;q=0.9'
+    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+    'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Accept-Language: en-US,en;q=0.5',
+    'Sec-Fetch-Mode: navigate'
   ],
   preferFreeFormats: true,
   youtubeSkipDashManifest: true
@@ -24,14 +26,17 @@ app.post('/api/info', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: "No URL provided" });
   try {
-    /* CHANGE: youtube-dl-exec will now fetch full metadata to ensure 'info.title' contains the accurate Instagram caption/title */
     const info = await youtubedl(url, { 
       dumpSingleJson: true, 
       ...COMMON_FLAGS 
     });
     
-    // Some platforms put the accurate title in 'description' or 'fulltitle' if 'title' is generic
-    const accurateTitle = info.title || info.fulltitle || "Media File";
+    /* CHANGE: Instagram often puts the caption in 'description'. 
+       We check description first because 'title' often just says "Instagram photo" or "Video".
+    */
+    const accurateTitle = (info.description && info.description.length > 2) 
+      ? info.description.split('\n')[0] // Take first line of caption
+      : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
     
     res.json({ 
       title: accurateTitle, 
@@ -48,7 +53,9 @@ app.get('/api/download', async (req, res) => {
 
   const isMp3 = type === 'mp3';
   const isReddit = url.includes('reddit.com');
-  const fileName = `${encodeURIComponent(title || 'download')}.${isMp3 ? 'mp3' : 'mp4'}`;
+  // Clean title for filename
+  const cleanTitle = (title || 'download').replace(/[/\\?%*:|"<>]/g, '-').substring(0, 100);
+  const fileName = `${encodeURIComponent(cleanTitle)}.${isMp3 ? 'mp3' : 'mp4'}`;
 
   res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
   res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
