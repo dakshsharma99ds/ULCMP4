@@ -628,30 +628,32 @@ function App() {
                     </button>
                   </div>
 
-                  {/* SKELETON LOADER - Fixed height to prevent jumping */}
+                  {/* SKELETON LOADER - Accurate spatial matching */}
                   {loading && !info && hasProcessedOnce && (
-                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse h-[380px] md:h-[180px]">
-                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch h-full">
+                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse">
+                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
                         <div className="shrink-0 w-full md:w-56 aspect-video rounded-xl bg-white/5 border border-white/5 shadow-inner"></div>
                         <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                          <div className="h-5 bg-white/10 rounded-md w-3/4"></div>
+                          <div className="flex-1 min-h-0">
+                             <div className="h-5 bg-white/10 rounded-md w-3/4 mb-2"></div>
+                          </div>
                           <div className="flex flex-col gap-3 mt-auto">
-                            <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
-                            <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
+                            <div className="w-full h-12 md:h-14 bg-white/5 rounded-xl border border-white/5"></div>
+                            <div className="w-full h-12 md:h-14 bg-white/5 rounded-xl border border-white/5"></div>
                           </div>
                         </div>
                       </div>
                     </div>
                   )}
 
-                  {/* INFO CARD - Matches skeleton height and layout stability */}
+                  {/* INFO CARD - Reverted to flexible height for orientation sanity */}
                   {info && (
-                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500 h-[380px] md:h-[180px]">
-                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch h-full">
+                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
+                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
                         
                         <div 
                           onClick={() => setIsModalOpen(true)}
-                          className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-full cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-[0.98] transition-all group/main-thumb"
+                          className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-[0.98] transition-all group/main-thumb"
                         >
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
@@ -672,8 +674,8 @@ function App() {
                             <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-2 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
                           </div>
                           <div className="flex flex-col gap-3 mt-auto select-none">
-                            <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP4 (1080P)</button>
-                            <button onClick={() => startDownload('mp3')} className="w-full py-4 bg-white/10 border border-white/10 text-white font-black rounded-xl hover:bg-white hover:text-black transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP3 (320kb/s)</button>
+                            <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 md:py-5 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP4 (1080P)</button>
+                            <button onClick={() => startDownload('mp3')} className="w-full py-4 md:py-5 bg-white/10 border border-white/10 text-white font-black rounded-xl hover:bg-white hover:text-black transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP3 (320kb/s)</button>
                           </div>
                         </div>
                       </div>
