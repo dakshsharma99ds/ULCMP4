@@ -447,14 +447,14 @@ function App() {
             </div>
             <button 
               onClick={() => setIsSearchMode(true)} 
-              className="ml-auto block cursor-pointer group transition-all duration-300"
+              className="ml-auto block cursor-pointer group transition-all duration-300 active:scale-95"
               style={{ 
                 opacity: (isNavOpen && !isSearchMode) ? 1 : 0, 
                 pointerEvents: (isNavOpen && !isSearchMode) ? 'auto' : 'none',
                 transform: (isNavOpen && !isSearchMode) ? 'scale(1)' : 'scale(0.8)'
               }}
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 icon-hover-trigger">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 icon-hover-trigger group-active:text-gray-500">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
@@ -473,7 +473,7 @@ function App() {
             }}
           >
             {/* HOME OPTION */}
-            <div onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8">
+            <div onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8 active:scale-95 transition-transform duration-200">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-6 h-6 shrink-0 transition-colors duration-300 
                 ${currentPage === 'home' ? 'icon-emerald-active' : 'icon-hover-trigger group-active:text-gray-500'}`}>
@@ -486,7 +486,7 @@ function App() {
             </div>
 
             {/* ABOUT OPTION */}
-            <div onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group">
+            <div onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group active:scale-95 transition-transform duration-200">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-7 h-7 shrink-0 ml-[-2px] transition-colors duration-300 
                 ${currentPage === 'about' ? 'icon-emerald-active' : 'icon-hover-trigger group-active:text-gray-500'}`}>
@@ -502,7 +502,7 @@ function App() {
           <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
             {/* RECENT / SEARCH MODE OPTION */}
             <div onClick={() => { if(!isSearchMode) { setIsSearchMode(true); setIsNavOpen(true); } }}
-              className={`shrink-0 flex items-center gap-6 cursor-pointer mb-4 group`}
+              className={`shrink-0 flex items-center gap-6 cursor-pointer mb-4 group active:scale-95 transition-transform duration-200`}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-6 h-6 shrink-0 transition-colors duration-300 
@@ -545,7 +545,7 @@ function App() {
 
         <div className="mt-auto px-2 pt-4 pb-6 shrink-0 overflow-hidden">
           {isSearchMode ? (
-            <div onClick={() => { setIsSearchMode(false); setSearchTerm(''); }} className="flex items-center gap-6 cursor-pointer group">
+            <div onClick={() => { setIsSearchMode(false); setSearchTerm(''); }} className="flex items-center gap-6 cursor-pointer group active:scale-95 transition-transform duration-200">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" 
                 className="w-6 h-6 shrink-0 transition-colors duration-300 icon-hover-trigger group-active:text-gray-500">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -556,7 +556,7 @@ function App() {
             </div>
           ) : (
             /* CONTACT OPTION */
-            <div onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group">
+            <div onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group active:scale-95 transition-transform duration-200">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-6 h-6 shrink-0 transition-colors duration-300 
                 ${currentPage === 'contact' ? 'icon-emerald-active' : 'icon-hover-trigger group-active:text-gray-500'}`}>
@@ -633,7 +633,7 @@ function App() {
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                     />
-                    <button onClick={() => fetchInfo()} className="bg-white text-black px-4 md:px-10 py-4 rounded-2xl hover:bg-emerald-400 hover:scale-105 active:bg-emerald-400 active:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center min-w-15 md:min-w-35 select-none">
+                    <button onClick={() => fetchInfo()} className="bg-white text-black px-4 md:px-10 py-4 rounded-2xl hover:bg-emerald-400 hover:scale-105 active:scale-105 active:scale-95 transition-all cursor-pointer flex items-center justify-center min-w-15 md:min-w-35 select-none">
                       {loading ? (
                         <svg className="animate-spin h-5 w-5 md:h-7 md:w-7 text-black" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
