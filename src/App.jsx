@@ -181,7 +181,6 @@ function App() {
     }
     
     setLoading(true);
-    // CHANGE: Clear existing info when loading starts for a new link to allow skeleton to show
     setInfo(null); 
     
     try {
@@ -199,11 +198,19 @@ function App() {
         return;
       }
 
-      setInfo({ ...data, fetchedUrl: targetUrl });
-      if (data.title) {
+      // --- CHANGE START: Logic to ensure Instagram shows accurate titles ---
+      let displayTitle = data.title;
+      if (targetUrl.includes('instagram.com') && (!data.title || data.title.toLowerCase().includes('instagram video'))) {
+        // If the API returns a generic title for Instagram, we prioritize the provided caption or platform-specific info
+        displayTitle = data.description || data.title || `Instagram Media - ${new URL(targetUrl).pathname.split('/')[2]}`;
+      }
+      // --- CHANGE END ---
+
+      setInfo({ ...data, title: displayTitle, fetchedUrl: targetUrl });
+      if (displayTitle) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
-            return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
+            return [{ title: displayTitle, url: targetUrl }, ...filtered].slice(0, 100);
         });
       }
     } catch (err) { 
@@ -623,7 +630,6 @@ function App() {
                     </button>
                   </div>
 
-                  {/* CHANGE: Added Skeleton Loader that appears when loading is true and info is null */}
                   {loading && !info && (
                     <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
