@@ -52,9 +52,6 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
 
-  // CHANGE: State to track if at least one link has been processed in this session
-  const [hasProcessedOnce, setHasProcessedOnce] = useState(false);
-
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
   };
@@ -184,11 +181,8 @@ function App() {
     }
     
     setLoading(true);
-    
-    // CHANGE: We clear info to trigger the skeleton, but only if it's not the first time
-    if (hasProcessedOnce) {
-       setInfo(null);
-    }
+    // CHANGE: Clear existing info when loading starts for a new link to allow skeleton to show
+    setInfo(null); 
     
     try {
       const res = await fetch('/api/info', {
@@ -206,10 +200,6 @@ function App() {
       }
 
       setInfo({ ...data, fetchedUrl: targetUrl });
-      
-      // CHANGE: Mark as processed so subsequent links show skeleton
-      setHasProcessedOnce(true);
-
       if (data.title) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
@@ -612,7 +602,7 @@ function App() {
                 </div>
 
                 <div className={`z-10 w-full max-w-85 md:max-w-2xl bg-white/2 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-6 md:p-8 shadow-2xl transition-all duration-500`}>
-                  <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${(info || (loading && url && hasProcessedOnce)) ? 'mb-6' : 'mb-0'}`}>
+                  <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${(info || (loading && url)) ? 'mb-6' : 'mb-0'}`}>
                     <input
                       type="text"
                       placeholder="INPUT MEDIA URL"
@@ -633,8 +623,8 @@ function App() {
                     </button>
                   </div>
 
-                  {/* CHANGE: Skeleton now only shows if loading is true AND it's NOT the first time processing (hasProcessedOnce is true) */}
-                  {loading && !info && hasProcessedOnce && (
+                  {/* CHANGE: Added Skeleton Loader that appears when loading is true and info is null */}
+                  {loading && !info && (
                     <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
                         <div className="shrink-0 w-full md:w-56 aspect-video rounded-xl bg-white/5 border border-white/5 shadow-inner"></div>
