@@ -408,7 +408,7 @@ function App() {
           <div className="shrink-0 z-50">
             <button 
               onClick={handleHamburgerClick} 
-              className={`hidden md:block cursor-pointer bg-transparent transition-none ${isNavOpen || isSearchMode ? 'text-emerald-400' : 'opacity-100'}`}
+              className={`hidden md:block cursor-pointer bg-transparent transition-none hover:text-gray-500 active:text-gray-500 ${isNavOpen || isSearchMode ? 'text-emerald-400 hover:text-emerald-300' : 'opacity-100'}`}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
@@ -447,12 +447,7 @@ function App() {
             </div>
             <button 
               onClick={() => setIsSearchMode(true)} 
-              className="ml-auto block cursor-pointer group transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1)"
-              style={{ 
-                opacity: (isNavOpen && !isSearchMode) ? 1 : 0, 
-                pointerEvents: (isNavOpen && !isSearchMode) ? 'auto' : 'none',
-                transform: (isNavOpen && !isSearchMode) ? 'translateX(0) scale(1)' : 'translateX(30px) scale(0.8)'
-              }}
+              className={`ml-auto block cursor-pointer group transition-all duration-400 ease-in-out ${isNavOpen && !isSearchMode ? 'opacity-100 translate-x-0 pointer-events-auto scale-100' : 'opacity-0 translate-x-10 pointer-events-none scale-75'}`}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 group-hover:text-gray-500 group-active:text-gray-500">
                 <circle cx="11" cy="11" r="8"></circle>
@@ -574,7 +569,7 @@ function App() {
         <AnimatePresence>
           {(!isNavOpen && !isSearchMode) && (
             <motion.button 
-              key="mobile-internal"
+              key="mobile-external"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
