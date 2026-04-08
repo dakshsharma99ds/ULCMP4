@@ -198,19 +198,23 @@ function App() {
         return;
       }
 
-      // --- CHANGE START: Logic to ensure Instagram shows accurate titles ---
-      let displayTitle = data.title;
-      if (targetUrl.includes('instagram.com') && (!data.title || data.title.toLowerCase().includes('instagram video'))) {
-        // If the API returns a generic title for Instagram, we prioritize the provided caption or platform-specific info
-        displayTitle = data.description || data.title || `Instagram Media - ${new URL(targetUrl).pathname.split('/')[2]}`;
+      // --- CHANGE AREA: Instagram Title Accuracy Fix ---
+      // We check if it's Instagram and if the title is generic. 
+      // If so, we prioritize the description (caption) and clean it up.
+      let accurateTitle = data.title;
+      if (targetUrl.includes('instagram.com')) {
+          const rawText = data.description || data.title || '';
+          // Clean Instagram's "Username on Instagram: 'caption'" format
+          const cleanedText = rawText.replace(/.*on Instagram: "(.*)"/, '$1').replace(/.*on Instagram: /, '');
+          accurateTitle = cleanedText.length > 1 ? cleanedText : `Instagram Media - ${targetUrl.split('/').filter(Boolean).pop()}`;
       }
-      // --- CHANGE END ---
+      // --- END OF CHANGE AREA ---
 
-      setInfo({ ...data, title: displayTitle, fetchedUrl: targetUrl });
-      if (displayTitle) {
+      setInfo({ ...data, title: accurateTitle, fetchedUrl: targetUrl });
+      if (accurateTitle) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
-            return [{ title: displayTitle, url: targetUrl }, ...filtered].slice(0, 100);
+            return [{ title: accurateTitle, url: targetUrl }, ...filtered].slice(0, 100);
         });
       }
     } catch (err) { 
