@@ -49,9 +49,6 @@ function App() {
   const [hoveredItem, setHoveredItem] = useState(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  // New state to track which item is currently being pressed on mobile
-  const [pressedItem, setPressedItem] = useState(null);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
 
@@ -321,7 +318,7 @@ function App() {
     <div className="h-screen w-screen bg-[#0a0a0a] text-white flex overflow-hidden fixed inset-0" onMouseMove={handleMouseMove}>
       
       <AnimatePresence>
-        {hoveredItem && typeof window !== 'undefined' && window.innerWidth >= 768 && (
+        {hoveredItem && (
           <CustomTooltip 
             text={hoveredItem} 
             mousePos={mousePos} 
@@ -369,7 +366,7 @@ function App() {
                     downloadThumbnailFile(info.thumbnail, info.title);
                     setHoveredItem(null);
                   }}
-                  className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-emerald-500 active:bg-emerald-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
+                  className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-emerald-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 </button>
@@ -377,7 +374,7 @@ function App() {
                   onMouseEnter={() => setHoveredItem("CLOSE")}
                   onMouseLeave={() => setHoveredItem(null)}
                   onClick={() => {setIsModalOpen(false); setHoveredItem(null);}}
-                  className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-red-500 active:bg-red-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
+                  className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-red-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
@@ -475,62 +472,48 @@ function App() {
               pointerEvents: isSearchMode ? 'none' : 'auto'
             }}
           >
-            {/* HOME */}
-            <div 
-              onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} 
-              onTouchStart={() => setPressedItem('home')}
-              onTouchEnd={() => setPressedItem(null)}
-              className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8"
-            >
+            {/* HOME OPTION */}
+            <div onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-6 h-6 shrink-0 transition-colors duration-300 
-                ${currentPage === 'home' ? 'icon-emerald-active' : (pressedItem === 'home' ? 'text-gray-500' : 'icon-hover-trigger')}`}>
+                ${currentPage === 'home' ? 'icon-emerald-active' : 'icon-hover-trigger group-active:text-gray-500'}`}>
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
               </svg>
               <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 
-                ${currentPage === 'home' ? 'text-emerald-400' : (pressedItem === 'home' ? 'text-gray-500' : 'group-hover:text-gray-500')}`} 
+                ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`} 
                 style={textTransitionStyle(isNavOpen)}>HOME</span>
             </div>
 
-            {/* ABOUT */}
-            <div 
-              onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} 
-              onTouchStart={() => setPressedItem('about')}
-              onTouchEnd={() => setPressedItem(null)}
-              className="shrink-0 flex items-center gap-6 cursor-pointer group"
-            >
+            {/* ABOUT OPTION */}
+            <div onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-7 h-7 shrink-0 ml-[-2px] transition-colors duration-300 
-                ${currentPage === 'about' ? 'icon-emerald-active' : (pressedItem === 'about' ? 'text-gray-500' : 'icon-hover-trigger')}`}>
+                ${currentPage === 'about' ? 'icon-emerald-active' : 'icon-hover-trigger group-active:text-gray-500'}`}>
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
               <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 
-                ${currentPage === 'about' ? 'text-emerald-400' : (pressedItem === 'about' ? 'text-gray-500' : 'group-hover:text-gray-500')}`} 
+                ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`} 
                 style={textTransitionStyle(isNavOpen)}>ABOUT</span>
             </div>
           </div>
 
           <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-            {/* RECENT */}
-            <div 
-              onClick={() => { if(!isSearchMode) { setIsSearchMode(true); setIsNavOpen(true); } }}
-              onTouchStart={() => setPressedItem('recent')}
-              onTouchEnd={() => setPressedItem(null)}
-              className="shrink-0 flex items-center gap-6 cursor-pointer mb-4 group"
+            {/* RECENT / SEARCH MODE OPTION */}
+            <div onClick={() => { if(!isSearchMode) { setIsSearchMode(true); setIsNavOpen(true); } }}
+              className={`shrink-0 flex items-center gap-6 cursor-pointer mb-4 group`}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-6 h-6 shrink-0 transition-colors duration-300 
-                ${isSearchMode ? 'icon-emerald-active' : (pressedItem === 'recent' ? 'text-gray-500' : 'icon-hover-trigger')}`}>
+                ${isSearchMode ? 'icon-emerald-active' : 'icon-hover-trigger group-active:text-gray-500'}`}>
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
               <span className={`nico-font text-sm tracking-[0.2em] whitespace-nowrap transition-colors duration-300 
-                ${isSearchMode ? 'text-emerald-400' : (pressedItem === 'recent' ? 'text-gray-500' : 'group-hover:text-gray-500')}`} 
+                ${isSearchMode ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`} 
                 style={textTransitionStyle(isNavOpen || isSearchMode)}>RECENT</span>
             </div>
-            
             <div className="ml-3 flex flex-col flex-1 min-h-0 transition-all duration-300"
               style={{ opacity: (isNavOpen || isSearchMode) ? 1 : 0, visibility: (isNavOpen || isSearchMode) ? 'visible' : 'hidden', overflow: 'hidden' }}
             >
@@ -562,49 +545,36 @@ function App() {
 
         <div className="mt-auto px-2 pt-4 pb-6 shrink-0 overflow-hidden">
           {isSearchMode ? (
-            <div 
-              onClick={() => { setIsSearchMode(false); setSearchTerm(''); }} 
-              onTouchStart={() => setPressedItem('back')}
-              onTouchEnd={() => setPressedItem(null)}
-              className="flex items-center gap-6 cursor-pointer group"
-            >
+            <div onClick={() => { setIsSearchMode(false); setSearchTerm(''); }} className="flex items-center gap-6 cursor-pointer group">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" 
-                className={`w-6 h-6 shrink-0 transition-colors duration-300 
-                ${pressedItem === 'back' ? 'text-gray-500' : 'icon-hover-trigger'}`}>
+                className="w-6 h-6 shrink-0 transition-colors duration-300 icon-hover-trigger group-active:text-gray-500">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
               </svg>
-              <span className={`nico-font text-sm tracking-widest transition-colors duration-300 
-                ${pressedItem === 'back' ? 'text-gray-500' : 'group-hover:text-gray-500'}`} 
+              <span className="nico-font text-sm tracking-widest transition-colors duration-300 group-hover:text-gray-500 group-active:text-gray-500" 
                 style={textTransitionStyle(isNavOpen || isSearchMode)}>BACK</span>
             </div>
           ) : (
-            /* CONTACT */
-            <div 
-              onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} 
-              onTouchStart={() => setPressedItem('contact')}
-              onTouchEnd={() => setPressedItem(null)}
-              className="flex items-center gap-6 cursor-pointer group"
-            >
+            /* CONTACT OPTION */
+            <div onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-6 h-6 shrink-0 transition-colors duration-300 
-                ${currentPage === 'contact' ? 'icon-emerald-active' : (pressedItem === 'contact' ? 'text-gray-500' : 'icon-hover-trigger')}`}>
+                ${currentPage === 'contact' ? 'icon-emerald-active' : 'icon-hover-trigger group-active:text-gray-500'}`}>
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
               </svg>
               <span className={`nico-font text-sm tracking-widest whitespace-nowrap transition-colors duration-300 
-                ${currentPage === 'contact' ? 'text-emerald-400' : (pressedItem === 'contact' ? 'text-gray-500' : 'group-hover:text-gray-500')}`} 
+                ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`} 
                 style={textTransitionStyle(isNavOpen)}>CONTACT</span>
             </div>
           )}
         </div>
       </nav>
 
-      {/* MOBILE TRIGGER BUTTON */}
       <div className="md:hidden">
         <AnimatePresence>
           {(!isNavOpen && !isSearchMode) && (
             <motion.button 
-              key="mobile-external"
+              key="mobile-internal"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
