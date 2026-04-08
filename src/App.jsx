@@ -408,7 +408,8 @@ function App() {
           <div className="shrink-0 z-50">
             <button 
               onClick={handleHamburgerClick} 
-              className={`hidden md:block cursor-pointer bg-transparent transition-none hover:text-gray-500 active:text-gray-500 ${isNavOpen || isSearchMode ? 'text-emerald-400 hover:text-emerald-300' : 'opacity-100'}`}
+              className={`hidden md:block cursor-pointer bg-transparent transition-none 
+                ${isNavOpen || isSearchMode ? 'text-emerald-400 hover:text-emerald-300' : 'opacity-100 hover:text-gray-500 active:text-gray-500'}`}
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
@@ -423,7 +424,7 @@ function App() {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.4 }} 
                     onClick={handleHamburgerClick} 
-                    className="cursor-pointer bg-transparent text-emerald-400 active:text-gray-500"
+                    className="cursor-pointer bg-transparent text-emerald-400 hover:text-emerald-300 active:text-gray-500"
                   >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                   </motion.button>
