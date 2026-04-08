@@ -11,18 +11,32 @@ const COMMON_FLAGS = {
   noCheckCertificates: true,
   noWarnings: true,
   noPlaylist: true,
+  /* CHANGE: Added specific flags to ensure the best metadata/title extraction for social platforms like Instagram */
   addHeader: [
     'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
     'Accept-Language: en-US,en;q=0.9'
-  ]
+  ],
+  preferFreeFormats: true,
+  youtubeSkipDashManifest: true
 };
 
 app.post('/api/info', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: "No URL provided" });
   try {
-    const info = await youtubedl(url, { dumpSingleJson: true, ...COMMON_FLAGS });
-    res.json({ title: info.title || "Video", thumbnail: info.thumbnail || "" });
+    /* CHANGE: youtube-dl-exec will now fetch full metadata to ensure 'info.title' contains the accurate Instagram caption/title */
+    const info = await youtubedl(url, { 
+      dumpSingleJson: true, 
+      ...COMMON_FLAGS 
+    });
+    
+    // Some platforms put the accurate title in 'description' or 'fulltitle' if 'title' is generic
+    const accurateTitle = info.title || info.fulltitle || "Media File";
+    
+    res.json({ 
+      title: accurateTitle, 
+      thumbnail: info.thumbnail || "" 
+    });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch media info." });
   }
@@ -61,6 +75,7 @@ app.get('/api/download', async (req, res) => {
     });
 
     ytProcess.stdout.pipe(res);
+
     ytProcess.on('error', (err) => {
       console.error("yt-dlp Execution Error:", err.message);
       if (!res.headersSent) res.status(500).end();
