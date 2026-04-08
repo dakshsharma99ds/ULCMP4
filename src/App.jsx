@@ -181,6 +181,7 @@ function App() {
     }
     
     setLoading(true);
+    // CHANGE: Clear existing info when loading starts for a new link to allow skeleton to show
     setInfo(null); 
     
     try {
@@ -198,23 +199,11 @@ function App() {
         return;
       }
 
-      // --- CHANGE AREA: Instagram Title Accuracy Fix ---
-      // We check if it's Instagram and if the title is generic. 
-      // If so, we prioritize the description (caption) and clean it up.
-      let accurateTitle = data.title;
-      if (targetUrl.includes('instagram.com')) {
-          const rawText = data.description || data.title || '';
-          // Clean Instagram's "Username on Instagram: 'caption'" format
-          const cleanedText = rawText.replace(/.*on Instagram: "(.*)"/, '$1').replace(/.*on Instagram: /, '');
-          accurateTitle = cleanedText.length > 1 ? cleanedText : `Instagram Media - ${targetUrl.split('/').filter(Boolean).pop()}`;
-      }
-      // --- END OF CHANGE AREA ---
-
-      setInfo({ ...data, title: accurateTitle, fetchedUrl: targetUrl });
-      if (accurateTitle) {
+      setInfo({ ...data, fetchedUrl: targetUrl });
+      if (data.title) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
-            return [{ title: accurateTitle, url: targetUrl }, ...filtered].slice(0, 100);
+            return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
         });
       }
     } catch (err) { 
@@ -634,6 +623,7 @@ function App() {
                     </button>
                   </div>
 
+                  {/* CHANGE: Added Skeleton Loader that appears when loading is true and info is null */}
                   {loading && !info && (
                     <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
