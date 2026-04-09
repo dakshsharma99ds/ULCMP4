@@ -34,7 +34,7 @@ app.post('/api/info', async (req, res) => {
     const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
     const isTumblrDirect = url.includes('va.media.tumblr.com');
     const isBilibili = url.includes('bilibili.com') || url.includes('b23.tv');
-    /* CHANGE: Added detection for Instagram */
+    /* CHANGE: Identify Instagram links for specific thumbnail handling */
     const isInstagram = url.includes('instagram.com');
     
     let accurateTitle;
@@ -42,37 +42,39 @@ app.post('/api/info', async (req, res) => {
     if (isTumblrDirect) {
       accurateTitle = "Tumblr video";
     } else if (isReddit || isPinterest || isBilibili) {
-      accurateTitle = info.title || info.fulltitle || "Media Content";
+      accurateTitle = info.title || info.fulltitle || "Media Content"; [cite: 23]
     } else if (isSnapchat) {
       accurateTitle = (info.description && info.description.length > 2) 
-        ? info.description.split('\n')[0] 
+        ? info.description.split('\n')[0] [cite: 24]
         : (info.title && !info.title.includes("Snapchat") ? info.title : info.fulltitle || "Snapchat Content");
     } else {
       accurateTitle = (info.description && info.description.length > 2) 
-        ? info.description.split('\n')[0] 
+        ? info.description.split('\n')[0] [cite: 26]
         : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
     }
-
-    /* CHANGE: Handle Instagram Post Thumbnails 
-       This specifically checks the thumbnails array if the primary thumbnail field is empty, 
-       ensuring /p/ (post) links show an image correctly. */
+    
+    /* CHANGE: Specific Instagram Thumbnail Logic 
+       This ensures that for Instagram posts (/p/), we check the thumbnails array 
+       if the primary thumbnail field is empty. 
+    */
     let accurateThumbnail = info.thumbnail || "";
     if (isInstagram && !accurateThumbnail && info.thumbnails && info.thumbnails.length > 0) {
+      // Pick the last (usually highest resolution) thumbnail from the array
       accurateThumbnail = info.thumbnails[info.thumbnails.length - 1].url;
     }
-    
+
     res.json({ 
       title: accurateTitle, 
       thumbnail: accurateThumbnail 
     });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch media info." });
+    res.status(500).json({ error: "Failed to fetch media info." }); [cite: 28]
   }
 });
 
 app.get('/api/download', async (req, res) => {
   const { url, type, title } = req.query;
-  if (!url) return res.status(400).send("No URL provided");
+  if (!url) return res.status(400).send("No URL provided"); [cite: 29]
 
   const isMp3 = type === 'mp3';
   const isReddit = url.includes('reddit.com');
@@ -88,7 +90,7 @@ app.get('/api/download', async (req, res) => {
     if (isMp3) {
       formatSelection = 'bestaudio/best';
     } else if (isReddit) {
-      formatSelection = 'bestvideo+bestaudio/best';
+      formatSelection = 'bestvideo+bestaudio/best'; [cite: 30]
     } else {
       formatSelection = 'best[ext=mp4]/b/best';
     }
@@ -104,7 +106,7 @@ app.get('/api/download', async (req, res) => {
       youtubeSkipDashManifest: true 
     });
 
-    ytProcess.stdout.pipe(res);
+    ytProcess.stdout.pipe(res); [cite: 31]
 
     ytProcess.on('error', (err) => {
       console.error("yt-dlp Execution Error:", err.message);
@@ -112,22 +114,22 @@ app.get('/api/download', async (req, res) => {
     });
 
     ytProcess.stderr.on('data', (data) => {
-      console.log(`yt-dlp Log: ${data.toString()}`);
+      console.log(`yt-dlp Log: ${data.toString()}`); [cite: 32]
     });
 
     res.on('close', () => {
-      if (ytProcess.kill) ytProcess.kill();
+      if (ytProcess.kill) ytProcess.kill(); [cite: 33]
     });
 
   } catch (error) {
     console.error("Critical Error:", error.message);
-    if (!res.headersSent) res.status(500).send("Server error.");
+    if (!res.headersSent) res.status(500).send("Server error."); [cite: 34]
   }
 });
 
 const distPath = path.resolve(process.cwd(), 'dist');
-app.use(express.static(distPath));
+app.use(express.static(distPath)); [cite: 35]
 app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`--- Server running at ${PORT} ---`));
+app.listen(PORT, () => console.log(`--- Server running at ${PORT} ---`)); [cite: 36]
