@@ -292,8 +292,8 @@ function App() {
       );
     }
     if (lowerUrl.includes('tumblr.com')) {
-      // CHANGE: Made tumblr logo non-draggable and set opacity to 70% to match other icons
-      return <img src="./tumblr.png" alt="tumblr" className="w-12 h-12 opacity-70" draggable="false" />; 
+      // CHANGE: Added select-none, pointer-events-none, and updated opacity to match insta logo
+      return <img src="./tumblr.png" alt="tumblr" className="w-12 h-12 opacity-70 select-none pointer-events-none" draggable="false" />; 
     }
     return null;
   };
