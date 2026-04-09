@@ -11,11 +11,9 @@ const COMMON_FLAGS = {
   noCheckCertificates: true,
   noWarnings: true,
   noPlaylist: true,
-  /* CHANGE: Enhanced headers to look more like a real user to Instagram's servers */
   addHeader: [
     'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-    'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-    'Accept-Language: en-US,en;q=0.5',
+    'Accept-Language: en-US,en;q=0.9',
     'Sec-Fetch-Mode: navigate'
   ],
   preferFreeFormats: true,
@@ -31,12 +29,21 @@ app.post('/api/info', async (req, res) => {
       ...COMMON_FLAGS 
     });
     
-    /* CHANGE: Instagram often puts the caption in 'description'. 
-       We check description first because 'title' often just says "Instagram photo" or "Video".
+    // Check platform
+    const isReddit = url.includes('reddit.com');
+    
+    /* CHANGE: Added logic to prioritize Title for Reddit, while keeping Description-fallback for Instagram.
+       For Reddit, we use info.title. For others (Instagram), we use the caption from info.description.
     */
-    const accurateTitle = (info.description && info.description.length > 2) 
-      ? info.description.split('\n')[0] // Take first line of caption
-      : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
+    let accurateTitle;
+    if (isReddit) {
+      accurateTitle = info.title || info.fulltitle || "Reddit Video";
+    } else {
+      // Instagram/Others logic: use description (caption) if it exists, otherwise title
+      accurateTitle = (info.description && info.description.length > 2) 
+        ? info.description.split('\n')[0] 
+        : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
+    }
     
     res.json({ 
       title: accurateTitle, 
@@ -53,7 +60,7 @@ app.get('/api/download', async (req, res) => {
 
   const isMp3 = type === 'mp3';
   const isReddit = url.includes('reddit.com');
-  // Clean title for filename
+
   const cleanTitle = (title || 'download').replace(/[/\\?%*:|"<>]/g, '-').substring(0, 100);
   const fileName = `${encodeURIComponent(cleanTitle)}.${isMp3 ? 'mp3' : 'mp4'}`;
 
