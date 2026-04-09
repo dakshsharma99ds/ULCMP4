@@ -34,7 +34,7 @@ app.post('/api/info', async (req, res) => {
     const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
     const isTumblrDirect = url.includes('va.media.tumblr.com');
     const isBilibili = url.includes('bilibili.com') || url.includes('b23.tv');
-    /* CHANGE: Detect Instagram for thumbnail and title handling */
+    /* CHANGE: Added detection for Instagram */
     const isInstagram = url.includes('instagram.com');
     
     let accurateTitle;
@@ -48,22 +48,22 @@ app.post('/api/info', async (req, res) => {
         ? info.description.split('\n')[0] 
         : (info.title && !info.title.includes("Snapchat") ? info.title : info.fulltitle || "Snapchat Content");
     } else {
-      // Instagram and others: fallback to description/caption first
       accurateTitle = (info.description && info.description.length > 2) 
         ? info.description.split('\n')[0] 
         : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
     }
-    
-    /* CHANGE: Specific Instagram Thumbnail Logic 
-       Ensures thumbnails for posts (/p/) are captured correctly by checking multiple potential info fields */
+
+    /* CHANGE: Handle Instagram Post Thumbnails 
+       This specifically checks the thumbnails array if the primary thumbnail field is empty, 
+       ensuring /p/ (post) links show an image correctly. */
     let accurateThumbnail = info.thumbnail || "";
     if (isInstagram && !accurateThumbnail && info.thumbnails && info.thumbnails.length > 0) {
-        accurateThumbnail = info.thumbnails[info.thumbnails.length - 1].url;
+      accurateThumbnail = info.thumbnails[info.thumbnails.length - 1].url;
     }
-
+    
     res.json({ 
       title: accurateTitle, 
-      thumbnail: accurateThumbnail // Use the processed thumbnail
+      thumbnail: accurateThumbnail 
     });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch media info." });
@@ -118,6 +118,7 @@ app.get('/api/download', async (req, res) => {
     res.on('close', () => {
       if (ytProcess.kill) ytProcess.kill();
     });
+
   } catch (error) {
     console.error("Critical Error:", error.message);
     if (!res.headersSent) res.status(500).send("Server error.");
