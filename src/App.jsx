@@ -52,6 +52,13 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
 
+  // FIX: Force tooltip update for hamburger when state changes while hovering
+  useEffect(() => {
+    if (hoveredItem === "EXPAND" || hoveredItem === "COLLAPSE") {
+      setHoveredItem(isNavOpen || isSearchMode ? "COLLAPSE" : "EXPAND");
+    }
+  }, [isNavOpen, isSearchMode]);
+
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
   };
@@ -292,7 +299,6 @@ function App() {
       );
     }
     if (lowerUrl.includes('tumblr.com')) {
-      // CHANGE: Added select-none, pointer-events-none, and updated opacity to match insta logo
       return <img src="./tumblr.png" alt="tumblr" className="w-12 h-12 opacity-70 select-none pointer-events-none" draggable="false" />; 
     }
     return null;
@@ -408,6 +414,8 @@ function App() {
         <div className="flex items-center mb-6 px-2 shrink-0 relative h-10 overflow-hidden">
           <div className="shrink-0 z-50">
             <button 
+              onMouseEnter={() => setHoveredItem(isNavOpen || isSearchMode ? "COLLAPSE" : "EXPAND")}
+              onMouseLeave={() => setHoveredItem(null)}
               onClick={handleHamburgerClick} 
               className={`hidden md:block cursor-pointer bg-transparent transition-none 
                 ${isNavOpen || isSearchMode ? 'text-emerald-400' : 'opacity-100 hover:text-gray-500 active:text-gray-500'}`}
@@ -448,7 +456,9 @@ function App() {
                 </div>
             </div>
             <button 
-              onClick={() => setIsSearchMode(true)} 
+              onMouseEnter={() => { if(isNavOpen && !isSearchMode) setHoveredItem("SEARCH"); }}
+              onMouseLeave={() => setHoveredItem(null)}
+              onClick={() => { setIsSearchMode(true); setHoveredItem(null); }} 
               className={`ml-auto block cursor-pointer group transition-all duration-400 ease-in-out ${isNavOpen && !isSearchMode ? 'opacity-100 translate-x-0 pointer-events-auto scale-100' : 'opacity-0 translate-x-10 pointer-events-none scale-75'}`}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 group-hover:text-gray-500 group-active:text-gray-500">
@@ -470,7 +480,12 @@ function App() {
             }}
           >
             {/* HOME */}
-            <div onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8">
+            <div 
+              onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("HOME"); }}
+              onMouseLeave={() => setHoveredItem(null)}
+              onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} 
+              className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8"
+            >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-6 h-6 shrink-0 
                 ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`}>
@@ -483,7 +498,11 @@ function App() {
             </div>
 
             {/* ABOUT */}
-            <div onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group">
+            <div 
+              onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("ABOUT"); }}
+              onMouseLeave={() => setHoveredItem(null)}
+              onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} 
+              className="shrink-0 flex items-center gap-6 cursor-pointer group">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-7 h-7 shrink-0 ml-[-2px] 
                 ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`}>
@@ -498,7 +517,10 @@ function App() {
 
           <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
             {/* RECENT */}
-            <div onClick={() => { if(!isSearchMode) { setIsSearchMode(true); setIsNavOpen(true); } }}
+            <div 
+              onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("RECENT"); }}
+              onMouseLeave={() => setHoveredItem(null)}
+              onClick={() => { if(!isSearchMode) { setIsSearchMode(true); setIsNavOpen(true); setHoveredItem(null); } }}
               className={`shrink-0 flex items-center gap-6 cursor-pointer mb-4 group`}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
@@ -553,7 +575,12 @@ function App() {
             </div>
           ) : (
             /* CONTACT */
-            <div onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group">
+            <div 
+              onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("CONTACT"); }}
+              onMouseLeave={() => setHoveredItem(null)}
+              onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} 
+              className="flex items-center gap-6 cursor-pointer group"
+            >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-6 h-6 shrink-0 
                 ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`}>
