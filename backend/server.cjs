@@ -53,9 +53,10 @@ app.post('/api/info', async (req, res) => {
         : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
     }
     
-    // Handle Instagram Post Thumbnails 
+    // CHANGE: Handle Instagram Post Thumbnails specifically
     let accurateThumbnail = info.thumbnail || "";
     if (isInstagram && !accurateThumbnail && info.thumbnails && info.thumbnails.length > 0) {
+      // Pick the last item in the array, which is usually the highest quality
       accurateThumbnail = info.thumbnails[info.thumbnails.length - 1].url;
     }
 
