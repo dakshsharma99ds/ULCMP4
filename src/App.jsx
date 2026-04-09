@@ -575,9 +575,10 @@ function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.1 }} // Instant fade out to prevent flicker
+              transition={{ duration: 0.1 }}
               onClick={() => setIsNavOpen(true)} 
-              className="fixed top-8 left-6 z-30 text-white transition-none pointer-events-auto hover:text-gray-500 active:text-gray-500"
+              className={`fixed top-8 left-6 z-30 transition-colors duration-200 pointer-events-auto hover:text-gray-500 active:text-gray-500
+                ${isNavOpen ? 'text-gray-500' : 'text-white'}`}
             >
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </motion.button>
