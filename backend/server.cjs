@@ -29,17 +29,27 @@ app.post('/api/info', async (req, res) => {
       ...COMMON_FLAGS 
     });
     
-    // Check platform
     const isReddit = url.includes('reddit.com');
+    const isSnapchat = url.includes('snapchat.com');
+    const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
+    /* CHANGE: Check for Tumblr direct media links */
+    const isTumblrDirect = url.includes('va.media.tumblr.com');
     
-    /* CHANGE: Added logic to prioritize Title for Reddit, while keeping Description-fallback for Instagram.
-       For Reddit, we use info.title. For others (Instagram), we use the caption from info.description.
-    */
     let accurateTitle;
-    if (isReddit) {
-      accurateTitle = info.title || info.fulltitle || "Reddit Video";
+
+    if (isTumblrDirect) {
+      /* CHANGE: Manual override for Tumblr direct video URLs */
+      accurateTitle = "Tumblr video";
+    } else if (isReddit || isPinterest) {
+      /* CHANGE: Prioritize titles for Reddit and Pinterest */
+      accurateTitle = info.title || info.fulltitle || (isPinterest ? "Pinterest Pin" : "Reddit Video");
+    } else if (isSnapchat) {
+      /* CHANGE: Prefer description for Snapchat to get the actual story/spotlight caption */
+      accurateTitle = (info.description && info.description.length > 2) 
+        ? info.description.split('\n')[0] 
+        : (info.title && !info.title.includes("Snapchat") ? info.title : info.fulltitle || "Snapchat Content");
     } else {
-      // Instagram/Others logic: use description (caption) if it exists, otherwise title
+      // Instagram and others: use description (caption) fallback
       accurateTitle = (info.description && info.description.length > 2) 
         ? info.description.split('\n')[0] 
         : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
