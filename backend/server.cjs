@@ -33,30 +33,24 @@ app.post('/api/info', async (req, res) => {
     const isSnapchat = url.includes('snapchat.com');
     const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
     const isTumblrDirect = url.includes('va.media.tumblr.com');
-    const isBilibili = url.includes('bilibili.com');
+    /* CHANGE: Detect Bilibili links to handle title prioritization */
+    const isBilibili = url.includes('bilibili.com') || url.includes('b23.tv');
     
     let accurateTitle;
 
     if (isTumblrDirect) {
       accurateTitle = "Tumblr video";
     } else if (isReddit || isPinterest || isBilibili) {
-      /* CHANGE: Explicitly prioritizing title for Bilibili, Reddit, and Pinterest */
-      accurateTitle = info.title || info.fulltitle || (isBilibili ? "Bilibili Video" : "Media Content");
+      /* CHANGE: For Bilibili, Reddit, and Pinterest, we strictly prioritize info.title 
+         to avoid long descriptions cluttering the UI. 
+      */
+      accurateTitle = info.title || info.fulltitle || "Media Content";
     } else if (isSnapchat) {
-      /* CHANGE: Logic to strip "Watch [User]'s story..." and provide accurate fallback */
-      const rawTitle = info.title || "";
-      const isGenericSnap = rawTitle.toLowerCase().startsWith("watch") || rawTitle.includes("Snapchat");
-      
-      if (info.description && info.description.length > 5 && !info.description.includes("Watch")) {
-        accurateTitle = info.description.split('\n')[0];
-      } else if (isGenericSnap) {
-        // Determine if it's Spotlight or Story based on URL
-        accurateTitle = url.includes('spotlight') ? "Snapchat Spotlight" : "Snapchat Story";
-      } else {
-        accurateTitle = rawTitle || "Snapchat Content";
-      }
+      accurateTitle = (info.description && info.description.length > 2) 
+        ? info.description.split('\n')[0] 
+        : (info.title && !info.title.includes("Snapchat") ? info.title : info.fulltitle || "Snapchat Content");
     } else {
-      // Default fallback (Instagram, etc.)
+      // Instagram and others: fallback to description/caption first
       accurateTitle = (info.description && info.description.length > 2) 
         ? info.description.split('\n')[0] 
         : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
