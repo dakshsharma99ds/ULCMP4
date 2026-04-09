@@ -47,7 +47,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home');
   
   const [hoveredItem, setHoveredItem] = useState(null);
-  const [mousePos, setMousePos] =({ x: 0, y: 0 });
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
@@ -279,23 +279,21 @@ function App() {
 
     if (lowerUrl.includes('linkedin.com')) {
       return (
-        /* CHANGE: Added draggable="false" to platform logos */
-        <svg viewBox="0 0 24 24" fill="currentColor" className={iconClasses} draggable="false">
+        <svg viewBox="0 0 24 24" fill="currentColor" className={iconClasses} draggable="true">
           <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
         </svg>
       );
     }
     if (lowerUrl.includes('instagram.com')) {
       return (
-        /* CHANGE: Added draggable="false" to platform logos */
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={iconClasses} draggable="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={iconClasses} draggable="true">
           <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
         </svg>
       );
     }
     if (lowerUrl.includes('tumblr.com')) {
-      /* CHANGE: Added draggable="false" and select-none to Tumblr logo image */
-      return <img src="./tumblr.png" alt="tumblr" className={`${iconClasses} select-none`} draggable="false" />; 
+      // CHANGE: Made tumblr logo non-draggable and set opacity to 70% to match other icons
+      return <img src="./tumblr.png" alt="tumblr" className="w-12 h-12 opacity-70" draggable="false" />; 
     }
     return null;
   };
@@ -388,7 +386,6 @@ function App() {
                 src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
                 className="max-h-[85vh] w-auto block select-none object-contain"
                 alt="Full Preview"
-                draggable="false"
               />
             </motion.div>
           </motion.div>
@@ -415,7 +412,7 @@ function App() {
               className={`hidden md:block cursor-pointer bg-transparent transition-none 
                 ${isNavOpen || isSearchMode ? 'text-emerald-400' : 'opacity-100 hover:text-gray-500 active:text-gray-500'}`}
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none" draggable="false"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
 
             <div className="md:hidden">
@@ -430,7 +427,7 @@ function App() {
                     onClick={handleHamburgerClick} 
                     className="cursor-pointer bg-transparent text-emerald-400 active:text-gray-500"
                   >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none" draggable="false"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                   </motion.button>
                 )}
               </AnimatePresence>
@@ -454,7 +451,7 @@ function App() {
               onClick={() => setIsSearchMode(true)} 
               className={`ml-auto block cursor-pointer group transition-all duration-400 ease-in-out ${isNavOpen && !isSearchMode ? 'opacity-100 translate-x-0 pointer-events-auto scale-100' : 'opacity-0 translate-x-10 pointer-events-none scale-75'}`}
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 group-hover:text-gray-500 group-active:text-gray-500" draggable="false">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 group-hover:text-gray-500 group-active:text-gray-500">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
@@ -472,10 +469,11 @@ function App() {
               pointerEvents: isSearchMode ? 'none' : 'auto'
             }}
           >
+            {/* HOME */}
             <div onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-6 h-6 shrink-0 
-                ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`} draggable="false">
+                ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`}>
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
               </svg>
@@ -484,10 +482,11 @@ function App() {
                 style={textTransitionStyle(isNavOpen)}>HOME</span>
             </div>
 
+            {/* ABOUT */}
             <div onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="shrink-0 flex items-center gap-6 cursor-pointer group">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-7 h-7 shrink-0 ml-[-2px] 
-                ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`} draggable="false">
+                ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`}>
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                 <circle cx="12" cy="7" r="4"></circle>
               </svg>
@@ -498,12 +497,13 @@ function App() {
           </div>
 
           <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            {/* RECENT */}
             <div onClick={() => { if(!isSearchMode) { setIsSearchMode(true); setIsNavOpen(true); } }}
               className={`shrink-0 flex items-center gap-6 cursor-pointer mb-4 group`}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-6 h-6 shrink-0 
-                ${isSearchMode ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`} draggable="false">
+                ${isSearchMode ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`}>
                 <circle cx="12" cy="12" r="10"></circle>
                 <polyline points="12 6 12 12 16 14"></polyline>
               </svg>
@@ -544,7 +544,7 @@ function App() {
           {isSearchMode ? (
             <div onClick={() => { setIsSearchMode(false); setSearchTerm(''); }} className="flex items-center gap-6 cursor-pointer group">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" 
-                className="w-6 h-6 shrink-0 group-hover:text-gray-500 group-active:text-gray-500" draggable="false">
+                className="w-6 h-6 shrink-0 group-hover:text-gray-500 group-active:text-gray-500">
                 <line x1="19" y1="12" x2="5" y2="12"></line>
                 <polyline points="12 19 5 12 12 5"></polyline>
               </svg>
@@ -552,10 +552,11 @@ function App() {
                 style={textTransitionStyle(isNavOpen || isSearchMode)}>BACK</span>
             </div>
           ) : (
+            /* CONTACT */
             <div onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
                 className={`w-6 h-6 shrink-0 
-                ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`} draggable="false">
+                ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`}>
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
               </svg>
               <span className={`nico-font text-sm tracking-widest whitespace-nowrap 
@@ -566,13 +567,14 @@ function App() {
         </div>
       </nav>
 
+      {/* MOBILE ONLY OUTSIDE HAMBURGER (NO FADE) */}
       <div className="md:hidden">
         <button 
           onClick={() => setIsNavOpen(true)} 
           className={`fixed top-8 left-6 z-30 transition-colors duration-200 pointer-events-auto hover:text-gray-500 active:text-gray-500
             ${isNavOpen ? 'text-gray-500' : 'text-white'}`}
         >
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none" draggable="false"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
       </div>
       
@@ -626,12 +628,12 @@ function App() {
                       className="bg-white text-black px-4 md:px-10 py-4 rounded-2xl hover:bg-emerald-400 active:bg-emerald-400 active:scale-95 transition-all cursor-pointer flex items-center justify-center min-w-15 md:min-w-35 select-none"
                     >
                       {loading ? (
-                        <svg className="animate-spin h-5 w-5 md:h-7 md:w-7 text-black" viewBox="0 0 24 24" draggable="false">
+                        <svg className="animate-spin h-5 w-5 md:h-7 md:w-7 text-black" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                       ) : (
-                        <svg className="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" draggable="false"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <svg className="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                       )}
                     </button>
                   </div>
@@ -662,9 +664,9 @@ function App() {
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
                               <>
-                                <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="false" />
+                                <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true" />
                                 <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover/main-thumb:opacity-100 transition-opacity flex items-center justify-center">
-                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg" draggable="false"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
                                 </div>
                               </>
                             ) : (
