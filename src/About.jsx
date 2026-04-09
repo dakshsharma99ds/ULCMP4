@@ -72,9 +72,10 @@ const About = () => {
             <h3 className="nico-font text-[7px] md:text-[10px] text-emerald-400/80 tracking-widest uppercase mb-auto text-center select-text">Tech Stack</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 md:gap-x-6 gap-y-2 md:gap-y-5 mb-auto">
               <div className="flex items-center gap-1.5 md:gap-2.5">
-                <svg viewBox="-11.5 -10.23174 23 20.46348" className="w-3 h-3 md:w-5 md:h-5 fill-none stroke-emerald-500/80 pointer-events-none select-none">
-                  <circle cx="0" cy="0" r="2.05" fill="currentColor" className="text-emerald-500/80" />
-                  <g stroke="currentColor" strokeWidth="1" fill="none" className="text-emerald-500/80">
+                {/* Unified color to match brighter logos */}
+                <svg viewBox="-11.5 -10.23174 23 20.46348" className="w-3 h-3 md:w-5 md:h-5 fill-none stroke-[#10b981] pointer-events-none select-none">
+                  <circle cx="0" cy="0" r="2.05" fill="currentColor" className="text-[#10b981]" />
+                  <g stroke="currentColor" strokeWidth="1" fill="none" className="text-[#10b981]">
                     <ellipse rx="11" ry="4.2" />
                     <ellipse rx="11" ry="4.2" transform="rotate(60)" />
                     <ellipse rx="11" ry="4.2" transform="rotate(120)" />
@@ -83,17 +84,18 @@ const About = () => {
                 <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white uppercase tracking-wider font-bold transition-colors duration-500 select-text">React</span>
               </div>
               <div className="flex items-center gap-1.5 md:gap-2.5">
-                <svg viewBox="0 0 24 24" className="tailwind-logo w-3 h-3 md:w-5 md:h-5 fill-emerald-500/80 transition-colors duration-500 pointer-events-none select-none">
+                {/* Added shrink-0 to keep Tailwind logo size fixed */}
+                <svg viewBox="0 0 24 24" className="tailwind-logo w-3 h-3 md:w-5 md:h-5 fill-[#10b981] transition-colors duration-500 pointer-events-none select-none shrink-0">
                   <path d="M12.001 4.8c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624C13.666 10.618 15.027 12 18.001 12c3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C16.337 6.182 14.976 4.8 12.001 4.8zm-6 7.2c-3.2 0-5.2 1.6-6 4.8 1.2-1.6 2.6-2.2 4.2-1.8.913.228 1.565.89 2.288 1.624 1.177 1.194 2.538 2.576 5.512 2.576 3.2 0 5.2-1.6 6-4.8-1.2 1.6-2.6 2.2-4.2 1.8-.913-.228-1.565-.89-2.288-1.624C10.337 13.382 8.976 12 6.001 12z" />
                 </svg>
                 <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white uppercase tracking-wider font-bold transition-colors duration-500 select-text">Tailwind</span>
               </div>
               <div className="flex items-center gap-1.5 md:gap-2.5">
-                <img src="/framer.png" alt="Framer" draggable="false" className="framer-logo w-3 h-3 md:w-5 md:h-5 [filter:brightness(0)_saturate(100%)_invert(61%)_sepia(97%)_saturate(392%)_hue-rotate(113deg)_brightness(94%)_contrast(88%)] pointer-events-none select-none transition-all duration-500" />
+                <img src="/framer.png" alt="Framer" draggable="false" className="framer-logo w-3 h-3 md:w-5 md:h-5 pointer-events-none select-none transition-all duration-500" />
                 <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white uppercase tracking-wider font-bold transition-colors duration-500 select-text">Framer</span>
               </div>
               <div className="flex items-center gap-1.5 md:gap-2.5">
-                <img src="/ffmpeg.png" alt="FFmpeg" draggable="false" className="ffmpeg-logo w-3 h-3 md:w-5 md:h-5 [filter:brightness(0)_saturate(100%)_invert(61%)_sepia(97%)_saturate(392%)_hue-rotate(113deg)_brightness(94%)_contrast(88%)] pointer-events-none select-none transition-all duration-500" />
+                <img src="/ffmpeg.png" alt="FFmpeg" draggable="false" className="ffmpeg-logo w-3 h-3 md:w-5 md:h-5 pointer-events-none select-none transition-all duration-500" />
                 <span className="font-mono text-[8px] md:text-[12px] text-gray-400 group-hover:text-white uppercase tracking-wider font-bold transition-colors duration-500 select-text">FFmpeg</span>
               </div>
             </div>
@@ -108,7 +110,8 @@ const About = () => {
                   {[...socialPlatforms, ...socialPlatforms, ...socialPlatforms].map((platform, index) => (
                   <div key={index} className="flex flex-col items-center mx-3 md:mx-5 gap-1 md:gap-1.5">
                     {platform.path ? (
-                      <svg viewBox="0 0 24 24" className="platform-icon w-5 h-5 md:w-8 md:h-8 fill-gray-500 group-hover:fill-white transition-colors duration-500 pointer-events-none select-none">
+                      /* Updated SVG icons to have same opacity and grayscale behavior as image icons */
+                      <svg viewBox="0 0 24 24" className="platform-icon w-5 h-5 md:w-8 md:h-8 fill-white opacity-50 grayscale group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-500 pointer-events-none select-none">
                         <path d={platform.path} />
                       </svg>
                     ) : (
@@ -134,8 +137,10 @@ const About = () => {
         .tailwind-logo {
           fill: #10b981 !important;
         }
+        
+        /* Adjusted filters to be less "bright" and match the React/Tailwind emerald exactly */
         .framer-logo, .ffmpeg-logo {
-          filter: brightness(0) saturate(100%) invert(61%) sepia(97%) saturate(392%) hue-rotate(113deg) brightness(94%) contrast(88%) !important;
+          filter: brightness(0) saturate(100%) invert(56%) sepia(80%) saturate(450%) hue-rotate(115deg) brightness(90%) contrast(95%) !important;
         }
 
         @media (max-width: 767px) {
@@ -150,6 +155,8 @@ const About = () => {
           }
           .group:focus .platform-icon {
             fill: white !important;
+            opacity: 1 !important;
+            filter: grayscale(0) !important;
           }
           .group:focus .platform-img {
             opacity: 1 !important;
@@ -162,7 +169,8 @@ const About = () => {
             fill: #10b981 !important;
           }
           .group:hover .framer-logo, .group:hover .ffmpeg-logo {
-            filter: brightness(0) saturate(100%) invert(61%) sepia(97%) saturate(392%) hue-rotate(113deg) brightness(94%) contrast(88%) !important;
+             /* Keeps them consistent even on hover */
+            filter: brightness(0) saturate(100%) invert(56%) sepia(80%) saturate(450%) hue-rotate(115deg) brightness(90%) contrast(95%) !important;
           }
         }
 
