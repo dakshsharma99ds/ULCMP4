@@ -34,7 +34,7 @@ app.post('/api/info', async (req, res) => {
     const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
     const isTumblrDirect = url.includes('va.media.tumblr.com');
     const isBilibili = url.includes('bilibili.com') || url.includes('b23.tv');
-    /* CHANGE: Identify Instagram links for specific thumbnail handling */
+    // Detect Instagram links
     const isInstagram = url.includes('instagram.com');
     
     let accurateTitle;
@@ -42,24 +42,20 @@ app.post('/api/info', async (req, res) => {
     if (isTumblrDirect) {
       accurateTitle = "Tumblr video";
     } else if (isReddit || isPinterest || isBilibili) {
-      accurateTitle = info.title || info.fulltitle || "Media Content"; [cite: 23]
+      accurateTitle = info.title || info.fulltitle || "Media Content";
     } else if (isSnapchat) {
       accurateTitle = (info.description && info.description.length > 2) 
-        ? info.description.split('\n')[0] [cite: 24]
+        ? info.description.split('\n')[0] 
         : (info.title && !info.title.includes("Snapchat") ? info.title : info.fulltitle || "Snapchat Content");
     } else {
       accurateTitle = (info.description && info.description.length > 2) 
-        ? info.description.split('\n')[0] [cite: 26]
+        ? info.description.split('\n')[0] 
         : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
     }
     
-    /* CHANGE: Specific Instagram Thumbnail Logic 
-       This ensures that for Instagram posts (/p/), we check the thumbnails array 
-       if the primary thumbnail field is empty. 
-    */
+    // Handle Instagram Post Thumbnails 
     let accurateThumbnail = info.thumbnail || "";
     if (isInstagram && !accurateThumbnail && info.thumbnails && info.thumbnails.length > 0) {
-      // Pick the last (usually highest resolution) thumbnail from the array
       accurateThumbnail = info.thumbnails[info.thumbnails.length - 1].url;
     }
 
@@ -68,13 +64,13 @@ app.post('/api/info', async (req, res) => {
       thumbnail: accurateThumbnail 
     });
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch media info." }); [cite: 28]
+    res.status(500).json({ error: "Failed to fetch media info." });
   }
 });
 
 app.get('/api/download', async (req, res) => {
   const { url, type, title } = req.query;
-  if (!url) return res.status(400).send("No URL provided"); [cite: 29]
+  if (!url) return res.status(400).send("No URL provided");
 
   const isMp3 = type === 'mp3';
   const isReddit = url.includes('reddit.com');
@@ -90,7 +86,7 @@ app.get('/api/download', async (req, res) => {
     if (isMp3) {
       formatSelection = 'bestaudio/best';
     } else if (isReddit) {
-      formatSelection = 'bestvideo+bestaudio/best'; [cite: 30]
+      formatSelection = 'bestvideo+bestaudio/best';
     } else {
       formatSelection = 'best[ext=mp4]/b/best';
     }
@@ -106,7 +102,7 @@ app.get('/api/download', async (req, res) => {
       youtubeSkipDashManifest: true 
     });
 
-    ytProcess.stdout.pipe(res); [cite: 31]
+    ytProcess.stdout.pipe(res);
 
     ytProcess.on('error', (err) => {
       console.error("yt-dlp Execution Error:", err.message);
@@ -114,22 +110,22 @@ app.get('/api/download', async (req, res) => {
     });
 
     ytProcess.stderr.on('data', (data) => {
-      console.log(`yt-dlp Log: ${data.toString()}`); [cite: 32]
+      console.log(`yt-dlp Log: ${data.toString()}`);
     });
 
     res.on('close', () => {
-      if (ytProcess.kill) ytProcess.kill(); [cite: 33]
+      if (ytProcess.kill) ytProcess.kill();
     });
 
   } catch (error) {
     console.error("Critical Error:", error.message);
-    if (!res.headersSent) res.status(500).send("Server error."); [cite: 34]
+    if (!res.headersSent) res.status(500).send("Server error.");
   }
 });
 
 const distPath = path.resolve(process.cwd(), 'dist');
-app.use(express.static(distPath)); [cite: 35]
+app.use(express.static(distPath));
 app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`--- Server running at ${PORT} ---`)); [cite: 36]
+app.listen(PORT, () => console.log(`--- Server running at ${PORT} ---`));
