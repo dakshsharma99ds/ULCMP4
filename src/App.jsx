@@ -566,6 +566,7 @@ function App() {
         </div>
       </nav>
 
+      {/* MOBILE ONLY OUTSIDE HAMBURGER */}
       <div className="md:hidden">
         <AnimatePresence>
           {(!isNavOpen && !isSearchMode) && (
@@ -574,7 +575,7 @@ function App() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+              transition={{ duration: 0.1 }} // Instant fade out to prevent flicker
               onClick={() => setIsNavOpen(true)} 
               className="fixed top-8 left-6 z-30 text-white transition-none pointer-events-auto hover:text-gray-500 active:text-gray-500"
             >
