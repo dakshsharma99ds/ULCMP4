@@ -33,17 +33,15 @@ app.post('/api/info', async (req, res) => {
     const isSnapchat = url.includes('snapchat.com');
     const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
     const isTumblrDirect = url.includes('va.media.tumblr.com');
-    /* CHANGE: Detect Bilibili links to handle title prioritization */
     const isBilibili = url.includes('bilibili.com') || url.includes('b23.tv');
+    /* CHANGE: Detect Instagram for thumbnail and title handling */
+    const isInstagram = url.includes('instagram.com');
     
     let accurateTitle;
 
     if (isTumblrDirect) {
       accurateTitle = "Tumblr video";
     } else if (isReddit || isPinterest || isBilibili) {
-      /* CHANGE: For Bilibili, Reddit, and Pinterest, we strictly prioritize info.title 
-         to avoid long descriptions cluttering the UI. 
-      */
       accurateTitle = info.title || info.fulltitle || "Media Content";
     } else if (isSnapchat) {
       accurateTitle = (info.description && info.description.length > 2) 
@@ -56,9 +54,16 @@ app.post('/api/info', async (req, res) => {
         : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
     }
     
+    /* CHANGE: Specific Instagram Thumbnail Logic 
+       Ensures thumbnails for posts (/p/) are captured correctly by checking multiple potential info fields */
+    let accurateThumbnail = info.thumbnail || "";
+    if (isInstagram && !accurateThumbnail && info.thumbnails && info.thumbnails.length > 0) {
+        accurateThumbnail = info.thumbnails[info.thumbnails.length - 1].url;
+    }
+
     res.json({ 
       title: accurateTitle, 
-      thumbnail: info.thumbnail || "" 
+      thumbnail: accurateThumbnail // Use the processed thumbnail
     });
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch media info." });
@@ -113,7 +118,6 @@ app.get('/api/download', async (req, res) => {
     res.on('close', () => {
       if (ytProcess.kill) ytProcess.kill();
     });
-
   } catch (error) {
     console.error("Critical Error:", error.message);
     if (!res.headersSent) res.status(500).send("Server error.");
