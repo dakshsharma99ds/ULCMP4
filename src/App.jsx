@@ -318,7 +318,7 @@ function App() {
     <div className="h-screen w-screen bg-[#0a0a0a] text-white flex overflow-hidden fixed inset-0" onMouseMove={handleMouseMove}>
       
       <AnimatePresence>
-        {/* CHANGE: Added window width check to disable tooltip on mobile */}
+        {/* Added window width check to disable tooltip on mobile */}
         {hoveredItem && window.innerWidth >= 768 && (
           <CustomTooltip 
             text={hoveredItem} 
@@ -367,7 +367,7 @@ function App() {
                     downloadThumbnailFile(info.thumbnail, info.title);
                     setHoveredItem(null);
                   }}
-                  /* CHANGE: Added active:bg-emerald-500 for mobile color change on press */
+                  /* Added active:bg-emerald-500 for mobile color change on press */
                   className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-emerald-500 active:bg-emerald-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -376,7 +376,7 @@ function App() {
                   onMouseEnter={() => setHoveredItem("CLOSE")}
                   onMouseLeave={() => setHoveredItem(null)}
                   onClick={() => {setIsModalOpen(false); setHoveredItem(null);}}
-                  /* CHANGE: Added active:bg-red-500 for mobile color change on press */
+                  /* Added active:bg-red-500 for mobile color change on press */
                   className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-red-500 active:bg-red-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
                 >
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -525,7 +525,8 @@ function App() {
                         onMouseEnter={() => setHoveredItem(getPlatformName(item.url))}
                         onMouseLeave={() => setHoveredItem(null)}
                         onClick={() => handleHistoryClick(item)} 
-                        className="text-[14px] py-1 text-gray-500 font-mono truncate cursor-pointer shrink-0 flex-1 hover:text-white active:text-white"
+                        /* CHANGE: Updated hover and active text color to emerald-400 (Green) for recent links */
+                        className="text-[14px] py-1 text-gray-500 font-mono truncate cursor-pointer shrink-0 flex-1 hover:text-emerald-400 active:text-emerald-400"
                       >
                         {item.title}
                       </div>
@@ -627,7 +628,7 @@ function App() {
                     />
                     <button 
                       onClick={() => fetchInfo()} 
-                      /* CHANGE: Added active:bg-emerald-400 for mobile download icon button color change */
+                      /* Added active:bg-emerald-400 for mobile download icon button color change */
                       className="bg-white text-black px-4 md:px-10 py-4 rounded-2xl hover:bg-emerald-400 active:bg-emerald-400 active:scale-95 transition-all cursor-pointer flex items-center justify-center min-w-15 md:min-w-35 select-none"
                     >
                       {loading ? (
@@ -683,9 +684,9 @@ function App() {
                             <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
                           </div>
                           <div className="flex flex-col gap-3 mt-auto select-none">
-                            {/* CHANGE: Added active:bg-emerald-300 for mobile MP4 button color change */}
+                            {/* Added active:bg-emerald-300 for mobile MP4 button color change */}
                             <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 active:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP4 (1080P)</button>
-                            {/* CHANGE: Added active:bg-white and active:text-black for mobile MP3 button color change */}
+                            {/* Added active:bg-white and active:text-black for mobile MP3 button color change */}
                             <button onClick={() => startDownload('mp3')} className="w-full py-4 bg-white/10 border border-white/10 text-white font-black rounded-xl hover:bg-white hover:text-black active:bg-white active:text-black transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP3 (320kb/s)</button>
                           </div>
                         </div>
