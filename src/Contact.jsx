@@ -81,22 +81,24 @@ const Contact = () => {
             
             <div className="space-y-8 md:space-y-10 w-full mt-10">
               <div className="grid grid-cols-2 md:flex md:flex-row gap-y-8 md:justify-between items-center md:items-start">
+                {/* NAME SECTION */}
                 <div className="group text-center md:text-left">
                   <p className="font-mono text-[9px] md:text-[10px] text-emerald-500/50 tracking-[0.3em] uppercase mb-1">Developer</p>
-                  <p className="nico-font text-lg md:text-2xl text-white group-hover:text-emerald-400 transition-colors duration-300">
+                  <p className="nico-font text-lg md:text-2xl text-white group-hover:text-emerald-400 group-active:text-emerald-400 transition-colors duration-300">
                     <span className="block md:inline">Daksh</span> <span className="block md:inline">Sharma</span>
                   </p>
                 </div>
 
+                {/* SOCIAL LINKS SECTION */}
                 <div className="group text-center md:text-left">
                   <p className="font-mono text-[9px] md:text-[10px] text-emerald-500/50 tracking-[0.3em] uppercase mb-2">Digital Presence</p>
                   <div className="flex flex-col md:flex-row items-center gap-2 md:gap-6">
-                    <a href="https://github.com/dakshsharma99ds" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm md:text-lg text-gray-300 hover:text-emerald-400 transition-all group/link">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500 group-hover/link:scale-110 transition-transform"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                    <a href="https://github.com/dakshsharma99ds" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm md:text-lg text-gray-300 hover:text-emerald-400 active:text-emerald-400 transition-all group/link">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500 group-hover/link:scale-110 group-active/link:scale-110 transition-transform"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
                       Github
                     </a>
-                    <a href="https://www.linkedin.com/in/dakshsharma2939" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm md:text-lg text-gray-300 hover:text-emerald-400 transition-all group/link">
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500 group-hover/link:scale-110 transition-transform"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                    <a href="https://www.linkedin.com/in/dakshsharma2939" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm md:text-lg text-gray-300 hover:text-emerald-400 active:text-emerald-400 transition-all group/link">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-500 group-hover/link:scale-110 group-active/link:scale-110 transition-transform"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
                       LinkedIn
                     </a>
                   </div>
@@ -104,13 +106,14 @@ const Contact = () => {
               </div>
 
               <div className="grid grid-cols-2 md:flex md:flex-row gap-y-8 md:justify-between items-center md:items-end">
+                {/* EMAIL & PHONE SECTION */}
                 <div className="space-y-1 text-center md:text-left">
                   <p className="font-mono text-[9px] md:text-[10px] text-emerald-500/50 tracking-[0.3em] uppercase mb-2">Direct Communication</p>
                   <div className="space-y-1 flex flex-col items-center md:items-start">
-                    <a href="mailto:dakshsharma999ds@gmail.com" className="font-mono text-[10px] md:text-sm text-gray-300 hover:text-emerald-400 transition-colors w-fit break-all">
+                    <a href="mailto:dakshsharma999ds@gmail.com" className="font-mono text-[10px] md:text-sm text-gray-300 hover:text-emerald-400 active:text-emerald-400 transition-colors w-fit break-all">
                       dakshsharma999ds@gmail.com
                     </a>
-                    <a href="tel:+918368919353" className="font-mono text-[10px] md:text-sm text-gray-300 hover:text-emerald-400 transition-colors w-fit">
+                    <a href="tel:+918368919353" className="font-mono text-[10px] md:text-sm text-gray-300 hover:text-emerald-400 active:text-emerald-400 transition-colors w-fit">
                       +91 83689 19353
                     </a>
                   </div>
