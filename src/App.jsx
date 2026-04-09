@@ -434,27 +434,38 @@ function App() {
           </div>
 
           <div className="flex-1 ml-4 relative h-full flex items-center overflow-hidden">
-            <div className={`absolute right-0 transition-all duration-400 ease-in-out ${isSearchMode ? 'opacity-100 translate-x-0 w-full' : 'opacity-0 translate-x-10 pointer-events-none w-0'}`}>
-                <div className="relative w-full pr-2">
-                  <input 
-                    type="text" 
-                    autoFocus={isSearchMode}
-                    placeholder="Search..." 
-                    className="w-full bg-white/5 border border-white/20 rounded-full px-4 py-1.5 text-xs font-mono outline-none focus:border-emerald-500/50 transition-all placeholder:select-none"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
+            {/* SEARCH CONTAINER */}
+            <div className={`relative w-full h-8 flex items-center transition-all duration-400 ease-in-out ${isNavOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-10 pointer-events-none'}`}>
+               
+               <div className={`absolute left-0 w-full flex items-center transition-all duration-400 ease-in-out ${isSearchMode ? 'translate-x-0' : 'translate-x-[calc(100%-32px)]'}`}>
+                  {/* THE ICON - Fades out when closing nav */}
+                  <button 
+                    onClick={() => setIsSearchMode(true)}
+                    className={`z-20 p-1.5 transition-all duration-300 rounded-full
+                    ${isSearchMode ? 'text-emerald-400 ml-2 scale-90' : 'text-white hover:text-gray-500 active:text-gray-500 ml-0 cursor-pointer'}
+                    `}
+                    style={{ opacity: isNavOpen ? 1 : 0, transition: 'opacity 0.3s ease, color 0.2s ease, transform 0.3s ease' }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 pointer-events-none">
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                  </button>
+
+                  {/* THE INPUT - Wipes from the right */}
+                  <div className={`absolute right-0 h-8 bg-white/5 border border-white/20 rounded-full transition-all duration-400 ease-in-out overflow-hidden flex items-center
+                    ${isSearchMode ? 'w-full opacity-100' : 'w-0 opacity-0 border-transparent'}`}>
+                    <input 
+                      type="text" 
+                      autoFocus={isSearchMode}
+                      placeholder="Search..." 
+                      className="w-full h-full bg-transparent pl-10 pr-4 text-xs font-mono outline-none placeholder:select-none text-emerald-100"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+               </div>
             </div>
-            <button 
-              onClick={() => setIsSearchMode(true)} 
-              className={`ml-auto block cursor-pointer group transition-all duration-400 ease-in-out ${isNavOpen && !isSearchMode ? 'opacity-100 translate-x-0 pointer-events-auto scale-100' : 'opacity-0 translate-x-10 pointer-events-none scale-75'}`}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 group-hover:text-gray-500 group-active:text-gray-500">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-            </button>
           </div>
         </div>
 
