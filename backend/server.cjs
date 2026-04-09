@@ -32,24 +32,31 @@ app.post('/api/info', async (req, res) => {
     const isReddit = url.includes('reddit.com');
     const isSnapchat = url.includes('snapchat.com');
     const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
-    /* CHANGE: Check for Tumblr direct media links */
     const isTumblrDirect = url.includes('va.media.tumblr.com');
+    const isBilibili = url.includes('bilibili.com');
     
     let accurateTitle;
 
     if (isTumblrDirect) {
-      /* CHANGE: Manual override for Tumblr direct video URLs */
       accurateTitle = "Tumblr video";
-    } else if (isReddit || isPinterest) {
-      /* CHANGE: Prioritize titles for Reddit and Pinterest */
-      accurateTitle = info.title || info.fulltitle || (isPinterest ? "Pinterest Pin" : "Reddit Video");
+    } else if (isReddit || isPinterest || isBilibili) {
+      /* CHANGE: Explicitly prioritizing title for Bilibili, Reddit, and Pinterest */
+      accurateTitle = info.title || info.fulltitle || (isBilibili ? "Bilibili Video" : "Media Content");
     } else if (isSnapchat) {
-      /* CHANGE: Prefer description for Snapchat to get the actual story/spotlight caption */
-      accurateTitle = (info.description && info.description.length > 2) 
-        ? info.description.split('\n')[0] 
-        : (info.title && !info.title.includes("Snapchat") ? info.title : info.fulltitle || "Snapchat Content");
+      /* CHANGE: Logic to strip "Watch [User]'s story..." and provide accurate fallback */
+      const rawTitle = info.title || "";
+      const isGenericSnap = rawTitle.toLowerCase().startsWith("watch") || rawTitle.includes("Snapchat");
+      
+      if (info.description && info.description.length > 5 && !info.description.includes("Watch")) {
+        accurateTitle = info.description.split('\n')[0];
+      } else if (isGenericSnap) {
+        // Determine if it's Spotlight or Story based on URL
+        accurateTitle = url.includes('spotlight') ? "Snapchat Spotlight" : "Snapchat Story";
+      } else {
+        accurateTitle = rawTitle || "Snapchat Content";
+      }
     } else {
-      // Instagram and others: use description (caption) fallback
+      // Default fallback (Instagram, etc.)
       accurateTitle = (info.description && info.description.length > 2) 
         ? info.description.split('\n')[0] 
         : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
