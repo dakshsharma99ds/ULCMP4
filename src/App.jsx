@@ -57,7 +57,7 @@ function App() {
     if (hoveredItem === "EXPAND" || hoveredItem === "COLLAPSE") {
       setHoveredItem(isNavOpen || isSearchMode ? "COLLAPSE" : "EXPAND");
     }
-  }, [isNavOpen, isSearchMode]);
+  }, [isNavOpen, isSearchMode, hoveredItem]);
 
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
@@ -198,21 +198,51 @@ function App() {
       });
       
       const data = await res.json();
-      
-      if (!res.ok || data.error || (!data.title && !data.thumbnail)) {
+      console.log("API Debug Info:", data); // Debugging is vital when "Invalid" shows up incorrectly
+
+      if (!res.ok || data.error) {
         showInvalidLinkError();
         setLoading(false);
         return;
       }
 
-      setInfo({ ...data, fetchedUrl: targetUrl });
-      if (data.title) {
-        setHistory(prev => {
-            const filtered = prev.filter(item => item.url !== targetUrl);
-            return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
-        });
+      // --- NEW RESILIENT DATA MAPPING ---
+      // Try multiple ways to find the thumbnail
+      let finalThumbnail = data.thumbnail || data.display_url || data.image || data.picture;
+      
+      // If thumbnail is still missing, check the medias array
+      if (!finalThumbnail && data.medias && data.medias.length > 0) {
+        // Find first image media, or just use the first item's url
+        const imgMedia = data.medias.find(m => m.type === 'image') || data.medias[0];
+        finalThumbnail = imgMedia.url || imgMedia.thumbnail;
       }
+
+      // Fallback title
+      const finalTitle = data.title || `Media from ${getPlatformName(targetUrl)}`;
+
+      // Final Check: Only error out if we have absolutely no media info at all
+      if (!finalThumbnail && (!data.medias || data.medias.length === 0)) {
+        showInvalidLinkError();
+        setLoading(false);
+        return;
+      }
+
+      const infoData = { 
+        ...data, 
+        title: finalTitle, 
+        thumbnail: finalThumbnail, 
+        fetchedUrl: targetUrl 
+      };
+
+      setInfo(infoData);
+      
+      setHistory(prev => {
+          const filtered = prev.filter(item => item.url !== targetUrl);
+          return [{ title: finalTitle, url: targetUrl }, ...filtered].slice(0, 100);
+      });
+
     } catch (err) { 
+      console.error("Fetch failure:", err);
       showInvalidLinkError(); 
     }
     setLoading(false);
@@ -691,17 +721,7 @@ function App() {
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
                               <>
-                                {/* ─── INSTAGRAM POST THUMBNAIL FIX ─────────────────────────────── */}
-                                {/* If the thumbnail fails to load (common for IG posts), try the    */}
-                                {/* public /media/ redirect URL built from the post shortcode.       */}
-                                <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true"
-                                  onError={(e) => {
-                                    const match = info.fetchedUrl && info.fetchedUrl.match(/instagram\.com\/p\/([^/?#]+)/i);
-                                    if (match && e.target.src !== `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.instagram.com/p/${match[1]}/media/?size=l`)}`) {
-                                      e.target.src = `https://images.weserv.nl/?url=${encodeURIComponent(`https://www.instagram.com/p/${match[1]}/media/?size=l`)}`;
-                                    }
-                                  }}
-                                />
+                                <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true" />
                                 <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover/main-thumb:opacity-100 transition-opacity flex items-center justify-center">
                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
                                 </div>
