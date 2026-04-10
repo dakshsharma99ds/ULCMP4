@@ -57,7 +57,7 @@ function App() {
     if (hoveredItem === "EXPAND" || hoveredItem === "COLLAPSE") {
       setHoveredItem(isNavOpen || isSearchMode ? "COLLAPSE" : "EXPAND");
     }
-  }, [isNavOpen, isSearchMode]);
+  }, [isNavOpen, isSearchMode, hoveredItem]);
 
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
@@ -90,40 +90,6 @@ function App() {
   const isInstagramStory = (link) => {
     return link.toLowerCase().includes('instagram.com/stories/');
   };
-
-  // ─── INSTAGRAM POST THUMBNAIL FIX ───────────────────────────────────────────
-  // Instagram posts (/p/ URLs) often don't return a thumbnail from the main API.
-  // This helper tries two approaches:
-  //   1. Direct fetch of Instagram's public oEmbed JSON (no auth, browser-accessible)
-  //   2. Fallback: construct a /media/ redirect URL from the post shortcode
-  const isInstagramPost = (link) => {
-    return link.toLowerCase().includes('instagram.com/p/');
-  };
-
-  const getInstagramPostThumbnail = async (postUrl) => {
-    // Approach 1: Instagram oEmbed — public endpoint, returns thumbnail_url
-    try {
-      const oembedUrl = `https://www.instagram.com/oembed/?url=${encodeURIComponent(postUrl)}`;
-      const res = await fetch(oembedUrl);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.thumbnail_url) return data.thumbnail_url;
-      }
-    } catch { /* fall through to approach 2 */ }
-
-    // Approach 2: Extract shortcode from URL and build the /media/ thumbnail redirect
-    try {
-      const match = postUrl.match(/instagram\.com\/p\/([^/?#]+)/i);
-      if (match) {
-        const shortcode = match[1];
-        // Instagram's media redirect — resolves to the actual CDN image
-        return `https://www.instagram.com/p/${shortcode}/media/?size=l`;
-      }
-    } catch { /* give up */ }
-
-    return null;
-  };
-  // ────────────────────────────────────────────────────────────────────────────
 
   const showInvalidLinkError = () => {
     toast.error(
@@ -233,28 +199,29 @@ function App() {
       
       const data = await res.json();
       
-      if (!res.ok || data.error || (!data.title && !data.thumbnail)) {
+      // AGGRESSIVE FALLBACK: Look for any key that might hold the thumbnail/image
+      const finalThumbnail = data.thumbnail || data.display_url || data.image || (data.medias && data.medias[0]?.extension === 'jpg' ? data.medias[0].url : null);
+      // Ensure we have a title to display, even if the API doesn't return one
+      const finalTitle = data.title || "Social Media Content";
+
+      if (!res.ok || data.error || (!data.title && !finalThumbnail)) {
         showInvalidLinkError();
         setLoading(false);
         return;
       }
 
-      // ─── INSTAGRAM POST THUMBNAIL FIX ─────────────────────────────────────
-      // Wrapped in its own try/catch so failures never reach the outer catch
-      // block (which would wrongly show the invalid link error).
-      if (!data.thumbnail && isInstagramPost(targetUrl)) {
-        try {
-          const igThumb = await getInstagramPostThumbnail(targetUrl);
-          if (igThumb) data.thumbnail = igThumb;
-        } catch { /* silently ignore — thumbnail is optional */ }
-      }
-      // ────────────────────────────────────────────────────────────────────
-
-      setInfo({ ...data, fetchedUrl: targetUrl });
-      if (data.title) {
+      // Store the mapped data in state
+      setInfo({ 
+        ...data, 
+        thumbnail: finalThumbnail, 
+        title: finalTitle,
+        fetchedUrl: targetUrl 
+      });
+      
+      if (finalTitle) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
-            return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
+            return [{ title: finalTitle, url: targetUrl }, ...filtered].slice(0, 100);
         });
       }
     } catch (err) { 
