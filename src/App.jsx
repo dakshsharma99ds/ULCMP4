@@ -205,13 +205,13 @@ function App() {
         return;
       }
 
-      // FIX: Sanitize and proxy the thumbnail immediately to prevent hotlink blocks
-      let finalThumbnail = data.thumbnail;
-      if (finalThumbnail && !finalThumbnail.includes('weserv.nl')) {
-        finalThumbnail = `https://images.weserv.nl/?url=${encodeURIComponent(finalThumbnail)}&default=ssl:placehold.co/600x400?text=No+Preview`;
+      // PROXY FIX: Immediately wrap the thumbnail in the proxy URL
+      let proxiedThumbnail = data.thumbnail;
+      if (proxiedThumbnail && !proxiedThumbnail.includes('weserv.nl')) {
+        proxiedThumbnail = `https://images.weserv.nl/?url=${encodeURIComponent(proxiedThumbnail)}&default=ssl:placehold.co/600x400?text=No+Preview`;
       }
 
-      setInfo({ ...data, thumbnail: finalThumbnail, fetchedUrl: targetUrl });
+      setInfo({ ...data, thumbnail: proxiedThumbnail, fetchedUrl: targetUrl });
       
       if (data.title) {
         setHistory(prev => {
@@ -313,8 +313,7 @@ function App() {
 
   const downloadThumbnailFile = async (imageUrl, title) => {
     try {
-      // Proxy the download request as well to avoid CORS issues in the browser
-      const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`);
+      const response = await fetch(imageUrl); // imageUrl is already proxied from fetchInfo
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -704,7 +703,7 @@ function App() {
                                 <img 
                                   key={info.thumbnail} 
                                   src={info.thumbnail} 
-                                  referrerPolicy="no-referrer" 
+                                  referrerPolicy="no-referrer"
                                   className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" 
                                   alt="preview" 
                                   draggable="true" 
