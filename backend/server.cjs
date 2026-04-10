@@ -53,19 +53,26 @@ app.post('/api/info', async (req, res) => {
         : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
     }
     
-    // CHANGE: Robust Instagram Thumbnail Extraction
-    // We check the top-level thumbnail, then the thumbnails array, then specific entries
-    let accurateThumbnail = info.thumbnail || "";
-    
+    // START FIX: Instagram Thumbnail Scavenger Logic
+    let accurateThumbnail = "";
+
     if (isInstagram) {
-      if (info.thumbnails && info.thumbnails.length > 0) {
-        // Try to get the last one (usually highest quality)
+      // 1. Check top-level thumbnail
+      if (info.thumbnail) accurateThumbnail = info.thumbnail;
+      
+      // 2. Check thumbnails array (highest resolution)
+      if (!accurateThumbnail && info.thumbnails && info.thumbnails.length > 0) {
         accurateThumbnail = info.thumbnails[info.thumbnails.length - 1].url;
-      } else if (info.display_url) {
-        // Some Instagram extractors provide display_url for posts
-        accurateThumbnail = info.display_url;
       }
+      
+      // 3. Check for specific Instagram fields display_url or image
+      if (!accurateThumbnail) {
+        accurateThumbnail = info.display_url || info.image || "";
+      }
+    } else {
+      accurateThumbnail = info.thumbnail || "";
     }
+    // END FIX
 
     res.json({ 
       title: accurateTitle, 
