@@ -152,6 +152,7 @@ function App() {
     }
   }, [isNavOpen, isSearchMode]);
 
+  // --- START OF INSTAGRAM THUMBNAIL LOGIC CHANGE ---
   const fetchInfo = async (manualUrl = null) => {
     let targetUrl = (manualUrl || url).trim();
     
@@ -197,22 +198,34 @@ function App() {
         body: JSON.stringify({ url: targetUrl })
       });
       
-      const data = await res.json();
+      let data = await res.json();
       
       if (!res.ok || data.error || (!data.title && !data.thumbnail)) {
-        showInvalidLinkError();
-        setLoading(false);
-        return;
+        // FALLBACK: If API fails but it's an Instagram link, try to fetch thumbnail manually
+        const instaMatch = targetUrl.match(/instagram\.com\/(?:p|reel|reels|tv)\/([A-Za-z0-9_-]+)/);
+        if (instaMatch) {
+            const shortcode = instaMatch[1];
+            data = {
+                title: `Instagram Media (${shortcode})`,
+                thumbnail: `https://www.instagram.com/p/${shortcode}/media/?size=l`,
+                fetchedUrl: targetUrl
+            };
+        } else {
+            showInvalidLinkError();
+            setLoading(false);
+            return;
+        }
       }
 
-      // PROXY FIX: Immediately wrap the thumbnail in the proxy URL
-      let proxiedThumbnail = data.thumbnail;
-      if (proxiedThumbnail && !proxiedThumbnail.includes('weserv.nl')) {
-        proxiedThumbnail = `https://images.weserv.nl/?url=${encodeURIComponent(proxiedThumbnail)}&default=ssl:placehold.co/600x400?text=No+Preview`;
+      // Final check: If it's Instagram but thumbnail is missing from API, inject it
+      if (targetUrl.includes('instagram.com') && !data.thumbnail) {
+        const instaMatch = targetUrl.match(/instagram\.com\/(?:p|reel|reels|tv)\/([A-Za-z0-9_-]+)/);
+        if (instaMatch) {
+            data.thumbnail = `https://www.instagram.com/p/${instaMatch[1]}/media/?size=l`;
+        }
       }
 
-      setInfo({ ...data, thumbnail: proxiedThumbnail, fetchedUrl: targetUrl });
-      
+      setInfo({ ...data, fetchedUrl: targetUrl });
       if (data.title) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
@@ -224,6 +237,7 @@ function App() {
     }
     setLoading(false);
   };
+  // --- END OF INSTAGRAM THUMBNAIL LOGIC CHANGE ---
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -313,7 +327,7 @@ function App() {
 
   const downloadThumbnailFile = async (imageUrl, title) => {
     try {
-      const response = await fetch(imageUrl); // imageUrl is already proxied from fetchInfo
+      const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -396,11 +410,9 @@ function App() {
               
               <img 
                 onLoad={handleImageLoad}
-                src={info.thumbnail} 
-                referrerPolicy="no-referrer"
+                src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
                 className="max-h-[85vh] w-auto block select-none object-contain"
                 alt="Full Preview"
-                onError={(e) => e.target.style.display = 'none'}
               />
             </motion.div>
           </motion.div>
@@ -700,17 +712,7 @@ function App() {
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
                               <>
-                                <img 
-                                  key={info.thumbnail} 
-                                  src={info.thumbnail} 
-                                  referrerPolicy="no-referrer"
-                                  className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" 
-                                  alt="preview" 
-                                  draggable="true" 
-                                  onError={(e) => {
-                                    e.target.style.display = 'none';
-                                  }}
-                                />
+                                <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true" />
                                 <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover/main-thumb:opacity-100 transition-opacity flex items-center justify-center">
                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
                                 </div>
