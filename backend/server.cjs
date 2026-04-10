@@ -2,10 +2,17 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const youtubedl = require('youtube-dl-exec');
+const axios = require('axios'); // Added for the scraper fallback
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+// Helper to decode entities (used by the Replit logic)
+const decodeHtmlEntities = (str) => {
+  return str.replace(/\\u([0-9a-fA-F]{4})/g, (match, grp) => String.fromCharCode(parseInt(grp, 16)))
+            .replace(/&amp;/g, '&');
+};
 
 const COMMON_FLAGS = {
   noCheckCertificates: true,
@@ -14,7 +21,6 @@ const COMMON_FLAGS = {
   addHeader: [
     'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
     'Accept-Language: en-US,en;q=0.9',
-    'Sec-Fetch-Mode: navigate',
     'Referer: https://www.instagram.com/'
   ],
   preferFreeFormats: true,
@@ -24,58 +30,49 @@ const COMMON_FLAGS = {
 app.post('/api/info', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: "No URL provided" });
+
   try {
+    // 1. Try yt-dlp first
     const info = await youtubedl(url, { 
       dumpSingleJson: true, 
       ...COMMON_FLAGS 
     });
     
-    const isReddit = url.includes('reddit.com');
-    const isSnapchat = url.includes('snapchat.com');
-    const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
-    const isTumblrDirect = url.includes('va.media.tumblr.com');
-    const isBilibili = url.includes('bilibili.com') || url.includes('b23.tv');
-    const isInstagram = url.includes('instagram.com');
-    
-    let accurateTitle;
-    if (isTumblrDirect) {
-      accurateTitle = "Tumblr video";
-    } else if (isReddit || isPinterest || isBilibili) {
-      accurateTitle = info.title || info.fulltitle || "Media Content";
-    } else if (isSnapchat) {
-      accurateTitle = (info.description && info.description.length > 2) 
-        ? info.description.split('\n')[0] 
-        : (info.title && !info.title.includes("Snapchat") ? info.title : info.fulltitle || "Snapchat Content");
-    } else {
-      accurateTitle = (info.description && info.description.length > 2) 
-        ? info.description.split('\n')[0] 
-        : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
-    }
-    
-    // (FIXED AREA) Instagram Thumbnail Scavenger Logic
-    let accurateThumbnail = "";
-    if (isInstagram) {
-      // 1. Check primary field
-      if (info.thumbnail) {
-        accurateThumbnail = info.thumbnail;
-      } 
-      // 2. Check thumbnails array (This is where /p/ posts store the high-res image)
-      else if (info.thumbnails && info.thumbnails.length > 0) {
-        accurateThumbnail = info.thumbnails[info.thumbnails.length - 1].url;
-      } 
-      // 3. Fallback to display_url or image
-      else {
-        accurateThumbnail = info.display_url || info.image || "";
+    let accurateTitle = (info.description && info.description.length > 2) 
+      ? info.description.split('\n')[0] 
+      : (info.title || info.fulltitle || "Media File");
+
+    let accurateThumbnail = info.thumbnail || "";
+
+    // 2. If it's Instagram and thumbnail is missing, use the Scraper Fallback
+    if (url.includes('instagram.com') && !accurateThumbnail) {
+      try {
+        const { data: html } = await axios.get(url, {
+          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36' }
+        });
+
+        // The Replit Logic you provided:
+        const allImgUrls = [...html.matchAll(/src="(https:\/\/[^"]*scontent[^"]*\.jpg[^"]*)"/g)].map(m =>
+          decodeHtmlEntities(m[1])
+        );
+
+        const mediaImgUrls = [...new Set(allImgUrls.filter(u => u.includes("t51.82787-15") || u.includes("t51.2885")))];
+        const highResImgUrls = mediaImgUrls.filter(u => !u.includes("s150x150") && !u.includes("s240x240") && !u.includes("s320x320"));
+
+        const downloadImgs = highResImgUrls.length > 0 ? highResImgUrls : mediaImgUrls;
+
+        if (downloadImgs.length > 0) {
+          accurateThumbnail = downloadImgs[0];
+        }
+      } catch (scrapeErr) {
+        console.error("Scraper fallback failed:", scrapeErr.message);
       }
-    } else {
-      accurateThumbnail = info.thumbnail || "";
     }
 
-    res.json({ 
-      title: accurateTitle, 
-      thumbnail: accurateThumbnail 
-    });
+    res.json({ title: accurateTitle, thumbnail: accurateThumbnail });
+
   } catch (error) {
+    console.error("Main Info Error:", error.message);
     res.status(500).json({ error: "Failed to fetch media info." });
   }
 });
@@ -85,8 +82,6 @@ app.get('/api/download', async (req, res) => {
   if (!url) return res.status(400).send("No URL provided");
 
   const isMp3 = type === 'mp3';
-  const isReddit = url.includes('reddit.com');
-
   const cleanTitle = (title || 'download').replace(/[/\\?%*:|"<>]/g, '-').substring(0, 100);
   const fileName = `${encodeURIComponent(cleanTitle)}.${isMp3 ? 'mp3' : 'mp4'}`;
 
@@ -94,37 +89,21 @@ app.get('/api/download', async (req, res) => {
   res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
 
   try {
-    let formatSelection;
-    if (isMp3) {
-      formatSelection = 'bestaudio/best';
-    } else if (isReddit) {
-      formatSelection = 'bestvideo+bestaudio/best';
-    } else {
-      formatSelection = 'best[ext=mp4]/b/best';
-    }
-
+    const formatSelection = isMp3 ? 'bestaudio/best' : 'best[ext=mp4]/b/best';
     const ytProcess = youtubedl.exec(url, {
       output: '-',
       format: formatSelection,
       ...COMMON_FLAGS,
       noCheckFormats: true,
       noPart: true,
-      extractorRetries: 1,
-      noMtime: true,
-      youtubeSkipDashManifest: true 
+      noMtime: true
     });
 
     ytProcess.stdout.pipe(res);
-
     ytProcess.on('error', (err) => {
-      console.error("yt-dlp Execution Error:", err.message);
       if (!res.headersSent) res.status(500).end();
     });
-
-    res.on('close', () => {
-      if (ytProcess.kill) ytProcess.kill();
-    });
-
+    res.on('close', () => { if (ytProcess.kill) ytProcess.kill(); });
   } catch (error) {
     if (!res.headersSent) res.status(500).send("Server error.");
   }
