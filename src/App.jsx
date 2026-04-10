@@ -52,12 +52,12 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
 
-  // Force tooltip update for hamburger
+  // FIX: Force tooltip update for hamburger when state changes while hovering
   useEffect(() => {
     if (hoveredItem === "EXPAND" || hoveredItem === "COLLAPSE") {
       setHoveredItem(isNavOpen || isSearchMode ? "COLLAPSE" : "EXPAND");
     }
-  }, [isNavOpen, isSearchMode, hoveredItem]);
+  }, [isNavOpen, isSearchMode]);
 
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
@@ -198,37 +198,32 @@ function App() {
       });
       
       const data = await res.json();
-      
-      // DEEP LOOKUP: Find thumbnail in many possible places
-      let finalThumbnail = data.thumbnail || data.display_url || data.image;
-      
-      // If still not found, check the medias array (common for Instagram/LinkedIn)
-      if (!finalThumbnail && data.medias && data.medias.length > 0) {
-        // Find the first media item that is an image, or just take the first one
-        const imageMedia = data.medias.find(m => m.type === 'image' || m.extension === 'jpg' || m.extension === 'png');
-        finalThumbnail = imageMedia ? imageMedia.url : data.medias[0].url;
+
+      // ─── INSTAGRAM POST THUMBNAIL FIX ────────────────────────────────────────
+      // For Instagram posts (/p/ URLs), the backend often returns no thumbnail.
+      // We patch data.thumbnail BEFORE the validation check below, so the
+      // "no title + no thumbnail" guard does not wrongly reject the post.
+      if (!data.thumbnail && typeof targetUrl === 'string' && targetUrl.toLowerCase().includes('instagram.com/p/')) {
+        try {
+          const match = targetUrl.match(/instagram\.com\/p\/([^/?#]+)/i);
+          if (match) {
+            data.thumbnail = `https://www.instagram.com/p/${match[1]}/media/?size=l`;
+          }
+        } catch { /* silently ignore */ }
       }
+      // ─────────────────────────────────────────────────────────────────────────
 
-      const finalTitle = data.title || "Social Media Content";
-
-      // If we have neither title nor thumbnail, then it's likely a real fail
-      if (!res.ok || data.error || (!data.title && !finalThumbnail)) {
+      if (!res.ok || data.error || (!data.title && !data.thumbnail)) {
         showInvalidLinkError();
         setLoading(false);
         return;
       }
 
-      setInfo({ 
-        ...data, 
-        thumbnail: finalThumbnail, 
-        title: finalTitle,
-        fetchedUrl: targetUrl 
-      });
-      
-      if (finalTitle) {
+      setInfo({ ...data, fetchedUrl: targetUrl });
+      if (data.title) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
-            return [{ title: finalTitle, url: targetUrl }, ...filtered].slice(0, 100);
+            return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
         });
       }
     } catch (err) { 
@@ -498,6 +493,7 @@ function App() {
               pointerEvents: isSearchMode ? 'none' : 'auto'
             }}
           >
+            {/* HOME */}
             <div 
               onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("HOME"); }}
               onMouseLeave={() => setHoveredItem(null)}
@@ -515,6 +511,7 @@ function App() {
                 style={textTransitionStyle(isNavOpen)}>HOME</span>
             </div>
 
+            {/* ABOUT */}
             <div 
               onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("ABOUT"); }}
               onMouseLeave={() => setHoveredItem(null)}
@@ -533,6 +530,7 @@ function App() {
           </div>
 
           <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            {/* RECENT */}
             <div 
               onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("RECENT"); }}
               onMouseLeave={() => setHoveredItem(null)}
@@ -590,6 +588,7 @@ function App() {
                 style={textTransitionStyle(isNavOpen || isSearchMode)}>BACK</span>
             </div>
           ) : (
+            /* CONTACT */
             <div 
               onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("CONTACT"); }}
               onMouseLeave={() => setHoveredItem(null)}
@@ -609,6 +608,7 @@ function App() {
         </div>
       </nav>
 
+      {/* MOBILE ONLY OUTSIDE HAMBURGER (NO FADE) */}
       <div className="md:hidden">
         <button 
           onClick={() => setIsNavOpen(true)} 
