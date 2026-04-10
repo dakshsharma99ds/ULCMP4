@@ -2,11 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const youtubedl = require('youtube-dl-exec');
-const axios = require('axios'); // Now active via your package.json [cite: 1]
+const axios = require('axios');
 
 const app = express();
-app.use(cors()); [cite: 2]
-app.use(express.json()); [cite: 2]
+app.use(cors());
+app.use(express.json());
 
 // Helper to decode HTML entities and Unicode in scraped Instagram URLs
 const decodeUrl = (str) => {
@@ -28,11 +28,10 @@ const COMMON_FLAGS = {
 };
 
 app.post('/api/info', async (req, res) => {
-  const { url } = req.body; [cite: 3]
-  if (!url) return res.status(400).json({ error: "No URL provided" }); [cite: 3]
+  const { url } = req.body;
+  if (!url) return res.status(400).json({ error: "No URL provided" });
   
   try {
-    // 1. Attempt to get info from yt-dlp [cite: 3]
     let info = {};
     try {
       info = await youtubedl(url, { 
@@ -44,9 +43,8 @@ app.post('/api/info', async (req, res) => {
     }
     
     const isInstagram = url.includes('instagram.com');
-    let accurateThumbnail = info.thumbnail || ""; [cite: 9]
+    let accurateThumbnail = info.thumbnail || "";
 
-    // 2. SCRAPER FALLBACK: If Instagram thumbnail is missing or generic [cite: 1, 9]
     if (isInstagram && (!accurateThumbnail || accurateThumbnail.includes('instagram_logo'))) {
       try {
         const { data: html } = await axios.get(url, {
@@ -56,7 +54,6 @@ app.post('/api/info', async (req, res) => {
           }
         });
 
-        // Use regex to find high-res scontent image URLs
         const allImgUrls = [...html.matchAll(/src="(https:\/\/[^"]*scontent[^"]*\.jpg[^"]*)"/g)].map(m =>
           decodeUrl(m[1])
         );
@@ -74,42 +71,38 @@ app.post('/api/info', async (req, res) => {
       }
     }
     
-    // 3. Title Logic [cite: 4, 5, 6, 7, 8]
     let accurateTitle;
     const isReddit = url.includes('reddit.com');
     const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
     const isBilibili = url.includes('bilibili.com') || url.includes('b23.tv');
 
     if (isReddit || isPinterest || isBilibili) {
-      accurateTitle = info.title || info.fulltitle || "Media Content"; [cite: 4, 5]
+      accurateTitle = info.title || info.fulltitle || "Media Content";
     } else {
       accurateTitle = (info.description && info.description.length > 2) 
-        ? info.description.split('\n')[0] [cite: 8]
-        : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File"); [cite: 8]
+        ? info.description.split('\n')[0]
+        : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
     }
     
-    res.json({ 
-      title: accurateTitle, 
-      thumbnail: accurateThumbnail 
-    });
-  } catch (error) { [cite: 10]
-    res.status(500).json({ error: "Failed to fetch media info." }); [cite: 10]
+    res.json({ title: accurateTitle, thumbnail: accurateThumbnail });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch media info." });
   }
 });
 
-app.get('/api/download', async (req, res) => { [cite: 11]
-  const { url, type, title } = req.query; [cite: 11]
-  if (!url) return res.status(400).send("No URL provided"); [cite: 11]
+app.get('/api/download', async (req, res) => {
+  const { url, type, title } = req.query;
+  if (!url) return res.status(400).send("No URL provided");
 
-  const isMp3 = type === 'mp3'; [cite: 11]
-  const cleanTitle = (title || 'download').replace(/[/\\?%*:|"<>]/g, '-').substring(0, 100); [cite: 11]
-  const fileName = `${encodeURIComponent(cleanTitle)}.${isMp3 ? 'mp3' : 'mp4'}`; [cite: 11]
+  const isMp3 = type === 'mp3';
+  const cleanTitle = (title || 'download').replace(/[/\\?%*:|"<>]/g, '-').substring(0, 100);
+  const fileName = `${encodeURIComponent(cleanTitle)}.${isMp3 ? 'mp3' : 'mp4'}`;
 
-  res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`); [cite: 11]
-  res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4'); [cite: 11]
+  res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+  res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
 
   try {
-    let formatSelection = isMp3 ? 'bestaudio/best' : (url.includes('reddit.com') ? 'bestvideo+bestaudio/best' : 'best[ext=mp4]/b/best'); [cite: 12]
+    let formatSelection = isMp3 ? 'bestaudio/best' : (url.includes('reddit.com') ? 'bestvideo+bestaudio/best' : 'best[ext=mp4]/b/best');
 
     const ytProcess = youtubedl.exec(url, {
       output: '-',
@@ -121,19 +114,19 @@ app.get('/api/download', async (req, res) => { [cite: 11]
       youtubeSkipDashManifest: true 
     });
 
-    ytProcess.stdout.pipe(res); [cite: 13]
-    ytProcess.on('error', (err) => { [cite: 13]
-      if (!res.headersSent) res.status(500).end(); [cite: 13]
+    ytProcess.stdout.pipe(res);
+    ytProcess.on('error', (err) => {
+      if (!res.headersSent) res.status(500).end();
     });
-    res.on('close', () => { if (ytProcess.kill) ytProcess.kill(); }); [cite: 15]
-  } catch (error) { [cite: 16]
-    if (!res.headersSent) res.status(500).send("Server error."); [cite: 16]
+    res.on('close', () => { if (ytProcess.kill) ytProcess.kill(); });
+  } catch (error) {
+    if (!res.headersSent) res.status(500).send("Server error.");
   }
 });
 
-const distPath = path.resolve(process.cwd(), 'dist'); [cite: 17]
-app.use(express.static(distPath)); [cite: 17]
-app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html'))); [cite: 17]
+const distPath = path.resolve(process.cwd(), 'dist');
+app.use(express.static(distPath));
+app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
-const PORT = process.env.PORT || 10000; [cite: 18]
-app.listen(PORT, () => console.log(`--- Server running at ${PORT} ---`)); [cite: 18]
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => console.log(`--- Server running at ${PORT} ---`));
