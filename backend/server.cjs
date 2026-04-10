@@ -35,22 +35,21 @@ app.post('/api/info', async (req, res) => {
     try {
       info = await youtubedl(url, { dumpSingleJson: true, ...COMMON_FLAGS });
     } catch (e) {
-      console.log("yt-dlp failed.");
+      console.log("yt-dlp metadata failed.");
     }
     
     let accurateThumbnail = info.thumbnail || "";
     const isInstagram = url.includes('instagram.com');
 
     if (isInstagram) {
-      // Logic to extract the post ID (shortcode)
-      // Works for /p/ABCDEFG/ or /reels/ABCDEFG/
+      // Direct high-quality redirect URL provided by Instagram for previews
       const match = url.match(/(?:\/p\/|\/reels\/|\/reel\/)([A-Za-z0-9_-]+)/);
       if (match && match[1]) {
         accurateThumbnail = `https://www.instagram.com/p/${match[1]}/media/?size=l`;
       }
     }
 
-    const title = info.title && info.title !== "Instagram" ? info.title : "Instagram Media";
+    const title = (info.title && info.title !== "Instagram") ? info.title : "Instagram Media";
     res.json({ 
       title: title.split('\n')[0], 
       thumbnail: accurateThumbnail 
@@ -75,7 +74,9 @@ app.get('/api/download', async (req, res) => {
     });
     ytProcess.stdout.pipe(res);
     res.on('close', () => { if (ytProcess.kill) ytProcess.kill(); });
-  } catch (e) { res.status(500).end(); }
+  } catch (e) { 
+    if (!res.headersSent) res.status(500).end(); 
+  }
 });
 
 const distPath = path.resolve(process.cwd(), 'dist');
@@ -83,4 +84,4 @@ app.use(express.static(distPath));
 app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Server live on ${PORT}`));
+app.listen(PORT, () => console.log(`--- Server running at ${PORT} ---`));
