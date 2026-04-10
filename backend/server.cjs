@@ -14,7 +14,8 @@ const COMMON_FLAGS = {
   addHeader: [
     'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
     'Accept-Language: en-US,en;q=0.9',
-    'Sec-Fetch-Mode: navigate'
+    'Sec-Fetch-Mode: navigate',
+    'Referer: https://www.instagram.com/'
   ],
   preferFreeFormats: true,
   youtubeSkipDashManifest: true
@@ -33,34 +34,52 @@ app.post('/api/info', async (req, res) => {
     const isSnapchat = url.includes('snapchat.com');
     const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
     const isTumblrDirect = url.includes('va.media.tumblr.com');
-    /* CHANGE: Detect Bilibili links to handle title prioritization */
     const isBilibili = url.includes('bilibili.com') || url.includes('b23.tv');
+    const isInstagram = url.includes('instagram.com');
     
     let accurateTitle;
 
     if (isTumblrDirect) {
       accurateTitle = "Tumblr video";
     } else if (isReddit || isPinterest || isBilibili) {
-      /* CHANGE: For Bilibili, Reddit, and Pinterest, we strictly prioritize info.title 
-         to avoid long descriptions cluttering the UI. 
-      */
       accurateTitle = info.title || info.fulltitle || "Media Content";
     } else if (isSnapchat) {
       accurateTitle = (info.description && info.description.length > 2) 
         ? info.description.split('\n')[0] 
         : (info.title && !info.title.includes("Snapchat") ? info.title : info.fulltitle || "Snapchat Content");
     } else {
-      // Instagram and others: fallback to description/caption first
       accurateTitle = (info.description && info.description.length > 2) 
         ? info.description.split('\n')[0] 
         : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
     }
     
+    // START FIX: Instagram Thumbnail Scavenger Logic
+    let accurateThumbnail = "";
+
+    if (isInstagram) {
+      // 1. Check top-level thumbnail
+      if (info.thumbnail) accurateThumbnail = info.thumbnail;
+      
+      // 2. Check thumbnails array (highest resolution)
+      if (!accurateThumbnail && info.thumbnails && info.thumbnails.length > 0) {
+        accurateThumbnail = info.thumbnails[info.thumbnails.length - 1].url;
+      }
+      
+      // 3. Check for specific Instagram fields display_url or image
+      if (!accurateThumbnail) {
+        accurateThumbnail = info.display_url || info.image || "";
+      }
+    } else {
+      accurateThumbnail = info.thumbnail || "";
+    }
+    // END FIX
+
     res.json({ 
       title: accurateTitle, 
-      thumbnail: info.thumbnail || "" 
+      thumbnail: accurateThumbnail 
     });
   } catch (error) {
+    console.error("Info Fetch Error:", error.message);
     res.status(500).json({ error: "Failed to fetch media info." });
   }
 });
