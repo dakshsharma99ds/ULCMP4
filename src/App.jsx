@@ -57,7 +57,7 @@ function App() {
     if (hoveredItem === "EXPAND" || hoveredItem === "COLLAPSE") {
       setHoveredItem(isNavOpen || isSearchMode ? "COLLAPSE" : "EXPAND");
     }
-  }, [isNavOpen, isSearchMode]);
+  }, [isNavOpen, isSearchMode, hoveredItem]);
 
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
@@ -199,8 +199,7 @@ function App() {
       
       const data = await res.json();
       
-      // Instagram Post Thumbnail Fix: 
-      // Check for alternative thumbnail fields commonly returned for static posts
+      // FIX: Check for alternative image fields commonly returned for Instagram posts
       const finalThumbnail = data.thumbnail || data.display_url || data.image || (data.medias && data.medias[0]?.extension === 'jpg' ? data.medias[0].url : null);
 
       if (!res.ok || data.error || (!data.title && !finalThumbnail)) {
