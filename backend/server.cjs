@@ -14,7 +14,8 @@ const COMMON_FLAGS = {
   addHeader: [
     'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
     'Accept-Language: en-US,en;q=0.9',
-    'Sec-Fetch-Mode: navigate'
+    'Sec-Fetch-Mode: navigate',
+    'Referer: https://www.instagram.com/'
   ],
   preferFreeFormats: true,
   youtubeSkipDashManifest: true
@@ -52,13 +53,18 @@ app.post('/api/info', async (req, res) => {
         : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
     }
     
-    // LOGIC CHANGE: Specific fix for Instagram Post Thumbnails
+    // CHANGE: Robust Instagram Thumbnail Extraction
+    // We check the top-level thumbnail, then the thumbnails array, then specific entries
     let accurateThumbnail = info.thumbnail || "";
     
-    // If it's Instagram and the primary thumbnail is missing, check the thumbnails array
-    if (isInstagram && !accurateThumbnail && info.thumbnails && info.thumbnails.length > 0) {
-      // Pick the last entry which is usually the highest resolution image
-      accurateThumbnail = info.thumbnails[info.thumbnails.length - 1].url;
+    if (isInstagram) {
+      if (info.thumbnails && info.thumbnails.length > 0) {
+        // Try to get the last one (usually highest quality)
+        accurateThumbnail = info.thumbnails[info.thumbnails.length - 1].url;
+      } else if (info.display_url) {
+        // Some Instagram extractors provide display_url for posts
+        accurateThumbnail = info.display_url;
+      }
     }
 
     res.json({ 
@@ -66,6 +72,7 @@ app.post('/api/info', async (req, res) => {
       thumbnail: accurateThumbnail 
     });
   } catch (error) {
+    console.error("Info Fetch Error:", error.message);
     res.status(500).json({ error: "Failed to fetch media info." });
   }
 });
