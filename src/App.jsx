@@ -306,8 +306,7 @@ function App() {
 
   const downloadThumbnailFile = async (imageUrl, title) => {
     try {
-      // PROXY REMOVED: Fetching direct from source to work with no-referrer
-      const response = await fetch(imageUrl, { referrerPolicy: "no-referrer" });
+      const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -318,7 +317,7 @@ function App() {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-       window.open(imageUrl); 
+      console.error("Download failed", error);
     }
   };
 
@@ -390,8 +389,7 @@ function App() {
               
               <img 
                 onLoad={handleImageLoad}
-                // PROXY REMOVED: loading direct image
-                src={info.thumbnail} 
+                src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
                 className="max-h-[85vh] w-auto block select-none object-contain"
                 alt="Full Preview"
               />
@@ -693,8 +691,7 @@ function App() {
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
                               <>
-                                {/* PROXY REMOVED: Loading direct for no-referrer fix */}
-                                <img key={info.thumbnail} src={info.thumbnail} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true" />
+                                <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true" />
                                 <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover/main-thumb:opacity-100 transition-opacity flex items-center justify-center">
                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
                                 </div>
