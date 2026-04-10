@@ -199,23 +199,17 @@ function App() {
       
       const data = await res.json();
       
-      // START OF CHANGE: Logic to ensure Instagram Post thumbnails are captured correctly
-      // We check if it's an instagram post and ensure the thumbnail data is prioritized 
-      // even if the API returns slightly different structures for posts vs reels.
-      const instagramThumbnail = (targetUrl.includes('instagram.com/p/') || targetUrl.includes('instagram.com/reel/')) 
-                                  ? (data.thumbnail || data.image || data.display_url) 
-                                  : data.thumbnail;
-      // END OF CHANGE
+      // Instagram Post Thumbnail Fix: 
+      // Check for alternative thumbnail fields commonly returned for static posts
+      const finalThumbnail = data.thumbnail || data.display_url || data.image || (data.medias && data.medias[0]?.extension === 'jpg' ? data.medias[0].url : null);
 
-      if (!res.ok || data.error || (!data.title && !instagramThumbnail)) {
+      if (!res.ok || data.error || (!data.title && !finalThumbnail)) {
         showInvalidLinkError();
         setLoading(false);
         return;
       }
 
-      // SET INFO updated with the instagramThumbnail check
-      setInfo({ ...data, thumbnail: instagramThumbnail, fetchedUrl: targetUrl });
-      
+      setInfo({ ...data, thumbnail: finalThumbnail, fetchedUrl: targetUrl });
       if (data.title) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
