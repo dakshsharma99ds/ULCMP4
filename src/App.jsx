@@ -205,15 +205,14 @@ function App() {
         return;
       }
 
-      // CHANGE START: Ensure Instagram thumbnails use the proxy to bypass CORS/hotlink protection
+      // FIX: Sanitize and proxy the thumbnail immediately to prevent hotlink blocks
       let finalThumbnail = data.thumbnail;
-      if (targetUrl.includes('instagram.com') && finalThumbnail) {
-        finalThumbnail = `https://images.weserv.nl/?url=${encodeURIComponent(finalThumbnail)}`;
+      if (finalThumbnail && !finalThumbnail.includes('weserv.nl')) {
+        finalThumbnail = `https://images.weserv.nl/?url=${encodeURIComponent(finalThumbnail)}&default=ssl:placehold.co/600x400?text=No+Preview`;
       }
 
       setInfo({ ...data, thumbnail: finalThumbnail, fetchedUrl: targetUrl });
-      // CHANGE END
-
+      
       if (data.title) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
@@ -314,6 +313,7 @@ function App() {
 
   const downloadThumbnailFile = async (imageUrl, title) => {
     try {
+      // Proxy the download request as well to avoid CORS issues in the browser
       const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
@@ -397,9 +397,11 @@ function App() {
               
               <img 
                 onLoad={handleImageLoad}
-                src={info.thumbnail.includes('weserv') ? info.thumbnail : `https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
+                src={info.thumbnail} 
+                referrerPolicy="no-referrer"
                 className="max-h-[85vh] w-auto block select-none object-contain"
                 alt="Full Preview"
+                onError={(e) => e.target.style.display = 'none'}
               />
             </motion.div>
           </motion.div>
@@ -699,7 +701,17 @@ function App() {
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
                               <>
-                                <img key={info.thumbnail} src={info.thumbnail} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true" />
+                                <img 
+                                  key={info.thumbnail} 
+                                  src={info.thumbnail} 
+                                  referrerPolicy="no-referrer" 
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" 
+                                  alt="preview" 
+                                  draggable="true" 
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                  }}
+                                />
                                 <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover/main-thumb:opacity-100 transition-opacity flex items-center justify-center">
                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
                                 </div>
