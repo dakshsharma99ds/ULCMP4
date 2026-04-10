@@ -34,7 +34,6 @@ app.post('/api/info', async (req, res) => {
     const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
     const isTumblrDirect = url.includes('va.media.tumblr.com');
     const isBilibili = url.includes('bilibili.com') || url.includes('b23.tv');
-    // Detect Instagram links
     const isInstagram = url.includes('instagram.com');
     
     let accurateTitle;
@@ -53,10 +52,12 @@ app.post('/api/info', async (req, res) => {
         : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
     }
     
-    // CHANGE: Handle Instagram Post Thumbnails specifically
+    // LOGIC CHANGE: Specific fix for Instagram Post Thumbnails
     let accurateThumbnail = info.thumbnail || "";
+    
+    // If it's Instagram and the primary thumbnail is missing, check the thumbnails array
     if (isInstagram && !accurateThumbnail && info.thumbnails && info.thumbnails.length > 0) {
-      // Pick the last item in the array, which is usually the highest quality
+      // Pick the last entry which is usually the highest resolution image
       accurateThumbnail = info.thumbnails[info.thumbnails.length - 1].url;
     }
 
