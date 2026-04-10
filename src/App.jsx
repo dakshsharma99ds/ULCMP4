@@ -57,7 +57,7 @@ function App() {
     if (hoveredItem === "EXPAND" || hoveredItem === "COLLAPSE") {
       setHoveredItem(isNavOpen || isSearchMode ? "COLLAPSE" : "EXPAND");
     }
-  }, [isNavOpen, isSearchMode, hoveredItem]);
+  }, [isNavOpen, isSearchMode]);
 
   const handleMouseMove = (e) => {
     setMousePos({ x: e.clientX, y: e.clientY });
@@ -90,6 +90,30 @@ function App() {
   const isInstagramStory = (link) => {
     return link.toLowerCase().includes('instagram.com/stories/');
   };
+
+  // ─── INSTAGRAM POST THUMBNAIL FIX ───────────────────────────────────────────
+  // Instagram posts (/p/ URLs) often don't return a thumbnail from the main API.
+  // This helper fetches it via Instagram's public oEmbed endpoint as a fallback.
+  const isInstagramPost = (link) => {
+    return link.toLowerCase().includes('instagram.com/p/');
+  };
+
+  const getInstagramPostThumbnail = async (postUrl) => {
+    try {
+      const oembedUrl = `https://www.instagram.com/oembed/?url=${encodeURIComponent(postUrl)}`;
+      const res = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(oembedUrl)}&output=json`, {
+        headers: { 'Accept': 'application/json' }
+      });
+      // weserv doesn't proxy JSON — use a CORS proxy or direct fetch instead
+      const direct = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(oembedUrl)}`);
+      const wrapper = await direct.json();
+      const data = JSON.parse(wrapper.contents);
+      return data.thumbnail_url || null;
+    } catch {
+      return null;
+    }
+  };
+  // ────────────────────────────────────────────────────────────────────────────
 
   const showInvalidLinkError = () => {
     toast.error(
@@ -199,16 +223,22 @@ function App() {
       
       const data = await res.json();
       
-      // FIX: Check for alternative image fields commonly returned for Instagram posts
-      const finalThumbnail = data.thumbnail || data.display_url || data.image || (data.medias && data.medias[0]?.extension === 'jpg' ? data.medias[0].url : null);
-
-      if (!res.ok || data.error || (!data.title && !finalThumbnail)) {
+      if (!res.ok || data.error || (!data.title && !data.thumbnail)) {
         showInvalidLinkError();
         setLoading(false);
         return;
       }
 
-      setInfo({ ...data, thumbnail: finalThumbnail, fetchedUrl: targetUrl });
+      // ─── INSTAGRAM POST THUMBNAIL FIX ───────────────────────────────────
+      // If this is an Instagram post and the API returned no thumbnail,
+      // try fetching it via Instagram's public oEmbed endpoint as a fallback.
+      if (!data.thumbnail && isInstagramPost(targetUrl)) {
+        const igThumb = await getInstagramPostThumbnail(targetUrl);
+        if (igThumb) data.thumbnail = igThumb;
+      }
+      // ─────────────────────────────────────────────────────────────────────
+
+      setInfo({ ...data, fetchedUrl: targetUrl });
       if (data.title) {
         setHistory(prev => {
             const filtered = prev.filter(item => item.url !== targetUrl);
