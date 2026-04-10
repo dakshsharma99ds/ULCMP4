@@ -52,7 +52,6 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
 
-  // FIX: Force tooltip update for hamburger when state changes while hovering
   useEffect(() => {
     if (hoveredItem === "EXPAND" || hoveredItem === "COLLAPSE") {
       setHoveredItem(isNavOpen || isSearchMode ? "COLLAPSE" : "EXPAND");
@@ -154,38 +153,18 @@ function App() {
 
   const fetchInfo = async (manualUrl = null) => {
     let targetUrl = (manualUrl || url).trim();
-    
-    if (!targetUrl) {
-      showEmptyUrlError();
-      return;
-    }
-
-    if (targetUrl && !/^https?:\/\//i.test(targetUrl)) {
-      targetUrl = 'https://' + targetUrl;
-    }
+    if (!targetUrl) { showEmptyUrlError(); return; }
+    if (targetUrl && !/^https?:\/\//i.test(targetUrl)) targetUrl = 'https://' + targetUrl;
 
     let isValid = false;
     try {
       const parsed = new URL(targetUrl);
       isValid = parsed.hostname.includes('.') && parsed.hostname.length > 3;
-    } catch (_) {
-      isValid = false;
-    }
+    } catch (_) { isValid = false; }
 
-    if (!isValid) {
-      showInvalidLinkError();
-      return;
-    }
-
-    if (isYouTube(targetUrl)) {
-      showYoutubeError();
-      return;
-    }
-
-    if (isInstagramStory(targetUrl)) {
-      showInstagramStoryError();
-      return;
-    }
+    if (!isValid) { showInvalidLinkError(); return; }
+    if (isYouTube(targetUrl)) { showYoutubeError(); return; }
+    if (isInstagramStory(targetUrl)) { showInstagramStoryError(); return; }
     
     setLoading(true);
     setInfo(null); 
@@ -196,15 +175,12 @@ function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: targetUrl })
       });
-      
       const data = await res.json();
-      
       if (!res.ok || data.error || (!data.title && !data.thumbnail)) {
         showInvalidLinkError();
         setLoading(false);
         return;
       }
-
       setInfo({ ...data, fetchedUrl: targetUrl });
       if (data.title) {
         setHistory(prev => {
@@ -212,17 +188,11 @@ function App() {
             return [{ title: data.title, url: targetUrl }, ...filtered].slice(0, 100);
         });
       }
-    } catch (err) { 
-      showInvalidLinkError(); 
-    }
+    } catch (err) { showInvalidLinkError(); }
     setLoading(false);
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      fetchInfo();
-    }
-  };
+  const handleKeyDown = (e) => { if (e.key === 'Enter') fetchInfo(); };
 
   const handleHistoryClick = (item) => {
     setCurrentPage('home'); 
@@ -240,10 +210,7 @@ function App() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-   
-    setTimeout(() => {
-        setDlProcessing(false);
-    }, 12000); 
+    setTimeout(() => setDlProcessing(false), 12000); 
   };
 
   const textTransitionStyle = (isVisible) => ({
@@ -253,9 +220,7 @@ function App() {
     display: 'inline-block'
   });
 
-  const filteredHistory = history.filter(item => 
-    item.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredHistory = history.filter(item => item.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const handleHamburgerClick = () => {
     if (isNavOpen || isSearchMode) {
@@ -267,11 +232,7 @@ function App() {
     }
   };
 
-  const closeMobileNav = () => {
-    setIsNavOpen(false);
-    setIsSearchMode(false);
-    setSearchTerm('');
-  };
+  const closeMobileNav = () => { setIsNavOpen(false); setIsSearchMode(false); setSearchTerm(''); };
 
   const pageVariants = {
     initial: { opacity: 0, y: 30 },
@@ -283,7 +244,6 @@ function App() {
   const getPlatformLogo = (fetchedUrl) => {
     const lowerUrl = fetchedUrl?.toLowerCase() || "";
     const iconClasses = "w-12 h-12 text-white/70"; 
-
     if (lowerUrl.includes('linkedin.com')) {
       return (
         <svg viewBox="0 0 24 24" fill="currentColor" className={iconClasses} draggable="true">
@@ -298,15 +258,13 @@ function App() {
         </svg>
       );
     }
-    if (lowerUrl.includes('tumblr.com')) {
-      return <img src="./tumblr.png" alt="tumblr" className="w-12 h-12 opacity-70 select-none pointer-events-none" draggable="false" />; 
-    }
+    if (lowerUrl.includes('tumblr.com')) return <img src="./tumblr.png" alt="tumblr" className="w-12 h-12 opacity-70 select-none pointer-events-none" draggable="false" />; 
     return null;
   };
 
   const downloadThumbnailFile = async (imageUrl, title) => {
     try {
-      const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`);
+      const response = await fetch(imageUrl, { referrerPolicy: "no-referrer" });
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -316,306 +274,90 @@ function App() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error("Download failed", error);
-    }
+    } catch (error) { window.open(imageUrl); }
   };
 
   return (
     <div className="h-screen w-screen bg-[#0a0a0a] text-white flex overflow-hidden fixed inset-0" onMouseMove={handleMouseMove}>
-      
       <AnimatePresence>
         {hoveredItem && window.innerWidth >= 768 && (
-          <CustomTooltip 
-            text={hoveredItem} 
-            mousePos={mousePos} 
-            isThumbnailOption={hoveredItem === "DOWNLOAD" || hoveredItem === "CLOSE"} 
-          />
+          <CustomTooltip text={hoveredItem} mousePos={mousePos} isThumbnailOption={hoveredItem === "DOWNLOAD" || hoveredItem === "CLOSE"} />
         )}
       </AnimatePresence>
 
       <Toaster theme="dark" position="bottom-right" toastOptions={{
-        style: { 
-          background: 'rgba(0,0,0,0.9)', 
-          border: '1px solid rgba(16, 185, 129, 0.4)', 
-          color: '#10b981', 
-          fontFamily: 'monospace',
-          textTransform: 'uppercase',
-          fontSize: '11px',
-          letterSpacing: '0.1em'
-        },
+        style: { background: 'rgba(0,0,0,0.9)', border: '1px solid rgba(16, 185, 129, 0.4)', color: '#10b981', fontFamily: 'monospace', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '0.1em' },
       }} />
 
       <AnimatePresence>
         {isModalOpen && info?.thumbnail && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-xl flex items-center justify-center p-6"
-            onClick={() => {setIsModalOpen(false); setHoveredItem(null);}}
-          >
-            <motion.div 
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.5, opacity: 0 }}
-              transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className={`relative bg-[#1a1a1a] overflow-hidden shadow-none
-                max-h-[85vh] max-w-[90vw] w-auto h-auto rounded-[2rem] border-[8px]`}
-              style={{ borderColor: '#97CEBB' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className={`absolute z-20 flex gap-3 top-6 right-6`}>
-                <button 
-                  onMouseEnter={() => setHoveredItem("DOWNLOAD")}
-                  onMouseLeave={() => setHoveredItem(null)}
-                  onClick={() => {
-                    downloadThumbnailFile(info.thumbnail, info.title);
-                    setHoveredItem(null);
-                  }}
-                  className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-emerald-500 active:bg-emerald-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                </button>
-                <button 
-                  onMouseEnter={() => setHoveredItem("CLOSE")}
-                  onMouseLeave={() => setHoveredItem(null)}
-                  onClick={() => {setIsModalOpen(false); setHoveredItem(null);}}
-                  className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-red-500 active:bg-red-500 backdrop-blur-md rounded-full flex items-center justify-center text-white transition-all cursor-pointer border border-white/10"
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-xl flex items-center justify-center p-6" onClick={() => {setIsModalOpen(false); setHoveredItem(null);}}>
+            <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.5, opacity: 0 }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="relative bg-[#1a1a1a] overflow-hidden rounded-[2rem] border-[8px]" style={{ borderColor: '#97CEBB' }} onClick={(e) => e.stopPropagation()}>
+              <div className="absolute z-20 flex gap-3 top-6 right-6">
+                <button onMouseEnter={() => setHoveredItem("DOWNLOAD")} onMouseLeave={() => setHoveredItem(null)} onClick={() => { downloadThumbnailFile(info.thumbnail, info.title); setHoveredItem(null); }} className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-emerald-500 rounded-full flex items-center justify-center border border-white/10"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+                <button onMouseEnter={() => setHoveredItem("CLOSE")} onMouseLeave={() => setHoveredItem(null)} onClick={() => {setIsModalOpen(false); setHoveredItem(null);}} className="w-10 h-10 md:w-12 md:h-12 bg-black/60 hover:bg-red-500 rounded-full flex items-center justify-center border border-white/10"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
               </div>
-              
-              <img 
-                onLoad={handleImageLoad}
-                src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
-                className="max-h-[85vh] w-auto block select-none object-contain"
-                alt="Full Preview"
-              />
+              <img onLoad={handleImageLoad} src={info.thumbnail} className="max-h-[85vh] w-auto block select-none object-contain" alt="Full Preview" />
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[40%] md:top-[-15%] md:left-[-10%] md:w-[60%] md:h-[60%] bg-emerald-500/20 rounded-full blur-[120px] md:blur-[180px] pointer-events-none"></div>
-      <div className="absolute bottom-[-20%] right-[-20%] w-[80%] h-[40%] md:bottom-[-15%] md:right-[-10%] md:w-[60%] md:h-[60%] bg-blue-500/20 rounded-full blur-[120px] md:blur-[180px] pointer-events-none"></div>
+      {/* BACKGROUND ELEMENTS */}
+      <div className="absolute top-[-20%] left-[-20%] w-[80%] h-[40%] bg-emerald-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-[-20%] right-[-20%] w-[80%] h-[40%] bg-blue-500/20 rounded-full blur-[120px] pointer-events-none"></div>
       
-      <div 
-        onClick={closeMobileNav}
-        className={`fixed inset-0 z-40 bg-black/60 transition-opacity duration-500 ease-in-out md:hidden ${
-          isNavOpen || isSearchMode ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-      />
+      <div onClick={closeMobileNav} className={`fixed inset-0 z-40 bg-black/60 transition-opacity duration-500 md:hidden ${isNavOpen || isSearchMode ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} />
 
-      <nav className={`fixed left-0 top-0 h-full z-50 bg-black/40 backdrop-blur-2xl md:backdrop-blur-xl border-r border-white/10 transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) flex flex-col p-4 pt-8 rounded-tr-[40px] rounded-br-[40px] 
-        ${isNavOpen || isSearchMode ? 'w-72 translate-x-0' : 'w-0 -translate-x-full md:w-20 md:translate-x-0'}`}>
-        
+      {/* NAVIGATION BAR */}
+      <nav className={`fixed left-0 top-0 h-full z-50 bg-black/40 backdrop-blur-2xl border-r border-white/10 transition-all duration-500 flex flex-col p-4 pt-8 rounded-tr-[40px] rounded-br-[40px] ${isNavOpen || isSearchMode ? 'w-72 translate-x-0' : 'w-0 -translate-x-full md:w-20 md:translate-x-0'}`}>
         <div className="flex items-center mb-6 px-2 shrink-0 relative h-10 overflow-hidden">
           <div className="shrink-0 z-50">
-            <button 
-              onMouseEnter={() => setHoveredItem(isNavOpen || isSearchMode ? "COLLAPSE" : "EXPAND")}
-              onMouseLeave={() => setHoveredItem(null)}
-              onClick={handleHamburgerClick} 
-              className={`hidden md:block cursor-pointer bg-transparent transition-none 
-                ${isNavOpen || isSearchMode ? 'text-emerald-400' : 'opacity-100 hover:text-gray-500 active:text-gray-500'}`}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-            </button>
-
-            <div className="md:hidden">
-              <AnimatePresence>
-                {(isNavOpen || isSearchMode) && (
-                  <motion.button 
-                    key="mobile-internal"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.4 }} 
-                    onClick={handleHamburgerClick} 
-                    className="cursor-pointer bg-transparent text-emerald-400 active:text-gray-500"
-                  >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-                  </motion.button>
-                )}
-              </AnimatePresence>
-            </div>
+            <button onMouseEnter={() => setHoveredItem(isNavOpen || isSearchMode ? "COLLAPSE" : "EXPAND")} onMouseLeave={() => setHoveredItem(null)} onClick={handleHamburgerClick} className={`hidden md:block cursor-pointer bg-transparent ${isNavOpen || isSearchMode ? 'text-emerald-400' : 'opacity-100 hover:text-gray-500'}`}><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
+            <div className="md:hidden"><AnimatePresence>{(isNavOpen || isSearchMode) && (<motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={handleHamburgerClick} className="text-emerald-400"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></motion.button>)}</AnimatePresence></div>
           </div>
-
           <div className="flex-1 ml-4 relative h-full flex items-center overflow-hidden">
-            <div className={`absolute right-0 transition-all duration-400 ease-in-out ${isSearchMode ? 'opacity-100 translate-x-0 w-full' : 'opacity-0 translate-x-10 pointer-events-none w-0'}`}>
-                <div className="relative w-full pr-2">
-                  <input 
-                    type="text" 
-                    autoFocus={isSearchMode}
-                    placeholder="Search..." 
-                    className="w-full bg-white/5 border border-white/20 rounded-full px-4 py-1.5 text-xs font-mono outline-none focus:border-emerald-500/50 transition-all placeholder:select-none"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-            </div>
-            <button 
-              onMouseEnter={() => { if(isNavOpen && !isSearchMode) setHoveredItem("SEARCH"); }}
-              onMouseLeave={() => setHoveredItem(null)}
-              onClick={() => { setIsSearchMode(true); setHoveredItem(null); }} 
-              className={`ml-auto block cursor-pointer group transition-all duration-400 ease-in-out ${isNavOpen && !isSearchMode ? 'opacity-100 translate-x-0 pointer-events-auto scale-100' : 'opacity-0 translate-x-10 pointer-events-none scale-75'}`}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 group-hover:text-gray-500 group-active:text-gray-500">
-                <circle cx="11" cy="11" r="8"></circle>
-                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-              </svg>
-            </button>
+            <div className={`absolute right-0 transition-all duration-400 ${isSearchMode ? 'opacity-100 translate-x-0 w-full' : 'opacity-0 translate-x-10 pointer-events-none w-0'}`}><div className="relative w-full pr-2"><input type="text" autoFocus={isSearchMode} placeholder="Search..." className="w-full bg-white/5 border border-white/20 rounded-full px-4 py-1.5 text-xs font-mono outline-none focus:border-emerald-500/50" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} /></div></div>
+            <button onMouseEnter={() => { if(isNavOpen && !isSearchMode) setHoveredItem("SEARCH"); }} onMouseLeave={() => setHoveredItem(null)} onClick={() => { setIsSearchMode(true); setHoveredItem(null); }} className={`ml-auto block cursor-pointer transition-all ${isNavOpen && !isSearchMode ? 'opacity-100 scale-100' : 'opacity-0 pointer-events-none scale-75'}`}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 hover:text-gray-500"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></button>
           </div>
         </div>
 
         <div className="flex-1 flex flex-col px-2 min-h-0 relative overflow-hidden">
-          <div className="flex flex-col transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) overflow-hidden shrink-0"
-            style={{ 
-              maxHeight: isSearchMode ? '0px' : '150px',
-              opacity: isSearchMode ? 0 : 1,
-              marginBottom: isSearchMode ? '0px' : '32px',
-              transform: isSearchMode ? 'translateY(-20px)' : 'translateY(0px)',
-              pointerEvents: isSearchMode ? 'none' : 'auto'
-            }}
-          >
-            {/* HOME */}
-            <div 
-              onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("HOME"); }}
-              onMouseLeave={() => setHoveredItem(null)}
-              onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} 
-              className="shrink-0 flex items-center gap-6 cursor-pointer group mb-8"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
-                className={`w-6 h-6 shrink-0 
-                ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`}>
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-                <polyline points="9 22 9 12 15 12 15 22"></polyline>
-              </svg>
-              <span className={`nico-font text-sm tracking-widest whitespace-nowrap 
-                ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`} 
-                style={textTransitionStyle(isNavOpen)}>HOME</span>
-            </div>
-
-            {/* ABOUT */}
-            <div 
-              onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("ABOUT"); }}
-              onMouseLeave={() => setHoveredItem(null)}
-              onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} 
-              className="shrink-0 flex items-center gap-6 cursor-pointer group">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" 
-                className={`w-7 h-7 shrink-0 ml-[-2px] 
-                ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`}>
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              <span className={`nico-font text-sm tracking-widest whitespace-nowrap 
-                ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`} 
-                style={textTransitionStyle(isNavOpen)}>ABOUT</span>
-            </div>
+          <div className="flex flex-col transition-all duration-500" style={{ maxHeight: isSearchMode ? '0px' : '150px', opacity: isSearchMode ? 0 : 1, marginBottom: isSearchMode ? '0px' : '32px', transform: isSearchMode ? 'translateY(-20px)' : 'translateY(0px)', pointerEvents: isSearchMode ? 'none' : 'auto' }}>
+            {/* NAV LINKS */}
+            <div onClick={() => {setCurrentPage('home'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group mb-8"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-6 h-6 ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span className={`nico-font text-sm tracking-widest ${currentPage === 'home' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen)}>HOME</span></div>
+            <div onClick={() => {setCurrentPage('about'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" className={`w-7 h-7 ml-[-2px] ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span className={`nico-font text-sm tracking-widest ${currentPage === 'about' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen)}>ABOUT</span></div>
           </div>
-
           <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-            {/* RECENT */}
-            <div 
-              onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("RECENT"); }}
-              onMouseLeave={() => setHoveredItem(null)}
-              onClick={() => { if(!isSearchMode) { setIsSearchMode(true); setIsNavOpen(true); setHoveredItem(null); } }}
-              className={`shrink-0 flex items-center gap-6 cursor-pointer mb-4 group`}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
-                className={`w-6 h-6 shrink-0 
-                ${isSearchMode ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`}>
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-              <span className={`nico-font text-sm tracking-[0.2em] whitespace-nowrap 
-                ${isSearchMode ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`} 
-                style={textTransitionStyle(isNavOpen || isSearchMode)}>RECENT</span>
-            </div>
-            <div className="ml-3 flex flex-col flex-1 min-h-0 transition-all duration-300"
-              style={{ opacity: (isNavOpen || isSearchMode) ? 1 : 0, visibility: (isNavOpen || isSearchMode) ? 'visible' : 'hidden', overflow: 'hidden' }}
-            >
-              <div className={`pr-4 flex flex-col h-full pb-4 custom-scrollbar overflow-y-auto ${scrollbarVisible ? 'scrollbar-visible' : ''}`}>
-                {filteredHistory.length > 0 ? (
-                  filteredHistory.map((item, i) => (
-                    <div key={i} className="flex items-stretch group">
-                      <div className="flex flex-col items-center mr-4"><div className="w-px bg-white/10 flex-1"></div></div>
-                      <div 
-                        onMouseEnter={() => setHoveredItem(getPlatformName(item.url))}
-                        onMouseLeave={() => setHoveredItem(null)}
-                        onClick={() => handleHistoryClick(item)} 
-                        className="text-[14px] py-1 text-gray-500 font-mono truncate cursor-pointer shrink-0 flex-1 hover:text-emerald-400 active:text-emerald-400"
-                      >
-                        {item.title}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="flex items-stretch select-none">
-                    <div className="flex flex-col items-center mr-4"><div className="w-px bg-white/10 flex-1"></div></div>
-                    <div className="text-[15px] text-gray-700 font-mono italic shrink-0 mt-2 whitespace-nowrap">{(isSearchMode && searchTerm) ? "No results" : "Empty"}</div>
-                  </div>
-                )}
-              </div>
+            <div onClick={() => { if(!isSearchMode) { setIsSearchMode(true); setIsNavOpen(true); } }} className="flex items-center gap-6 cursor-pointer mb-4 group"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-6 h-6 ${isSearchMode ? 'text-emerald-400' : 'group-hover:text-gray-500'}`}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg><span className={`nico-font text-sm tracking-[0.2em] ${isSearchMode ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen || isSearchMode)}>RECENT</span></div>
+            <div className="ml-3 flex flex-col flex-1 min-h-0" style={{ opacity: (isNavOpen || isSearchMode) ? 1 : 0, visibility: (isNavOpen || isSearchMode) ? 'visible' : 'hidden', overflow: 'hidden' }}>
+              <div className={`pr-4 flex flex-col h-full pb-4 custom-scrollbar overflow-y-auto ${scrollbarVisible ? 'scrollbar-visible' : ''}`}>{filteredHistory.length > 0 ? (filteredHistory.map((item, i) => (<div key={i} className="flex items-stretch group"><div className="flex flex-col items-center mr-4"><div className="w-px bg-white/10 flex-1"></div></div><div onClick={() => handleHistoryClick(item)} className="text-[14px] py-1 text-gray-500 font-mono truncate cursor-pointer flex-1 hover:text-emerald-400">{item.title}</div></div>))) : (<div className="flex items-stretch"><div className="flex flex-col items-center mr-4"><div className="w-px bg-white/10 flex-1"></div></div><div className="text-[15px] text-gray-700 font-mono italic mt-2 whitespace-nowrap">{(isSearchMode && searchTerm) ? "No results" : "Empty"}</div></div>)}</div>
             </div>
           </div>
         </div>
 
         <div className="mt-auto px-2 pt-4 pb-6 shrink-0 overflow-hidden">
           {isSearchMode ? (
-            <div onClick={() => { setIsSearchMode(false); setSearchTerm(''); }} className="flex items-center gap-6 cursor-pointer group">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" 
-                className="w-6 h-6 shrink-0 group-hover:text-gray-500 group-active:text-gray-500">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-              </svg>
-              <span className="nico-font text-sm tracking-widest group-hover:text-gray-500 group-active:text-gray-500" 
-                style={textTransitionStyle(isNavOpen || isSearchMode)}>BACK</span>
-            </div>
+            <div onClick={() => { setIsSearchMode(false); setSearchTerm(''); }} className="flex items-center gap-6 cursor-pointer group"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-6 h-6 group-hover:text-gray-500"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg><span className="nico-font text-sm tracking-widest group-hover:text-gray-500" style={textTransitionStyle(isNavOpen || isSearchMode)}>BACK</span></div>
           ) : (
-            /* CONTACT */
-            <div 
-              onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("CONTACT"); }}
-              onMouseLeave={() => setHoveredItem(null)}
-              onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} 
-              className="flex items-center gap-6 cursor-pointer group"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" 
-                className={`w-6 h-6 shrink-0 
-                ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`}>
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-              </svg>
-              <span className={`nico-font text-sm tracking-widest whitespace-nowrap 
-                ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-gray-500 group-active:text-gray-500'}`} 
-                style={textTransitionStyle(isNavOpen)}>CONTACT</span>
-            </div>
+            <div onClick={() => {setCurrentPage('contact'); if(window.innerWidth < 768) setIsNavOpen(false);}} className="flex items-center gap-6 cursor-pointer group"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`w-6 h-6 ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span className={`nico-font text-sm tracking-widest ${currentPage === 'contact' ? 'text-emerald-400' : 'group-hover:text-gray-500'}`} style={textTransitionStyle(isNavOpen)}>CONTACT</span></div>
           )}
         </div>
       </nav>
 
-      {/* MOBILE ONLY OUTSIDE HAMBURGER (NO FADE) */}
-      <div className="md:hidden">
-        <button 
-          onClick={() => setIsNavOpen(true)} 
-          className={`fixed top-8 left-6 z-30 transition-colors duration-200 pointer-events-auto hover:text-gray-500 active:text-gray-500
-            ${isNavOpen ? 'text-gray-500' : 'text-white'}`}
-        >
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="select-none pointer-events-none"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-        </button>
-      </div>
+      {/* MOBILE HAMBURGER */}
+      <div className="md:hidden"><button onClick={() => setIsNavOpen(true)} className={`fixed top-8 left-6 z-30 ${isNavOpen ? 'text-gray-500' : 'text-white'}`}><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button></div>
       
-      <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
+      {/* MAIN CONTENT AREA */}
+      <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
         
         {dlProcessing && (
-          <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center select-none">
-            <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 border-solid rounded-full animate-spin mb-10"></div>
+          <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center">
+            <div className="w-16 h-16 md:w-20 md:h-20 border-t-4 border-emerald-400 rounded-full animate-spin mb-10"></div>
             <div className="flex flex-col w-fit items-stretch px-4">
                <h2 className="nico-font text-2xl md:text-5xl text-emerald-400 tracking-widest text-center whitespace-nowrap">DOWNLOADING</h2>
                <div className="flex justify-between w-full mt-2 md:mt-6 text-gray-500 text-[10px] md:text-xs font-mono uppercase tracking-widest">
-                 {"PLEASE WAIT UNTIL THE FILE IS READY".split("").map((char, i) => (
-                   <span key={i} className={char === " " ? "w-1" : ""}>{char}</span>
-                 ))}
+                 {"PLEASE WAIT UNTIL THE FILE IS READY".split("").map((char, i) => (<span key={i} className={char === " " ? "w-1" : ""}>{char}</span>))}
                </div>
             </div>
           </div>
@@ -623,92 +365,39 @@ function App() {
 
         <AnimatePresence mode="wait">
           {currentPage === 'home' && (
-            <motion.div 
-              key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition}
-              className="w-full flex flex-col items-center justify-center md:max-h-none overflow-visible"
-            >
-              <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 md:mt-0 py-4 md:py-0 ${(info || (loading && url)) ? 'pt-8 md:pt-0' : ''}`}>
-                
-                <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center pt-2 md:pt-0 -mt-20 md:mt-0 overflow-visible">
-                  <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 md:pt-3 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]">
-                    <span className="text-white">ULC</span>
-                    <span className="text-emerald-400">MP4</span>
-                  </h1>
-                  <div className="relative inline-block">
-                    <p className="text-emerald-500/80 tracking-[0.65em] md:tracking-[0.95em] text-[8px] md:text-[11px] uppercase font-bold">link to mp4 in seconds</p>
-                    <div className="h-0.5 w-full bg-linear-to-r from-transparent via-emerald-500 to-transparent mt-3 opacity-50"></div>
-                  </div>
+            <motion.div key="home" initial="initial" animate="animate" exit="exit" variants={pageVariants} className="w-full flex flex-col items-center justify-center overflow-visible">
+              <div className={`w-full flex flex-col items-center scale-[0.95] md:scale-100 origin-center mt-0 py-4 ${(info || (loading && url)) ? 'pt-8' : ''}`}>
+                <div id="header-section" className="z-10 text-center mb-6 md:mb-8 flex flex-col items-center -mt-20 md:mt-0">
+                  <h1 className="nico-font text-6xl md:text-8xl mb-1 md:mb-2 pt-6 drop-shadow-[0_0_20px_rgba(52,211,153,0.4)]"><span className="text-white">ULC</span><span className="text-emerald-400">MP4</span></h1>
+                  <div className="relative inline-block"><p className="text-emerald-500/80 tracking-[0.65em] text-[8px] md:text-[11px] uppercase font-bold">link to mp4 in seconds</p><div className="h-0.5 w-full bg-linear-to-r from-transparent via-emerald-500 to-transparent mt-3 opacity-50"></div></div>
                 </div>
 
-                <div className={`z-10 w-full max-w-85 md:max-w-2xl bg-white/2 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-6 md:p-8 shadow-2xl transition-all duration-500`}>
+                <div className="z-10 w-full max-w-85 md:max-w-2xl bg-white/2 border border-white/10 backdrop-blur-3xl rounded-[2.5rem] p-6 md:p-8 shadow-2xl">
                   <div className={`flex flex-row gap-2 md:gap-4 items-stretch ${(info || (loading && url)) ? 'mb-6' : 'mb-0'}`}>
-                    <input
-                      type="text"
-                      placeholder="INPUT MEDIA URL"
-                      onKeyDown={handleKeyDown}
-                      className="flex-1 bg-black/60 border border-white/5 rounded-2xl px-4 py-4 md:px-8 md:py-5 focus:border-emerald-500/30 transition-all outline-none text-emerald-100 font-mono text-[10px] md:text-sm placeholder:select-none"
-                      value={url}
-                      onChange={(e) => setUrl(e.target.value)}
-                    />
-                    <button 
-                      onClick={() => fetchInfo()} 
-                      className="bg-white text-black px-4 md:px-10 py-4 rounded-2xl hover:bg-emerald-400 active:bg-emerald-400 active:scale-95 transition-all cursor-pointer flex items-center justify-center min-w-15 md:min-w-35 select-none"
-                    >
-                      {loading ? (
-                        <svg className="animate-spin h-5 w-5 md:h-7 md:w-7 text-black" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                      ) : (
-                        <svg className="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                      )}
-                    </button>
+                    <input type="text" placeholder="INPUT MEDIA URL" onKeyDown={handleKeyDown} className="flex-1 bg-black/60 border border-white/5 rounded-2xl px-4 py-4 md:px-8 md:py-5 focus:border-emerald-500/30 font-mono text-[10px] md:text-sm" value={url} onChange={(e) => setUrl(e.target.value)} />
+                    <button onClick={() => fetchInfo()} className="bg-white text-black px-4 md:px-10 py-4 rounded-2xl hover:bg-emerald-400 transition-all flex items-center justify-center min-w-15 md:min-w-35">{loading ? (<svg className="animate-spin h-5 w-5 md:h-7 md:w-7" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>) : (<svg className="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>)}</button>
                   </div>
 
-                  {loading && !info && (
-                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 animate-pulse">
-                      <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
-                        <div className="shrink-0 w-full md:w-56 aspect-video rounded-xl bg-white/5 border border-white/5 shadow-inner"></div>
-                        <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                          <div className="h-5 bg-white/10 rounded-md w-3/4 mb-4"></div>
-                          <div className="flex flex-col gap-3 mt-auto">
-                            <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
-                            <div className="w-full h-12 bg-white/5 rounded-xl border border-white/5"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  {loading && !info && (<div className="bg-black/40 border border-white/10 rounded-3xl p-4 md:p-6 animate-pulse"><div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch"><div className="shrink-0 w-full md:w-56 aspect-video rounded-xl bg-white/5 shadow-inner"></div><div className="flex-1 min-w-0 flex flex-col justify-between py-1"><div className="h-5 bg-white/10 rounded-md w-3/4 mb-4"></div><div className="flex flex-col gap-3 mt-auto"><div className="w-full h-12 bg-white/5 rounded-xl"></div><div className="w-full h-12 bg-white/5 rounded-xl"></div></div></div></div></div>)}
 
                   {info && (
-                    <div className="bg-black/40 border border-white/10 rounded-3xl md:rounded-4xl overflow-hidden p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="bg-black/40 border border-white/10 rounded-3xl p-4 md:p-6 transition-all animate-in fade-in slide-in-from-bottom-4 duration-500">
                       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-stretch">
-                        
-                        <div 
-                          onClick={() => setIsModalOpen(true)}
-                          className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black md:h-auto cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.5)] active:scale-[0.98] transition-all group/main-thumb"
-                        >
+                        <div onClick={() => setIsModalOpen(true)} className="relative shrink-0 w-full md:w-56 aspect-video overflow-hidden rounded-xl border border-white/10 bg-black cursor-pointer group/main-thumb">
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
                               <>
-                                <img key={info.thumbnail} src={`https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true" />
-                                <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover/main-thumb:opacity-100 transition-opacity flex items-center justify-center">
-                                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                                </div>
+                                <img key={info.thumbnail} src={info.thumbnail} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform group-hover/main-thumb:scale-105" alt="preview" />
+                                <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover/main-thumb:opacity-100 transition-opacity flex items-center justify-center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></div>
                               </>
-                            ) : (
-                              <div className="flex items-center justify-center h-full text-white/70">{getPlatformLogo(info.fetchedUrl)}</div>
-                            )}
+                            ) : (<div className="flex items-center justify-center h-full text-white/70">{getPlatformLogo(info.fetchedUrl)}</div>)}
                           </div>
                         </div>
-
                         <div className="flex-1 min-w-0 flex flex-col justify-between">
-                          <div className="overflow-hidden">
-                            <h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 whitespace-nowrap truncate leading-tight tracking-tight">{info.title}</h3>
-                          </div>
+                          <div className="overflow-hidden"><h3 className="text-[14px] md:text-[16px] font-bold text-white mb-4 truncate leading-tight">{info.title}</h3></div>
                           <div className="flex flex-col gap-3 mt-auto select-none">
-                            <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 active:bg-emerald-300 transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP4 (1080P)</button>
-                            <button onClick={() => startDownload('mp3')} className="w-full py-4 bg-white/10 border border-white/10 text-white font-black rounded-xl hover:bg-white hover:text-black active:bg-white active:text-black transition-all flex justify-center items-center gap-2 text-[10px] md:text-[11px] uppercase nico-font cursor-pointer active:scale-[0.98]">Download MP3 (320kb/s)</button>
+                            <button onClick={() => startDownload('mp4', '1080p')} className="w-full py-4 bg-emerald-500 text-black font-black rounded-xl hover:bg-emerald-300 transition-all text-[10px] md:text-[11px] nico-font">Download MP4 (1080P)</button>
+                            <button onClick={() => startDownload('mp3')} className="w-full py-4 bg-white/10 border border-white/10 text-white font-black rounded-xl hover:bg-white hover:text-black transition-all text-[10px] md:text-[11px] nico-font">Download MP3 (320kb/s)</button>
                           </div>
                         </div>
                       </div>
@@ -718,12 +407,8 @@ function App() {
               </div>
             </motion.div>
           )}
-          {currentPage === 'about' && (
-            <motion.div key="about" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition} className="w-full flex justify-center"><About /></motion.div>
-          )}
-          {currentPage === 'contact' && (
-            <motion.div key="contact" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition} className="w-full flex justify-center"><Contact /></motion.div>
-          )}
+          {currentPage === 'about' && (<motion.div key="about" initial="initial" animate="animate" exit="exit" variants={pageVariants} className="w-full flex justify-center"><About /></motion.div>)}
+          {currentPage === 'contact' && (<motion.div key="contact" initial="initial" animate="animate" exit="exit" variants={pageVariants} className="w-full flex justify-center"><Contact /></motion.div>)}
         </AnimatePresence>
       </div>
     </div>
