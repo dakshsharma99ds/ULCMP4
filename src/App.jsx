@@ -52,7 +52,7 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
 
-  // FIX: Force tooltip update for hamburger when state changes while hovering
+  // Force tooltip update for hamburger
   useEffect(() => {
     if (hoveredItem === "EXPAND" || hoveredItem === "COLLAPSE") {
       setHoveredItem(isNavOpen || isSearchMode ? "COLLAPSE" : "EXPAND");
@@ -199,18 +199,25 @@ function App() {
       
       const data = await res.json();
       
-      // AGGRESSIVE FALLBACK: Look for any key that might hold the thumbnail/image
-      const finalThumbnail = data.thumbnail || data.display_url || data.image || (data.medias && data.medias[0]?.extension === 'jpg' ? data.medias[0].url : null);
-      // Ensure we have a title to display, even if the API doesn't return one
+      // DEEP LOOKUP: Find thumbnail in many possible places
+      let finalThumbnail = data.thumbnail || data.display_url || data.image;
+      
+      // If still not found, check the medias array (common for Instagram/LinkedIn)
+      if (!finalThumbnail && data.medias && data.medias.length > 0) {
+        // Find the first media item that is an image, or just take the first one
+        const imageMedia = data.medias.find(m => m.type === 'image' || m.extension === 'jpg' || m.extension === 'png');
+        finalThumbnail = imageMedia ? imageMedia.url : data.medias[0].url;
+      }
+
       const finalTitle = data.title || "Social Media Content";
 
+      // If we have neither title nor thumbnail, then it's likely a real fail
       if (!res.ok || data.error || (!data.title && !finalThumbnail)) {
         showInvalidLinkError();
         setLoading(false);
         return;
       }
 
-      // Store the mapped data in state
       setInfo({ 
         ...data, 
         thumbnail: finalThumbnail, 
@@ -491,7 +498,6 @@ function App() {
               pointerEvents: isSearchMode ? 'none' : 'auto'
             }}
           >
-            {/* HOME */}
             <div 
               onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("HOME"); }}
               onMouseLeave={() => setHoveredItem(null)}
@@ -509,7 +515,6 @@ function App() {
                 style={textTransitionStyle(isNavOpen)}>HOME</span>
             </div>
 
-            {/* ABOUT */}
             <div 
               onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("ABOUT"); }}
               onMouseLeave={() => setHoveredItem(null)}
@@ -528,7 +533,6 @@ function App() {
           </div>
 
           <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-            {/* RECENT */}
             <div 
               onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("RECENT"); }}
               onMouseLeave={() => setHoveredItem(null)}
@@ -586,7 +590,6 @@ function App() {
                 style={textTransitionStyle(isNavOpen || isSearchMode)}>BACK</span>
             </div>
           ) : (
-            /* CONTACT */
             <div 
               onMouseEnter={() => { if(!isNavOpen && !isSearchMode) setHoveredItem("CONTACT"); }}
               onMouseLeave={() => setHoveredItem(null)}
@@ -606,7 +609,6 @@ function App() {
         </div>
       </nav>
 
-      {/* MOBILE ONLY OUTSIDE HAMBURGER (NO FADE) */}
       <div className="md:hidden">
         <button 
           onClick={() => setIsNavOpen(true)} 
