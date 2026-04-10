@@ -2,80 +2,121 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const youtubedl = require('youtube-dl-exec');
-const axios = require('axios');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-const decodeUrl = (str) => {
-  if (!str) return "";
-  return str.replace(/\\u([0-9a-fA-F]{4})/g, (match, grp) => String.fromCharCode(parseInt(grp, 16)))
-            .replace(/&amp;/g, '&')
-            .replace(/\\/g, '');
-};
 
 const COMMON_FLAGS = {
   noCheckCertificates: true,
   noWarnings: true,
   noPlaylist: true,
   addHeader: [
-    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
     'Accept-Language: en-US,en;q=0.9',
-    'Referer: https://www.instagram.com/'
-  ]
+    'Sec-Fetch-Mode: navigate'
+  ],
+  preferFreeFormats: true,
+  youtubeSkipDashManifest: true
 };
 
 app.post('/api/info', async (req, res) => {
   const { url } = req.body;
   if (!url) return res.status(400).json({ error: "No URL provided" });
-  
   try {
-    let info = {};
-    try {
-      info = await youtubedl(url, { dumpSingleJson: true, ...COMMON_FLAGS });
-    } catch (e) {
-      console.log("yt-dlp metadata failed.");
+    const info = await youtubedl(url, { 
+      dumpSingleJson: true, 
+      ...COMMON_FLAGS 
+    });
+    
+    const isReddit = url.includes('reddit.com');
+    const isSnapchat = url.includes('snapchat.com');
+    const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
+    const isTumblrDirect = url.includes('va.media.tumblr.com');
+    /* CHANGE: Detect Bilibili links to handle title prioritization */
+    const isBilibili = url.includes('bilibili.com') || url.includes('b23.tv');
+    
+    let accurateTitle;
+
+    if (isTumblrDirect) {
+      accurateTitle = "Tumblr video";
+    } else if (isReddit || isPinterest || isBilibili) {
+      /* CHANGE: For Bilibili, Reddit, and Pinterest, we strictly prioritize info.title 
+         to avoid long descriptions cluttering the UI. 
+      */
+      accurateTitle = info.title || info.fulltitle || "Media Content";
+    } else if (isSnapchat) {
+      accurateTitle = (info.description && info.description.length > 2) 
+        ? info.description.split('\n')[0] 
+        : (info.title && !info.title.includes("Snapchat") ? info.title : info.fulltitle || "Snapchat Content");
+    } else {
+      // Instagram and others: fallback to description/caption first
+      accurateTitle = (info.description && info.description.length > 2) 
+        ? info.description.split('\n')[0] 
+        : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
     }
     
-    let accurateThumbnail = info.thumbnail || "";
-    const isInstagram = url.includes('instagram.com');
-
-    if (isInstagram) {
-      // Direct high-quality redirect URL provided by Instagram for previews
-      const match = url.match(/(?:\/p\/|\/reels\/|\/reel\/)([A-Za-z0-9_-]+)/);
-      if (match && match[1]) {
-        accurateThumbnail = `https://www.instagram.com/p/${match[1]}/media/?size=l`;
-      }
-    }
-
-    const title = (info.title && info.title !== "Instagram") ? info.title : "Instagram Media";
     res.json({ 
-      title: title.split('\n')[0], 
-      thumbnail: accurateThumbnail 
+      title: accurateTitle, 
+      thumbnail: info.thumbnail || "" 
     });
   } catch (error) {
-    res.status(500).json({ error: "Fetch failed" });
+    res.status(500).json({ error: "Failed to fetch media info." });
   }
 });
 
 app.get('/api/download', async (req, res) => {
   const { url, type, title } = req.query;
+  if (!url) return res.status(400).send("No URL provided");
+
   const isMp3 = type === 'mp3';
+  const isReddit = url.includes('reddit.com');
+
   const cleanTitle = (title || 'download').replace(/[/\\?%*:|"<>]/g, '-').substring(0, 100);
-  res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(cleanTitle)}.${isMp3 ? 'mp3' : 'mp4'}"`);
+  const fileName = `${encodeURIComponent(cleanTitle)}.${isMp3 ? 'mp3' : 'mp4'}`;
+
+  res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+  res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
+
   try {
+    let formatSelection;
+    if (isMp3) {
+      formatSelection = 'bestaudio/best';
+    } else if (isReddit) {
+      formatSelection = 'bestvideo+bestaudio/best';
+    } else {
+      formatSelection = 'best[ext=mp4]/b/best';
+    }
+
     const ytProcess = youtubedl.exec(url, {
       output: '-',
-      format: isMp3 ? 'bestaudio/best' : 'best[ext=mp4]/b/best',
+      format: formatSelection,
       ...COMMON_FLAGS,
       noCheckFormats: true,
-      noPart: true
+      noPart: true,
+      extractorRetries: 1,
+      noMtime: true,
+      youtubeSkipDashManifest: true 
     });
+
     ytProcess.stdout.pipe(res);
-    res.on('close', () => { if (ytProcess.kill) ytProcess.kill(); });
-  } catch (e) { 
-    if (!res.headersSent) res.status(500).end(); 
+
+    ytProcess.on('error', (err) => {
+      console.error("yt-dlp Execution Error:", err.message);
+      if (!res.headersSent) res.status(500).end();
+    });
+
+    ytProcess.stderr.on('data', (data) => {
+      console.log(`yt-dlp Log: ${data.toString()}`);
+    });
+
+    res.on('close', () => {
+      if (ytProcess.kill) ytProcess.kill();
+    });
+
+  } catch (error) {
+    console.error("Critical Error:", error.message);
+    if (!res.headersSent) res.status(500).send("Server error.");
   }
 });
 
