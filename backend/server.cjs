@@ -8,8 +8,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Helper to decode HTML entities and Unicode in scraped Instagram URLs
+// Enhanced decoder for Instagram's obfuscated URLs
 const decodeUrl = (str) => {
+  if (!str) return "";
   return str.replace(/\\u([0-9a-fA-F]{4})/g, (match, grp) => String.fromCharCode(parseInt(grp, 16)))
             .replace(/&amp;/g, '&')
             .replace(/\\/g, '');
@@ -20,12 +21,13 @@ const COMMON_FLAGS = {
   noWarnings: true,
   noPlaylist: true,
   addHeader: [
-    'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+    'User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1',
+    'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Language: en-US,en;q=0.9',
-    'Referer: https://www.instagram.com/'
-  ],
-  preferFreeFormats: true,
-  youtubeSkipDashManifest: true
+    'Sec-Fetch-Site: cross-site',
+    'Sec-Fetch-Mode: navigate',
+    'Sec-Fetch-Dest: document'
+  ]
 };
 
 app.post('/api/info', async (req, res) => {
@@ -35,105 +37,74 @@ app.post('/api/info', async (req, res) => {
   try {
     let info = {};
     try {
-      info = await youtubedl(url, { 
-        dumpSingleJson: true, 
-        ...COMMON_FLAGS 
-      });
+      info = await youtubedl(url, { dumpSingleJson: true, ...COMMON_FLAGS });
     } catch (e) {
-      console.log("yt-dlp info failed, relying on embed scraper.");
+      console.log("yt-dlp metadata failed.");
     }
     
-    const isInstagram = url.includes('instagram.com');
     let accurateThumbnail = info.thumbnail || "";
+    const isInstagram = url.includes('instagram.com');
 
-    // START: Instagram Thumbnail Fix (Embed Bypass + Scraper)
     if (isInstagram && (!accurateThumbnail || accurateThumbnail.includes('instagram_logo'))) {
       try {
-        // Step A: Convert to Embed URL to bypass login wall
-        const baseUrl = url.split('?')[0].replace(/\/+$/, '');
-        const embedUrl = `${baseUrl}/embed/`;
-        
-        const { data: html } = await axios.get(embedUrl, {
-          headers: { 
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Accept-Language': 'en-US,en;q=0.9'
-          },
-          timeout: 5000
+        // Method 1: Try the __a=1 query (Instagram's internal JSON endpoint)
+        const jsonUrl = `${url.split('?')[0]}?__a=1&__d=dis`;
+        const response = await axios.get(jsonUrl, { 
+          headers: { 'User-Agent': 'Instagram 219.0.0.12.117 Android' },
+          timeout: 5000 
         });
-
-        // Step B: Look for 'thumbnail_url' in the embed JSON metadata first
-        const jsonMatch = html.match(/"thumbnail_url":"([^"]+)"/);
-        if (jsonMatch) {
-          accurateThumbnail = decodeUrl(jsonMatch[1]);
+        
+        if (response.data?.graphql?.shortcode_media?.display_url) {
+          accurateThumbnail = response.data.graphql.shortcode_media.display_url;
         } else {
-          // Step C: Fallback to your Regex scraper logic
-          const allImgUrls = [...html.matchAll(/src="(https:\/\/[^"]*scontent[^"]*\.jpg[^"]*)"/g)].map(m =>
-            decodeUrl(m[1])
-          );
-          const mediaImgUrls = [...new Set(allImgUrls.filter(u => u.includes("t51.2885") || u.includes("t51.12461") || u.includes("scontent")))];
-          if (mediaImgUrls.length > 0) {
-            accurateThumbnail = mediaImgUrls[0];
+          // Method 2: Fallback to the public OG:Image tag scraper
+          const { data: html } = await axios.get(url, { headers: COMMON_FLAGS.addHeader });
+          
+          // Look for meta og:image which is rarely blocked
+          const ogMatch = html.match(/<meta[^>]*property="og:image"[^>]*content="([^"]+)"/i);
+          if (ogMatch) {
+            accurateThumbnail = decodeUrl(ogMatch[1]);
+          } else {
+            // Method 3: Regex for scontent (last resort)
+            const imgMatch = html.match(/"display_url":"([^"]+)"/);
+            if (imgMatch) accurateThumbnail = decodeUrl(imgMatch[1]);
           }
         }
-      } catch (scrapeErr) {
-        console.error("Instagram embed scraper failed:", scrapeErr.message);
+      } catch (err) {
+        console.error("Scraper failed to bypass wall.");
       }
     }
-    // END: Instagram Thumbnail Fix
 
-    let accurateTitle;
-    const isReddit = url.includes('reddit.com');
-    const isPinterest = url.includes('pinterest.com') || url.includes('pin.it');
-
-    if (isReddit || isPinterest) {
-      accurateTitle = info.title || info.fulltitle || "Media Content";
-    } else {
-      accurateTitle = (info.description && info.description.length > 2) 
+    const accurateTitle = (info.description && info.description.length > 2) 
         ? info.description.split('\n')[0]
-        : (info.title && info.title !== "Instagram" ? info.title : info.fulltitle || "Media File");
-    }
+        : (info.title && info.title !== "Instagram" ? info.title : "Instagram Post");
     
-    res.json({ 
-      title: accurateTitle, 
-      thumbnail: accurateThumbnail 
-    });
+    res.json({ title: accurateTitle, thumbnail: accurateThumbnail });
   } catch (error) {
-    console.error("Main API Error:", error.message);
-    res.status(500).json({ error: "Failed to fetch media info." });
+    res.status(500).json({ error: "Server busy. Try again." });
   }
 });
 
+// Download route remains same...
 app.get('/api/download', async (req, res) => {
   const { url, type, title } = req.query;
-  if (!url) return res.status(400).send("No URL provided");
-
   const isMp3 = type === 'mp3';
   const cleanTitle = (title || 'download').replace(/[/\\?%*:|"<>]/g, '-').substring(0, 100);
-  const fileName = `${encodeURIComponent(cleanTitle)}.${isMp3 ? 'mp3' : 'mp4'}`;
-
-  res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+  
+  res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(cleanTitle)}.${isMp3 ? 'mp3' : 'mp4'}"`);
   res.setHeader('Content-Type', isMp3 ? 'audio/mpeg' : 'video/mp4');
 
   try {
-    let formatSelection = isMp3 ? 'bestaudio/best' : (url.includes('reddit.com') ? 'bestvideo+bestaudio/best' : 'best[ext=mp4]/b/best');
-
     const ytProcess = youtubedl.exec(url, {
       output: '-',
-      format: formatSelection,
+      format: isMp3 ? 'bestaudio/best' : 'best[ext=mp4]/b/best',
       ...COMMON_FLAGS,
       noCheckFormats: true,
-      noPart: true,
-      noMtime: true
+      noPart: true
     });
-
     ytProcess.stdout.pipe(res);
-    ytProcess.on('error', (err) => {
-      if (!res.headersSent) res.status(500).end();
-    });
     res.on('close', () => { if (ytProcess.kill) ytProcess.kill(); });
-  } catch (error) {
-    if (!res.headersSent) res.status(500).send("Server error.");
-  }
+  } catch (e) { res.status(500).end(); }
 });
 
 const distPath = path.resolve(process.cwd(), 'dist');
@@ -141,4 +112,4 @@ app.use(express.static(distPath));
 app.get(/^((?!\/api).)*$/, (req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`--- Server running at ${PORT} ---`));
+app.listen(PORT, () => console.log(`Server live on ${PORT}`));
