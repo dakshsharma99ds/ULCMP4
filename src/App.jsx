@@ -205,14 +205,13 @@ function App() {
         return;
       }
 
-      // CHANGE START: Check for Instagram links and use a proxy to display thumbnail
-      let displayThumbnail = data.thumbnail;
-      if (targetUrl.includes('instagram.com') && displayThumbnail) {
-        // We use weserv.nl to proxy the image because Instagram blocks direct hotlinking
-        displayThumbnail = `https://images.weserv.nl/?url=${encodeURIComponent(displayThumbnail)}`;
+      // CHANGE START: Ensure Instagram thumbnails use the proxy to bypass CORS/hotlink protection
+      let finalThumbnail = data.thumbnail;
+      if (targetUrl.includes('instagram.com') && finalThumbnail) {
+        finalThumbnail = `https://images.weserv.nl/?url=${encodeURIComponent(finalThumbnail)}`;
       }
 
-      setInfo({ ...data, thumbnail: displayThumbnail, fetchedUrl: targetUrl });
+      setInfo({ ...data, thumbnail: finalThumbnail, fetchedUrl: targetUrl });
       // CHANGE END
 
       if (data.title) {
@@ -315,9 +314,7 @@ function App() {
 
   const downloadThumbnailFile = async (imageUrl, title) => {
     try {
-      // Ensure we use weserv for the final download to avoid CORS blocks on blob fetching
-      const proxyUrl = imageUrl.includes('images.weserv.nl') ? imageUrl : `https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`;
-      const response = await fetch(proxyUrl);
+      const response = await fetch(`https://images.weserv.nl/?url=${encodeURIComponent(imageUrl)}`);
       const blob = await response.blob();
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -400,7 +397,7 @@ function App() {
               
               <img 
                 onLoad={handleImageLoad}
-                src={info.thumbnail.includes('images.weserv.nl') ? info.thumbnail : `https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
+                src={info.thumbnail.includes('weserv') ? info.thumbnail : `https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} 
                 className="max-h-[85vh] w-auto block select-none object-contain"
                 alt="Full Preview"
               />
@@ -702,7 +699,7 @@ function App() {
                           <div className="relative z-10 w-full h-full flex items-center justify-center">
                             {info.thumbnail ? (
                               <>
-                                <img key={info.thumbnail} src={info.thumbnail.includes('images.weserv.nl') ? info.thumbnail : `https://images.weserv.nl/?url=${encodeURIComponent(info.thumbnail)}`} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true" />
+                                <img key={info.thumbnail} src={info.thumbnail} referrerPolicy="no-referrer" className="w-full h-full object-cover transition-transform duration-500 group-hover/main-thumb:scale-105" alt="preview" draggable="true" />
                                 <div className="absolute inset-0 bg-black/40 opacity-100 md:opacity-0 group-hover/main-thumb:opacity-100 transition-opacity flex items-center justify-center">
                                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-lg"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
                                 </div>
