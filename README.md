@@ -16,6 +16,7 @@ Universal Link Convertor , A clean, ad-free experience to convert social media l
 * **🟢 Pinterest**
 * **🟢 Snapchat**
 * **🟢 BiliBili**
+* **🟢 TikTok**
 * **🟢 Tumblr**
 
 ## ✨ Features
