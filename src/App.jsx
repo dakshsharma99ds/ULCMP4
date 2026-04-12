@@ -152,7 +152,6 @@ function App() {
     }
   }, [isNavOpen, isSearchMode]);
 
-  // --- START OF INSTAGRAM THUMBNAIL LOGIC CHANGE ---
   const fetchInfo = async (manualUrl = null) => {
     let targetUrl = (manualUrl || url).trim();
     
@@ -201,7 +200,6 @@ function App() {
       let data = await res.json();
       
       if (!res.ok || data.error || (!data.title && !data.thumbnail)) {
-        // FALLBACK: If API fails but it's an Instagram link, try to fetch thumbnail manually
         const instaMatch = targetUrl.match(/instagram\.com\/(?:p|reel|reels|tv)\/([A-Za-z0-9_-]+)/);
         if (instaMatch) {
             const shortcode = instaMatch[1];
@@ -217,7 +215,6 @@ function App() {
         }
       }
 
-      // Final check: If it's Instagram but thumbnail is missing from API, inject it
       if (targetUrl.includes('instagram.com') && !data.thumbnail) {
         const instaMatch = targetUrl.match(/instagram\.com\/(?:p|reel|reels|tv)\/([A-Za-z0-9_-]+)/);
         if (instaMatch) {
@@ -237,7 +234,6 @@ function App() {
     }
     setLoading(false);
   };
-  // --- END OF INSTAGRAM THUMBNAIL LOGIC CHANGE ---
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
@@ -626,7 +622,10 @@ function App() {
         </button>
       </div>
       
-      <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden ${isNavOpen || isSearchMode ? 'md:ml-72' : 'ml-0'}`}>
+      {/* CHANGE START: Content is shifted right for 1280x720 area logic, but xl:ml-0 forces it to absolute center on screens 1280px and wider */}
+      <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden 
+        ${isNavOpen || isSearchMode ? 'md:ml-72 xl:ml-0' : 'md:ml-20 xl:ml-0 ml-0'}`}>
+        {/* CHANGE END */}
         
         {dlProcessing && (
           <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center select-none">
