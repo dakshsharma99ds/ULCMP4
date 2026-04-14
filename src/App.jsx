@@ -52,6 +52,15 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
 
+  // Updated logic: Monitor for 1024px and up (covers 720p, 1080p and beyond)
+  const [isLargeRes, setIsLargeRes] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsLargeRes(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // FIX: Force tooltip update for hamburger when state changes while hovering
   useEffect(() => {
     if (hoveredItem === "EXPAND" || hoveredItem === "COLLAPSE") {
@@ -622,10 +631,18 @@ function App() {
         </button>
       </div>
       
-      {/* CHANGE START: Content is shifted right for 1280x720 area logic, but xl:ml-0 forces it to absolute center on screens 1280px and wider */}
-      <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden 
-        ${isNavOpen || isSearchMode ? 'md:ml-72 xl:ml-0' : 'md:ml-20 xl:ml-0 ml-0'}`}>
-        {/* CHANGE END */}
+      {/* MAIN CONTENT AREA: REFINED FOR ABSOLUTE CENTER ON ALL RES >= 1024px */}
+      <div 
+        className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden 
+        ${isNavOpen || isSearchMode ? 'md:ml-72 lg:ml-0' : 'md:ml-20 lg:ml-0'}`}
+        /* logic: On large screens (720p and up), we treat the sidebar as a floating overlay. 
+           We usetranslateX to slide the center slightly to create a balanced "slide" feel without 
+           destroying the absolute centering of the header/input.
+        */
+        style={isLargeRes ? {
+          transform: (isNavOpen || isSearchMode) ? 'translateX(100px)' : 'translateX(0px)'
+        } : {}}
+      >
         
         {dlProcessing && (
           <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center select-none">
