@@ -52,13 +52,12 @@ function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isVertical, setIsVertical] = useState(false);
 
-  // Updated logic: Monitor for 1024px and up (covers 720p, 1080p and beyond)
-  const [isLargeRes, setIsLargeRes] = useState(window.innerWidth >= 1024);
-
+  // 1280px AND HIGHER: track if screen is wide enough for absolute-center slide behavior
+  const [isWide, setIsWide] = useState(window.innerWidth >= 1280);
   useEffect(() => {
-    const handleResize = () => setIsLargeRes(window.innerWidth >= 1024);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const handleWideResize = () => setIsWide(window.innerWidth >= 1280);
+    window.addEventListener('resize', handleWideResize);
+    return () => window.removeEventListener('resize', handleWideResize);
   }, []);
 
   // FIX: Force tooltip update for hamburger when state changes while hovering
@@ -631,18 +630,10 @@ function App() {
         </button>
       </div>
       
-      {/* MAIN CONTENT AREA: REFINED FOR ABSOLUTE CENTER ON ALL RES >= 1024px */}
-      <div 
-        className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden 
-        ${isNavOpen || isSearchMode ? 'md:ml-72 lg:ml-0' : 'md:ml-20 lg:ml-0'}`}
-        /* logic: On large screens (720p and up), we treat the sidebar as a floating overlay. 
-           We usetranslateX to slide the center slightly to create a balanced "slide" feel without 
-           destroying the absolute centering of the header/input.
-        */
-        style={isLargeRes ? {
-          transform: (isNavOpen || isSearchMode) ? 'translateX(100px)' : 'translateX(0px)'
-        } : {}}
-      >
+      {/* CHANGE START: Content is shifted right for 1280x720 area logic, but xl:ml-0 forces it to absolute center on screens 1280px and wider */}
+      <div className={`flex-1 flex flex-col items-center justify-center p-4 md:p-6 transition-all duration-500 ease-in-out h-full overflow-hidden 
+        ${isNavOpen || isSearchMode ? 'md:ml-72 xl:ml-0' : 'md:ml-20 xl:ml-0 ml-0'}`}>
+        {/* CHANGE END */}
         
         {dlProcessing && (
           <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-2xl flex flex-col items-center justify-center select-none">
@@ -658,6 +649,18 @@ function App() {
           </div>
         )}
 
+        {/* 1280px+ SLIDE BLOCK START: translateX shifts content from absolute center when sidebar opens */}
+        <div style={isWide ? {
+          transform: isNavOpen || isSearchMode ? 'translateX(144px)' : 'translateX(0px)',
+          transition: 'transform 500ms ease-in-out',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100%',
+        } : { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        {/* 1280px+ SLIDE BLOCK END */}
         <AnimatePresence mode="wait">
           {currentPage === 'home' && (
             <motion.div 
@@ -762,6 +765,7 @@ function App() {
             <motion.div key="contact" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={pageVariants.transition} className="w-full flex justify-center"><Contact /></motion.div>
           )}
         </AnimatePresence>
+        </div>
       </div>
     </div>
   );
